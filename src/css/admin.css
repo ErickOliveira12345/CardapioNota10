@@ -1,0 +1,301 @@
+/* ═══════════════════════════════════════════════════════
+   SISTEMA DE PEDIDOS — ESTILOS ADMIN
+   Dark header | Cards informativos | Responsive dashboard
+═══════════════════════════════════════════════════════ */
+
+/* Importa variáveis e reset do style.css */
+:root {
+  --primary:        #FF6B35;
+  --primary-dark:   #E55A25;
+  --primary-light:  #FFF0EA;
+  --secondary:      #2C3E50;
+  --success:        #27AE60;
+  --warning:        #F39C12;
+  --danger:         #E74C3C;
+  --info:           #3498DB;
+  --purple:         #8E44AD;
+  --bg:             #F0F2F5;
+  --surface:        #FFFFFF;
+  --border:         #E1E5EB;
+  --text:           #2C3E50;
+  --text-light:     #7F8C8D;
+  --shadow-sm:  0 1px 4px rgba(0,0,0,.08);
+  --shadow:     0 2px 12px rgba(0,0,0,.10);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.14);
+  --radius-sm:  6px;
+  --radius:     12px;
+  --radius-lg:  20px;
+  --transition: .2s ease;
+  --admin-header: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+  min-height: 100dvh;
+}
+button { cursor: pointer; border: none; background: none; font: inherit; }
+a { text-decoration: none; color: inherit; }
+ul, ol { list-style: none; }
+.hidden { display: none !important; }
+
+/* ══ Status badges (mesmo do style.css) ═══════════════ */
+.pedido-badge, .admin-status-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .25rem .75rem; border-radius: 100px;
+  font-size: .78rem; font-weight: 600; white-space: nowrap;
+}
+.status--warning  { background: #FEF9C3; color: #854D0E; }
+.status--info     { background: #DBEAFE; color: #1E40AF; }
+.status--primary  { background: #FFEDD5; color: #9A3412; }
+.status--purple   { background: #F3E8FF; color: #6B21A8; }
+.status--success  { background: #DCFCE7; color: #166534; }
+.status--danger   { background: #FEE2E2; color: #991B1B; }
+
+/* ══ Header Admin ══════════════════════════════════════ */
+.admin-header {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--admin-header);
+  background: var(--secondary);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+}
+.admin-header__brand {
+  display: flex; align-items: center; gap: .75rem; color: white;
+}
+.admin-header__brand-icon { font-size: 1.6rem; }
+.admin-header__brand-name { font-size: 1.1rem; font-weight: 700; }
+.admin-header__brand-sub {
+  font-size: .75rem; opacity: .6; font-weight: 400;
+}
+.admin-header__actions { display: flex; align-items: center; gap: .5rem; }
+.btn-client-view {
+  color: rgba(255,255,255,.75); font-size: .85rem;
+  padding: .45rem .85rem; border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,.2);
+  transition: all var(--transition);
+}
+.btn-client-view:hover { background: rgba(255,255,255,.1); color: white; }
+.btn-clear {
+  color: #FC8181; font-size: .8rem;
+  padding: .45rem .85rem; border-radius: var(--radius-sm);
+  border: 1px solid rgba(252,129,129,.35);
+  transition: all var(--transition);
+}
+.btn-clear:hover { background: rgba(252,129,129,.1); }
+
+/* ══ Layout Principal ══════════════════════════════════ */
+.admin-main {
+  max-width: 1200px; margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+
+/* ══ Stats Cards ═══════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .75rem;
+}
+.stat-card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; gap: .9rem;
+  border-left: 4px solid transparent;
+  transition: box-shadow var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow); }
+.stat-card--total     { border-left-color: var(--info); }
+.stat-card--aguardando{ border-left-color: var(--warning); }
+.stat-card--preparando{ border-left-color: var(--primary); }
+.stat-card--finalizado{ border-left-color: var(--success); }
+.stat-card--chamados  { border-left-color: var(--danger); }
+.stat-card__icon { font-size: 1.75rem; }
+.stat-card__body {}
+.stat-card__value { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.stat-card__label { font-size: .78rem; color: var(--text-light); margin-top: .15rem; }
+
+/* ══ Alertas de Atendimento ════════════════════════════ */
+.alertas-section {}
+.section-title {
+  font-size: 1rem; font-weight: 700; margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.alertas-grid { display: flex; flex-direction: column; gap: .6rem; }
+
+.alerta-card {
+  background: #FFF5F5;
+  border: 2px solid var(--danger);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
+  display: flex; align-items: center; gap: .75rem;
+  animation: blink-border 1.2s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+@keyframes blink-border {
+  0%, 100% { border-color: var(--danger); background: #FFF5F5; }
+  50%       { border-color: #FC8181;      background: #FFF; }
+}
+
+.alerta-card__pulse {
+  position: absolute; top: 50%; left: -2px; transform: translateY(-50%);
+  width: 6px; height: 40%; border-radius: 0 4px 4px 0;
+  background: var(--danger);
+  animation: pulse-bar 1.2s ease infinite;
+}
+@keyframes pulse-bar {
+  0%, 100% { height: 60%; opacity: 1; }
+  50%       { height: 80%; opacity: .6; }
+}
+
+.alerta-card__body { flex: 1; }
+.alerta-mesa { display: block; font-weight: 700; font-size: .95rem; color: var(--danger); }
+.alerta-hora { font-size: .78rem; color: var(--text-light); }
+.btn-visualizado {
+  flex-shrink: 0; padding: .5rem .85rem;
+  border-radius: var(--radius-sm); font-size: .8rem; font-weight: 600;
+  background: var(--danger); color: white;
+  transition: all var(--transition);
+}
+.btn-visualizado:hover { background: #C0392B; }
+
+/* ══ Pedidos ═══════════════════════════════════════════ */
+.pedidos-section {}
+.pedidos-header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+  margin-bottom: .75rem;
+}
+.filtros-pedidos {
+  display: flex; gap: .4rem; flex-wrap: wrap;
+}
+.filtro-btn {
+  padding: .35rem .85rem; border-radius: 100px;
+  border: 1.5px solid var(--border); font-size: .82rem; color: var(--text-light);
+  transition: all var(--transition);
+}
+.filtro-btn:hover { border-color: var(--primary); color: var(--primary); }
+.filtro-btn.active {
+  background: var(--primary); border-color: var(--primary);
+  color: white; font-weight: 600;
+}
+
+.pedidos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .75rem;
+}
+
+/* Card de pedido no admin */
+.pedido-card-admin {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow-sm);
+  border-top: 3px solid transparent;
+  transition: box-shadow var(--transition);
+}
+.pedido-card-admin:hover { box-shadow: var(--shadow); }
+.pedido-card-admin.card--warning  { border-top-color: var(--warning); }
+.pedido-card-admin.card--info     { border-top-color: var(--info); }
+.pedido-card-admin.card--primary  { border-top-color: var(--primary); }
+.pedido-card-admin.card--purple   { border-top-color: var(--purple); }
+.pedido-card-admin.card--success  { border-top-color: var(--success); }
+.pedido-card-admin.card--danger   { border-top-color: var(--danger); }
+
+.pedido-card-admin__header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem;
+}
+.pedido-card-admin__meta { display: flex; align-items: center; gap: .5rem; }
+
+.admin-mesa-badge {
+  background: var(--secondary); color: white;
+  padding: .25rem .75rem; border-radius: 100px;
+  font-weight: 700; font-size: .85rem;
+}
+.admin-pedido-id { font-size: .78rem; color: var(--text-muted, #BDC3C7); font-family: monospace; }
+
+/* Lista de itens dentro do card */
+.admin-itens-list {
+  display: flex; flex-direction: column; gap: .25rem;
+  margin-bottom: .75rem; padding: .5rem .75rem;
+  background: var(--bg); border-radius: var(--radius-sm);
+}
+.pedido-item-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .85rem; color: var(--text); gap: .5rem;
+}
+.pedido-item-row span:first-child { flex: 1; }
+.pedido-item-row span:last-child { color: var(--text-light); font-size: .8rem; }
+
+/* Footer do card admin */
+.pedido-card-admin__footer {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem;
+  border-top: 1px solid var(--border); padding-top: .75rem;
+}
+.admin-footer-meta { display: flex; flex-direction: column; gap: .2rem; }
+.admin-hora { font-size: .8rem; color: var(--text-light); }
+.admin-total { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+.admin-status-select-wrap {
+  display: flex; flex-direction: column; gap: .2rem; align-items: flex-end;
+}
+.admin-status-select-wrap label { font-size: .75rem; color: var(--text-light); }
+.admin-status-select {
+  padding: .4rem .7rem; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); font-size: .85rem;
+  background: var(--surface); color: var(--text);
+  cursor: pointer; transition: border-color var(--transition);
+  max-width: 220px;
+}
+.admin-status-select:focus { outline: none; border-color: var(--primary); }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .75rem; padding: 3rem 1rem;
+  color: var(--text-light); text-align: center;
+  grid-column: 1 / -1;
+}
+.empty-state__icon { font-size: 3rem; }
+
+/* ══ Toast (igual ao cliente) ══════════════════════════ */
+#toast-container {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999;
+  display: flex; flex-direction: column; gap: .5rem;
+  align-items: flex-end; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: .6rem;
+  background: var(--secondary); color: white;
+  padding: .75rem 1.1rem; border-radius: var(--radius);
+  font-size: .9rem; box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateX(16px);
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  pointer-events: all;
+}
+.toast--visible { opacity: 1; transform: translateX(0); }
+.toast--success { background: #166534; }
+.toast--error   { background: #991B1B; }
+.toast--warning { background: #854D0E; }
+.toast--info    { background: #1E40AF; }
+.toast__icon { font-size: 1rem; flex-shrink: 0; }
+
+/* ══ Responsive ════════════════════════════════════════ */
+@media (min-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 768px) {
+  .admin-main { padding: 1.5rem 2rem 3rem; }
+  .stats-grid { grid-template-columns: repeat(5, 1fr); }
+  .pedidos-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .pedidos-grid { grid-template-columns: repeat(3, 1fr); }
+}

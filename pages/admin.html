@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Admin — Sabor &amp; Arte</title>
+  <link rel="stylesheet" href="../src/css/admin.css" />
+</head>
+<body class="page-admin">
+
+  <!-- ── Header ─────────────────────────────────────── -->
+  <header class="admin-header">
+    <div class="admin-header__brand">
+      <span class="admin-header__brand-icon">🍽️</span>
+      <div>
+        <div class="admin-header__brand-name">Painel Admin</div>
+        <div class="admin-header__brand-sub">Sabor &amp; Arte</div>
+      </div>
+    </div>
+    <div class="admin-header__actions">
+      <a href="index.html" class="btn-client-view">👁️ Ver como cliente</a>
+      <button class="btn-clear" id="btn-clear-all">🗑️ Resetar dados</button>
+    </div>
+  </header>
+
+  <!-- ── Conteúdo Principal ─────────────────────────── -->
+  <main class="admin-main">
+
+    <!-- ── Cards de Estatísticas ──────────────────────── -->
+    <section>
+      <div class="stats-grid">
+        <div class="stat-card stat-card--total">
+          <span class="stat-card__icon">📋</span>
+          <div class="stat-card__body">
+            <div class="stat-card__value" id="stat-total">0</div>
+            <div class="stat-card__label">Total de pedidos</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card--aguardando">
+          <span class="stat-card__icon">⏳</span>
+          <div class="stat-card__body">
+            <div class="stat-card__value" id="stat-aguardando">0</div>
+            <div class="stat-card__label">Aguardando</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card--preparando">
+          <span class="stat-card__icon">👨‍🍳</span>
+          <div class="stat-card__body">
+            <div class="stat-card__value" id="stat-preparando">0</div>
+            <div class="stat-card__label">Em preparo</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card--finalizado">
+          <span class="stat-card__icon">✅</span>
+          <div class="stat-card__body">
+            <div class="stat-card__value" id="stat-finalizado">0</div>
+            <div class="stat-card__label">Finalizados</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card--chamados">
+          <span class="stat-card__icon">🔔</span>
+          <div class="stat-card__body">
+            <div class="stat-card__value" id="stat-chamados">0</div>
+            <div class="stat-card__label">Chamados ativos</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Alertas de Atendimento ──────────────────────── -->
+    <section class="alertas-section hidden" id="alertas-section">
+      <h2 class="section-title">🚨 Chamados de Atendimento</h2>
+      <div class="alertas-grid" id="alertas-grid"></div>
+    </section>
+
+    <!-- ── Lista de Pedidos ────────────────────────────── -->
+    <section class="pedidos-section">
+      <div class="pedidos-header">
+        <h2 class="section-title" style="margin:0">📦 Pedidos</h2>
+        <div class="filtros-pedidos" id="filtros-pedidos" role="group" aria-label="Filtrar pedidos">
+          <button class="filtro-btn active" data-filtro="todos">Todos</button>
+          <button class="filtro-btn" data-filtro="aguardando">⏳ Aguardando</button>
+          <button class="filtro-btn" data-filtro="preparando">👨‍🍳 Preparando</button>
+          <button class="filtro-btn" data-filtro="saindo">🛵 Saindo</button>
+          <button class="filtro-btn" data-filtro="finalizado">✅ Finalizados</button>
+        </div>
+      </div>
+      <div class="pedidos-grid" id="pedidos-grid">
+        <div class="empty-state">
+          <span class="empty-state__icon">📋</span>
+          <p>Nenhum pedido ainda. Aguardando clientes...</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- Módulos JS -->
+  <script src="../src/js/storage.js"></script>
+  <script src="../src/js/utils.js"></script>
+  <script src="../src/js/orders.js"></script>
+  <script src="../src/js/admin.js"></script>
+</body>
+</html>
