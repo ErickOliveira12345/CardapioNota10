@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+vite-dev.log
+vite-dev.err
+react-page*.png
+.chrome-debug*/
+.chrome-cdp/
