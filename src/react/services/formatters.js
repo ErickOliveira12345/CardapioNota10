@@ -26,9 +26,9 @@ export function timeSince(timestamp) {
   if (seconds < 60) return "agora mesmo";
 
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `ha ${minutes} min`;
+  if (minutes < 60) return `há ${minutes} min`;
 
-  return `ha ${Math.floor(minutes / 60)}h`;
+  return `há ${Math.floor(minutes / 60)}h`;
 }
 
 export function getStatus(key) {

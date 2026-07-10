@@ -41,7 +41,7 @@ export function AdminPage({
   }, [filter, orders]);
 
   function handleReset() {
-    if (!window.confirm("Limpar TODOS os dados? Pedidos, chamados e sessoes.")) return;
+    if (!window.confirm("Limpar TODOS os dados? Pedidos, chamados e sessões.")) return;
     onResetData();
   }
 
@@ -54,7 +54,7 @@ export function AdminPage({
           </span>
           <div>
             <div className="admin-header__brand-name">Painel Admin</div>
-            <div className="admin-header__brand-sub">Cardapio Nota10</div>
+            <div className="admin-header__brand-sub">Cardápio Nota10</div>
           </div>
         </div>
         <div className="admin-header__actions">
@@ -80,7 +80,7 @@ export function AdminPage({
 
         {activeCalls.length > 0 && (
           <section className="alertas-section">
-            <h2 className="section-title">🚨 Chamados de Atendimento</h2>
+            <h2 className="section-title">🚨 Chamados de atendimento</h2>
             <div className="alertas-grid">
               {activeCalls.map((call) => (
                 <div className="alerta-card" key={`${call.mesa}-${call.timestamp}`}>

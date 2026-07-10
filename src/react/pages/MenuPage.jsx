@@ -4,7 +4,6 @@ import { formatCurrency, formatTime, getStatus } from "../services/formatters.js
 
 export function MenuPage({
   table,
-  onTableChange,
   onNavigate,
   onAddItem,
   onOpenCart,
@@ -36,7 +35,7 @@ export function MenuPage({
         </div>
       </header>
 
-      <nav className="categorias-nav" aria-label="Categorias do cardapio">
+      <nav className="categorias-nav" aria-label="Categorias do cardápio">
         {menuCategories.map((item) => (
           <button
             className={`categoria-tab ${activeCategory === item.id ? "active" : ""}`}
@@ -58,10 +57,10 @@ export function MenuPage({
                 🍽️
               </div>
               <h2>Bem-vindo!</h2>
-              <p>Selecione uma categoria para ver o cardapio</p>
+              <p>Selecione uma categoria para ver o cardápio</p>
             </div>
 
-            <h3>O que voce quer hoje?</h3>
+            <h3>O que você quer hoje?</h3>
             <div className="categorias-grid">
               {menuCategories.map((item) => (
                 <button
@@ -149,7 +148,7 @@ function OrderStatus({ order }) {
           <span className={`pedido-badge ${status.color}`}>
             {status.icon} {status.label}
           </span>
-          <span className="pedido-hora">Feito as {formatTime(order.criadoEm)}</span>
+          <span className="pedido-hora">Feito às {formatTime(order.criadoEm)}</span>
         </div>
 
         <details className="pedido-detalhes">

@@ -10,14 +10,14 @@ export class AppErrorBoundary extends Component {
   }
 
   componentDidCatch(error) {
-    console.error("[CardapioNota10]", error);
+    console.error("[CardápioNota10]", error);
   }
 
   render() {
     if (this.state.error) {
       return (
         <main className="react-error">
-          <h1>Erro ao carregar o CardapioNota10</h1>
+          <h1>Erro ao carregar o CardápioNota10</h1>
           <p>{this.state.error.message}</p>
         </main>
       );

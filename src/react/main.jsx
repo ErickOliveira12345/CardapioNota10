@@ -17,7 +17,7 @@ try {
 } catch (error) {
   rootElement.innerHTML = `
     <main class="react-error">
-      <h1>Erro ao iniciar o CardapioNota10</h1>
+      <h1>Erro ao iniciar o CardápioNota10</h1>
       <p>${error.message}</p>
     </main>
   `;

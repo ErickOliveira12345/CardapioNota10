@@ -56,10 +56,10 @@ export function App() {
       route === "/admin" ? "page-admin" : route === "/menu" ? "page-menu" : "page-qr";
     document.title =
       route === "/admin"
-        ? "Painel Admin - CardapioNota10"
+        ? "Painel Admin - CardápioNota10"
         : route === "/menu"
-          ? `Mesa ${table} - CardapioNota10`
-          : "CardapioNota10 - Escaneie sua mesa";
+          ? `Mesa ${table} - CardápioNota10`
+          : "CardápioNota10 - Escaneie sua mesa";
   }, [route, table]);
 
   useEffect(() => {
@@ -163,8 +163,8 @@ export function App() {
     setCalls(getCalls());
     showToast(
       created
-        ? "Chamado enviado! Um atendente vira ate voce."
-        : "Chamado ja enviado! Aguarde o atendimento.",
+        ? "Chamado enviado! Um atendente virá até você."
+        : "Chamado já enviado! Aguarde o atendimento.",
       created ? "success" : "warning",
       4000,
     );
@@ -189,7 +189,7 @@ export function App() {
     setActiveOrder(null);
     setOrders([]);
     setCalls([]);
-    showToast("Sessao limpa. Escolha uma mesa para continuar.", "info");
+    showToast("Sessão limpa. Escolha uma mesa para continuar.", "info");
   }
 
   function resetData() {
@@ -248,7 +248,6 @@ export function App() {
     <>
       <MenuPage
         table={table}
-        onTableChange={setTable}
         onNavigate={navigate}
         onAddItem={addItem}
         onOpenCart={() => setIsCartOpen(true)}

@@ -14,7 +14,7 @@ const qrCodes = [
   {
     mesa: 3,
     imagem: "/src/img/qrcode-3.svg",
-    descricao: "Mesa no terraco",
+    descricao: "Mesa no terraço",
   },
   {
     mesa: 4,
@@ -30,21 +30,21 @@ export function HomePage({ currentTable, onSelectTable, onContinueSession, onNew
         <div className="qr-logo" aria-hidden="true">
           🍽️
         </div>
-        <h1 className="qr-restaurant-name">Cardapio Nota10</h1>
-        <p className="qr-tagline">Cardapio digital · Peca na mesa</p>
+        <h1 className="qr-restaurant-name">Cardápio Nota10</h1>
+        <p className="qr-tagline">Cardápio digital · Peça na mesa</p>
       </header>
 
       {currentTable && (
         <div className="session-banner">
           <p>
-            Voce ja tem uma sessao ativa na <strong>Mesa {currentTable}</strong>.
+            Você já tem uma sessão ativa na <strong>Mesa {currentTable}</strong>.
           </p>
           <div className="session-actions">
             <button className="btn-return" type="button" onClick={onContinueSession}>
               Continuar pedido
             </button>
             <button className="btn-new-session" type="button" onClick={onNewSession}>
-              Nova sessao
+              Nova sessão
             </button>
           </div>
         </div>
@@ -61,7 +61,7 @@ export function HomePage({ currentTable, onSelectTable, onContinueSession, onNew
         </div>
         <div className="instruction-step">
           <span className="step-num">3</span>
-          <span>Escolha seus itens e faca seu pedido</span>
+          <span>Escolha seus itens e faça seu pedido</span>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ export function HomePage({ currentTable, onSelectTable, onContinueSession, onNew
       </div>
 
       <p className="qr-admin-link">
-        Funcionario?{" "}
+        Funcionário?{" "}
         <button type="button" onClick={() => onNavigate("/admin")}>
           Acessar painel do estabelecimento →
         </button>

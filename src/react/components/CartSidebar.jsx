@@ -1,5 +1,5 @@
-import { formatCurrency } from "../services/formatters.js";
 import React from "react";
+import { formatCurrency } from "../services/formatters.js";
 
 export function CartSidebar({
   items,
@@ -33,8 +33,8 @@ export function CartSidebar({
               <span className="cart-empty__icon" aria-hidden="true">
                 🛒
               </span>
-              <p>Seu carrinho esta vazio</p>
-              <p style={{ fontSize: ".82rem" }}>Adicione itens do cardapio</p>
+              <p>Seu carrinho está vazio</p>
+              <p style={{ fontSize: ".82rem" }}>Adicione itens do cardápio</p>
             </div>
           ) : (
             <div>
@@ -69,7 +69,7 @@ export function CartSidebar({
               <strong>{formatCurrency(total)}</strong>
             </div>
             <button className="btn-finalizar" type="button" onClick={onFinishOrder}>
-              Finalizar Pedido
+              Finalizar pedido
             </button>
           </div>
         )}
