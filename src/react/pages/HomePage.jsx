@@ -91,7 +91,7 @@ export function HomePage({ currentTable, onSelectTable, onContinueSession, onNew
 
       <p className="qr-admin-link">
         Funcionário?{" "}
-        <button type="button" onClick={() => onNavigate("/admin")}>
+        <button type="button" onClick={() => onNavigate("/login")}>
           Acessar painel do estabelecimento →
         </button>
       </p>

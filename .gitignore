@@ -7,3 +7,4 @@ vite-dev.err
 react-page*.png
 .chrome-debug*/
 .chrome-cdp/
+serviceAccountKey.json

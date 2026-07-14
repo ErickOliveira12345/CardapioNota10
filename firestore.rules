@@ -1,18 +1,221 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function ehAdministrador() {
+      return estaAutenticado()
+        && request.auth.token.admin == true;
+    }
+
+    function ehProprioUsuario(userId) {
+      return estaAutenticado()
+        && request.auth.uid == userId;
+    }
+
+    function ehProprietario(establishmentId) {
+      return estaAutenticado()
+        && get(
+          /databases/$(database)/documents/establishments/$(establishmentId)
+        ).data.ownerId == request.auth.uid;
+    }
+
+    function podeGerenciarEstabelecimento(establishmentId) {
+      return ehAdministrador()
+        || ehProprietario(establishmentId);
+    }
+
+    /*
+     * Usuários do Firebase Authentication.
+     */
+    match /users/{userId} {
+      allow create: if ehProprioUsuario(userId)
+        && request.resource.data.keys().hasAll([
+          'nome',
+          'email',
+          'role',
+          'status',
+          'estabelecimentoId',
+          'criadoEm',
+          'atualizadoEm'
+        ])
+        && request.resource.data.role == 'subscriber'
+        && request.resource.data.status == 'onboarding'
+        && request.resource.data.estabelecimentoId == null;
+
+      allow read: if ehProprioUsuario(userId)
+        || ehAdministrador();
+
+      allow update: if ehAdministrador()
+        || (
+          ehProprioUsuario(userId)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.email == resource.data.email
+        );
+
+      allow delete: if false;
+    }
+
+    /*
+     * Os planos podem ser vistos na página comercial.
+     * Somente administradores poderão alterá-los.
+     */
+    match /plans/{planId} {
+      allow read: if true;
+      allow create, update, delete: if ehAdministrador();
+    }
+
+    /*
+     * Assinaturas serão controladas posteriormente
+     * pelo administrador e pelas Cloud Functions.
+     */
+    match /subscriptions/{subscriptionId} {
+      allow read: if ehAdministrador()
+        || (
+          estaAutenticado()
+          && resource.data.userId == request.auth.uid
+        );
+
+      allow create, update, delete: if false;
+    }
+
+    match /subscriptionPayments/{paymentId} {
+      allow read: if ehAdministrador()
+        || (
+          estaAutenticado()
+          && resource.data.userId == request.auth.uid
+        );
+
+      allow create, update, delete: if false;
+    }
+
+    /*
+     * Documento principal do estabelecimento.
+     */
+    match /establishments/{establishmentId} {
+      allow create: if estaAutenticado()
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow read: if resource.data.status == 'active'
+        || podeGerenciarEstabelecimento(establishmentId);
+
+      allow update: if podeGerenciarEstabelecimento(
+        establishmentId
+      );
+
+      allow delete: if false;
+
+      /*
+       * Cardápio público.
+       */
+      match /categories/{categoryId} {
+        allow read: if true;
+
+        allow create, update, delete:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+      }
+
+      match /products/{productId} {
+        allow read: if true;
+
+        allow create, update, delete:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+      }
+
+      match /tables/{tableId} {
+        allow read: if true;
+
+        allow create, update, delete:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+      }
+
+      /*
+       * Funcionários.
+       */
+      match /employees/{employeeId} {
+        allow read: if podeGerenciarEstabelecimento(
+          establishmentId
+        );
+
+        allow create, update, delete:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+      }
+
+      /*
+       * Pedidos.
+       *
+       * Clientes podem criar pedidos sem login.
+       * O painel precisa estar autenticado para
+       * ler e alterar todos os pedidos.
+       */
+      match /orders/{orderId} {
+        allow create: if
+          request.resource.data.mesa is int
+          && request.resource.data.mesa > 0
+          && request.resource.data.itens is list
+          && request.resource.data.itens.size() > 0
+          && request.resource.data.total is number
+          && request.resource.data.total >= 0
+          && request.resource.data.status == 'aguardando';
+
+        allow read, update:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+
+        allow delete: if false;
+      }
+
+      /*
+       * Chamados de atendimento.
+       */
+      match /serviceCalls/{callId} {
+        allow create: if
+          request.resource.data.mesa is int
+          && request.resource.data.mesa > 0
+          && request.resource.data.visualizado == false;
+
+        allow read, update:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+
+        allow delete: if false;
+      }
+
+      match /settings/{settingId} {
+        allow read, write:
+          if podeGerenciarEstabelecimento(
+            establishmentId
+          );
+      }
+    }
+
+    /*
+     * Histórico administrativo.
+     */
+    match /adminLogs/{logId} {
+      allow read: if ehAdministrador();
+      allow write: if false;
+    }
+
+    /*
+     * Qualquer caminho não descrito acima fica bloqueado.
+     */
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 8, 10);
+      allow read, write: if false;
     }
   }
 }

@@ -4,24 +4,32 @@ export const menuCategories = [
     nome: "Bebidas",
     icone: "🥤",
     descricao: "Sucos, refrigerantes e drinks",
+    ordem: 1,
+    ativa: true,
   },
   {
     id: "porcoes",
     nome: "Porções",
     icone: "🍟",
     descricao: "Petiscos e entradas para compartilhar",
+    ordem: 2,
+    ativa: true,
   },
   {
     id: "lanches",
     nome: "Lanches",
     icone: "🍔",
     descricao: "Hambúrgueres e sanduíches artesanais",
+    ordem: 3,
+    ativa: true,
   },
   {
     id: "sobremesas",
     nome: "Sobremesas",
     icone: "🍰",
     descricao: "Doces e sobremesas irresistíveis",
+    ordem: 4,
+    ativa: true,
   },
 ];
 

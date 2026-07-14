@@ -34,7 +34,24 @@ export function AdminPage({
   );
 
   const filteredOrders = useMemo(() => {
-    const sortedOrders = [...orders].sort((a, b) => b.criadoEm - a.criadoEm);
+    function getTime(value) {
+      if (!value) return 0;
+
+      if (typeof value?.toMillis === "function") {
+        return value.toMillis();
+      }
+
+      if (value instanceof Date) {
+        return value.getTime();
+      }
+
+      return Number(value) || 0;
+    }
+
+    const sortedOrders = [...orders].sort(
+      (a, b) => getTime(b.criadoEm) - getTime(a.criadoEm)
+    );
+    
     return filter === "todos"
       ? sortedOrders
       : sortedOrders.filter((order) => order.status === filter);

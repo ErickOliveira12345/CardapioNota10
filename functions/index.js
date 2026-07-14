@@ -1,32 +1,194 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { initializeApp } = require("firebase-admin/app");
+const {
+  getFirestore,
+  FieldValue,
+} = require("firebase-admin/firestore");
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+initializeApp();
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+const db = getFirestore();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+exports.createInitialPlans = onCall(
+  {
+    region: "southamerica-east1",
+  },
+  async (request) => {
+    /*
+     * Esta chave é temporária.
+     * Depois de criar os planos, removeremos esta função.
+     */
+    const setupKey = request.data?.setupKey;
+    
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    if (setupKey !== "cardapio-nota10-configuracao-inicial") {
+      throw new HttpsError(
+        "permission-denied",
+        "Chave de configuração inválida.",
+      );
+    }
+
+    const plans = {
+      basic: {
+        code: "basic",
+        nome: "Básico",
+        descricao: "Plano inicial para pequenos estabelecimentos",
+
+        ativo: true,
+        ordem: 1,
+
+        teste: {
+          habilitado: true,
+          dias: 30,
+          preco: 0,
+        },
+
+        promocao: {
+          habilitada: false,
+          meses: 0,
+          preco: 0,
+        },
+
+        precoMensal: 3990,
+
+        cobranca: {
+          ciclo: "monthly",
+          intervalo: 1,
+        },
+
+        funcionalidades: {
+          maxMesas: 10,
+          maxCategorias: 10,
+          maxProdutos: 50,
+          maxFuncionarios: 1,
+
+          cardapioQrCode: true,
+          controlePedidos: true,
+          chamadosAtendimento: true,
+          relatoriosVendas: false,
+          relatoriosAvancados: false,
+          marcaPersonalizada: false,
+          suportePrioritario: false,
+        },
+
+        mercadoPagoPlanId: null,
+      },
+
+      intermediate: {
+        code: "intermediate",
+        nome: "Intermediário",
+        descricao: "Plano para estabelecimentos em crescimento",
+
+        ativo: true,
+        ordem: 2,
+
+        teste: {
+          habilitado: false,
+          dias: 0,
+          preco: 0,
+        },
+
+        promocao: {
+          habilitada: true,
+          meses: 1,
+          preco: 990,
+        },
+
+        precoMensal: 5990,
+
+        cobranca: {
+          ciclo: "monthly",
+          intervalo: 1,
+        },
+
+        funcionalidades: {
+          maxMesas: 30,
+          maxCategorias: 30,
+          maxProdutos: 200,
+          maxFuncionarios: 5,
+
+          cardapioQrCode: true,
+          controlePedidos: true,
+          chamadosAtendimento: true,
+          relatoriosVendas: true,
+          relatoriosAvancados: false,
+          marcaPersonalizada: false,
+          suportePrioritario: false,
+        },
+
+        mercadoPagoPlanId: null,
+      },
+
+      premium: {
+        code: "premium",
+        nome: "Premium",
+        descricao: "Plano completo para grandes estabelecimentos",
+
+        ativo: true,
+        ordem: 3,
+
+        teste: {
+          habilitado: false,
+          dias: 0,
+          preco: 0,
+        },
+
+        promocao: {
+          habilitada: true,
+          meses: 1,
+          preco: 1990,
+        },
+
+        precoMensal: 9990,
+
+        cobranca: {
+          ciclo: "monthly",
+          intervalo: 1,
+        },
+
+        funcionalidades: {
+          maxMesas: -1,
+          maxCategorias: -1,
+          maxProdutos: -1,
+          maxFuncionarios: 20,
+
+          cardapioQrCode: true,
+          controlePedidos: true,
+          chamadosAtendimento: true,
+          relatoriosVendas: true,
+          relatoriosAvancados: true,
+          marcaPersonalizada: true,
+          suportePrioritario: true,
+        },
+
+        mercadoPagoPlanId: null,
+      },
+    };
+
+    const batch = db.batch();
+
+    for (const [planId, plan] of Object.entries(plans)) {
+      const planReference = db.collection("plans").doc(planId);
+
+      batch.set(
+        planReference,
+        {
+          ...plan,
+          criadoEm: FieldValue.serverTimestamp(),
+          atualizadoEm: FieldValue.serverTimestamp(),
+          atualizadoPor: "initial-setup",
+        },
+        {
+          merge: true,
+        },
+      );
+    }
+
+    await batch.commit();
+
+    return {
+      success: true,
+      createdPlans: Object.keys(plans),
+    };
+  },
+);
