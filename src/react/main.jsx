@@ -1,8 +1,11 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+
 import "./styles.css";
+
 import { App } from "./App.jsx";
 import { AppErrorBoundary } from "./components/AppErrorBoundary.jsx";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
 
 const rootElement = document.getElementById("root");
 
@@ -10,7 +13,9 @@ try {
   createRoot(rootElement).render(
     <React.StrictMode>
       <AppErrorBoundary>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </AppErrorBoundary>
     </React.StrictMode>,
   );

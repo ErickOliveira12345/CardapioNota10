@@ -19,9 +19,25 @@ service cloud.firestore {
 
     function ehProprietario(establishmentId) {
       return estaAutenticado()
-        && get(
-          /databases/$(database)/documents/establishments/$(establishmentId)
-        ).data.ownerId == request.auth.uid;
+        && (
+          (
+            exists(
+              /databases/$(database)/documents/establishments/$(establishmentId)
+            )
+            && get(
+              /databases/$(database)/documents/establishments/$(establishmentId)
+            ).data.ownerId == request.auth.uid
+          )
+          ||
+          (
+            existsAfter(
+              /databases/$(database)/documents/establishments/$(establishmentId)
+            )
+            && getAfter(
+              /databases/$(database)/documents/establishments/$(establishmentId)
+            ).data.ownerId == request.auth.uid
+          )
+        );
     }
 
     function podeGerenciarEstabelecimento(establishmentId) {
@@ -53,8 +69,28 @@ service cloud.firestore {
       allow update: if ehAdministrador()
         || (
           ehProprioUsuario(userId)
-          && request.resource.data.role == resource.data.role
-          && request.resource.data.email == resource.data.email
+
+          && request.resource.data.role
+            == resource.data.role
+
+          && request.resource.data.email
+            == resource.data.email
+
+          && (
+            request.resource.data.estabelecimentoId
+              == resource.data.estabelecimentoId
+
+            || (
+              resource.data.estabelecimentoId
+                == null
+
+              && request.resource.data.estabelecimentoId
+                is string
+
+              && request.resource.data.status
+                == 'active'
+            )
+          )
         );
 
       allow delete: if false;
@@ -74,13 +110,26 @@ service cloud.firestore {
      * pelo administrador e pelas Cloud Functions.
      */
     match /subscriptions/{subscriptionId} {
+      allow create: if estaAutenticado()
+        && request.resource.data.userId
+          == request.auth.uid
+        && request.resource.data.establishmentId
+          == subscriptionId
+        && request.resource.data.planId
+          == 'basic'
+        && request.resource.data.status
+          == 'trial'
+        && request.resource.data.valorAtual
+          == 0;
+
       allow read: if ehAdministrador()
         || (
           estaAutenticado()
-          && resource.data.userId == request.auth.uid
+          && resource.data.userId
+            == request.auth.uid
         );
 
-      allow create, update, delete: if false;
+      allow update, delete: if false;
     }
 
     match /subscriptionPayments/{paymentId} {

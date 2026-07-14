@@ -5,17 +5,15 @@ import React, {
 } from "react";
 
 import { CartSidebar } from "./components/CartSidebar.jsx";
+import { useAuth } from "./contexts/AuthContext.jsx";
 import { AdminPage } from "./pages/AdminPage.jsx";
+import { FirstAccessPage } from "./pages/FirstAccessPage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
+import { LoginPage } from "./pages/LoginPage.jsx";
 import { MenuPage } from "./pages/MenuPage.jsx";
-import {LoginPage} from "./pages/LoginPage.jsx";
+import { RegisterPage } from "./pages/RegisterPage.jsx";
 
-import {RegisterPage} from "./pages/RegisterPage.jsx";
-
-import {
-  Storage,
-  STORAGE_KEYS,
-} from "./services/storage.js";
+import { getStatus } from "./services/formatters.js";
 
 import {
   createOrder,
@@ -27,12 +25,11 @@ import {
 } from "./services/orders.js";
 
 import {
-  getStatus,
-} from "./services/formatters.js";
+  Storage,
+  STORAGE_KEYS,
+} from "./services/storage.js";
 
-import {
-  showToast,
-} from "./services/toast.js";
+import { showToast } from "./services/toast.js";
 
 const ACTIVE_ORDER_STATUSES = [
   "aguardando",
@@ -54,9 +51,7 @@ function getTableFromUrl() {
     window.location.search,
   );
 
-  const table = Number(
-    searchParams.get("mesa"),
-  );
+  const table = Number(searchParams.get("mesa"));
 
   return Number.isInteger(table) && table > 0
     ? table
@@ -88,9 +83,7 @@ function getSavedCart() {
 function getTime(value) {
   if (!value) return 0;
 
-  if (
-    typeof value?.toMillis === "function"
-  ) {
+  if (typeof value?.toMillis === "function") {
     return value.toMillis();
   }
 
@@ -105,7 +98,43 @@ function getTime(value) {
     : 0;
 }
 
+function Redirect({ to }) {
+  useEffect(() => {
+    if (getRoute() === to) return;
+
+    window.history.replaceState({}, "", to);
+    window.dispatchEvent(
+      new PopStateEvent("popstate"),
+    );
+  }, [to]);
+
+  return (
+    <main className="auth-page">
+      <section className="auth-card">
+        <p>Redirecionando...</p>
+      </section>
+    </main>
+  );
+}
+
+function ToastContainer() {
+  return (
+    <div
+      id="toast-container"
+      aria-live="polite"
+    />
+  );
+}
+
 export function App() {
+  const {
+    loading: authLoading,
+    establishmentId,
+    isAuthenticated,
+    isOnboarding,
+    refreshProfile,
+  } = useAuth();
+
   const [route, setRoute] = useState(getRoute);
 
   const [table, setTable] = useState(
@@ -122,14 +151,13 @@ export function App() {
   const [calls, setCalls] = useState([]);
 
   const [firebaseLoading, setFirebaseLoading] =
-    useState(true);
+    useState(false);
 
-  const [isSubmittingOrder, setIsSubmittingOrder] =
-  useState(false);
-  /*
-   * Navegação do navegador:
-   * voltar e avançar.
-   */
+  const [
+    isSubmittingOrder,
+    setIsSubmittingOrder,
+  ] = useState(false);
+
   useEffect(() => {
     function handlePopState() {
       setRoute(getRoute());
@@ -148,16 +176,24 @@ export function App() {
     };
   }, []);
 
-  /*
-   * Listener de pedidos do Firestore.
-   */
   useEffect(() => {
-    const stopObservingOrders = observeOrders(
+    if (
+      route !== "/admin" ||
+      !isAuthenticated ||
+      !establishmentId
+    ) {
+      setOrders([]);
+      setFirebaseLoading(false);
+      return undefined;
+    }
+
+    setFirebaseLoading(true);
+
+    const unsubscribe = observeOrders(
       (firebaseOrders) => {
         setOrders(firebaseOrders);
         setFirebaseLoading(false);
       },
-
       (error) => {
         console.error(
           "Erro ao carregar pedidos:",
@@ -172,22 +208,34 @@ export function App() {
           4000,
         );
       },
+      establishmentId,
     );
 
     return () => {
-      stopObservingOrders();
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
     };
-  }, []);
+  }, [
+    route,
+    isAuthenticated,
+    establishmentId,
+  ]);
 
-  /*
-   * Listener de chamados do Firestore.
-   */
   useEffect(() => {
-    const stopObservingCalls = observeCalls(
+    if (
+      route !== "/admin" ||
+      !isAuthenticated ||
+      !establishmentId
+    ) {
+      setCalls([]);
+      return undefined;
+    }
+
+    const unsubscribe = observeCalls(
       (firebaseCalls) => {
         setCalls(firebaseCalls);
       },
-
       (error) => {
         console.error(
           "Erro ao carregar chamados:",
@@ -200,17 +248,20 @@ export function App() {
           4000,
         );
       },
+      establishmentId,
     );
 
     return () => {
-      stopObservingCalls();
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
     };
-  }, []);
+  }, [
+    route,
+    isAuthenticated,
+    establishmentId,
+  ]);
 
-  /*
-   * Atualiza mesa pela URL e configura
-   * título e classe da página.
-   */
   useEffect(() => {
     const tableFromUrl = getTableFromUrl();
 
@@ -227,19 +278,26 @@ export function App() {
         ? "page-admin"
         : route === "/menu"
           ? "page-menu"
-          : "page-qr";
+          : route === "/login" ||
+              route === "/cadastro" ||
+              route === "/primeiro-acesso"
+            ? "page-auth"
+            : "page-qr";
 
     document.title =
       route === "/admin"
         ? "Painel Admin - CardápioNota10"
         : route === "/menu"
           ? `Mesa ${table} - CardápioNota10`
-          : "CardápioNota10 - Escaneie sua mesa";
+          : route === "/login"
+            ? "Entrar - CardápioNota10"
+            : route === "/cadastro"
+              ? "Criar conta - CardápioNota10"
+              : route === "/primeiro-acesso"
+                ? "Primeiro acesso - CardápioNota10"
+                : "CardápioNota10 - Escaneie sua mesa";
   }, [route, table]);
 
-  /*
-   * Salva a mesa localmente.
-   */
   useEffect(() => {
     if (route !== "/menu") return;
 
@@ -249,9 +307,6 @@ export function App() {
     );
   }, [route, table]);
 
-  /*
-   * Salva o carrinho localmente.
-   */
   useEffect(() => {
     Storage.save(
       STORAGE_KEYS.CARRINHO,
@@ -259,12 +314,6 @@ export function App() {
     );
   }, [cartItems]);
 
-  /*
-   * Pedido ativo da mesa atual.
-   *
-   * Agora é obtido diretamente da lista
-   * atualizada em tempo real pelo Firestore.
-   */
   const activeOrder = useMemo(() => {
     return (
       [...orders]
@@ -304,12 +353,7 @@ export function App() {
   }, [cartItems]);
 
   function navigate(path) {
-    window.history.pushState(
-      {},
-      "",
-      path,
-    );
-
+    window.history.pushState({}, "", path);
     setRoute(getRoute());
 
     window.scrollTo({
@@ -400,7 +444,10 @@ export function App() {
   }
 
   async function finishOrder() {
-    if (cartItems.length === 0 || isSubmittingOrder) {
+    if (
+      cartItems.length === 0 ||
+      isSubmittingOrder
+    ) {
       return;
     }
 
@@ -416,12 +463,6 @@ export function App() {
       setCartItems([]);
       Storage.remove(STORAGE_KEYS.CARRINHO);
       setIsCartOpen(false);
-
-      /*
-       * Atualização otimista.
-       * O listener do Firestore confirmará
-       * os dados logo em seguida.
-       */
 
       showToast(
         "Pedido enviado com sucesso! Aguarde...",
@@ -440,7 +481,7 @@ export function App() {
         "error",
         5000,
       );
-    }finally {
+    } finally {
       setIsSubmittingOrder(false);
     }
   }
@@ -507,19 +548,12 @@ export function App() {
   }
 
   function continueSession() {
-    navigate(
-      `/menu?mesa=${table}`,
-    );
+    navigate(`/menu?mesa=${table}`);
   }
 
   function startNewSession() {
-    Storage.remove(
-      STORAGE_KEYS.MESA,
-    );
-
-    Storage.remove(
-      STORAGE_KEYS.CARRINHO,
-    );
+    Storage.remove(STORAGE_KEYS.MESA);
+    Storage.remove(STORAGE_KEYS.CARRINHO);
 
     setTable(1);
     setCartItems([]);
@@ -531,22 +565,9 @@ export function App() {
     );
   }
 
-  /*
-   * Por segurança, esta função não apaga
-   * os pedidos do Firestore.
-   *
-   * Posteriormente criaremos uma Cloud Function
-   * exclusiva para o administrador excluir
-   * dados de teste.
-   */
   function resetData() {
-    Storage.remove(
-      STORAGE_KEYS.MESA,
-    );
-
-    Storage.remove(
-      STORAGE_KEYS.CARRINHO,
-    );
+    Storage.remove(STORAGE_KEYS.MESA);
+    Storage.remove(STORAGE_KEYS.CARRINHO);
 
     setCartItems([]);
     setIsCartOpen(false);
@@ -562,10 +583,20 @@ export function App() {
     orderId,
     status,
   ) {
+    if (!establishmentId) {
+      showToast(
+        "Estabelecimento não identificado.",
+        "error",
+      );
+
+      return;
+    }
+
     try {
       await updateOrderStatus(
         orderId,
         status,
+        establishmentId,
       );
 
       showToast(
@@ -593,10 +624,20 @@ export function App() {
     callTable,
     timestamp,
   ) {
+    if (!establishmentId) {
+      showToast(
+        "Estabelecimento não identificado.",
+        "error",
+      );
+
+      return;
+    }
+
     try {
       await markCallAsSeen(
         callTable,
         timestamp,
+        establishmentId,
       );
 
       showToast(
@@ -618,37 +659,81 @@ export function App() {
     }
   }
 
+  if (authLoading) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <p>Carregando...</p>
+        </section>
+      </main>
+    );
+  }
+
   if (route === "/cadastro") {
+    if (isAuthenticated && isOnboarding) {
+      return <Redirect to="/primeiro-acesso" />;
+    }
+
+    if (isAuthenticated && !isOnboarding) {
+      return <Redirect to="/admin" />;
+    }
+
     return (
       <>
-        <RegisterPage
-          onNavigate={navigate}
-        />
-
-        <div
-          id="toast-container"
-          aria-live="polite"
-        />
+        <RegisterPage onNavigate={navigate} />
+        <ToastContainer />
       </>
     );
   }
 
   if (route === "/login") {
+    if (isAuthenticated && isOnboarding) {
+      return <Redirect to="/primeiro-acesso" />;
+    }
+
+    if (isAuthenticated && !isOnboarding) {
+      return <Redirect to="/admin" />;
+    }
+
     return (
       <>
-        <LoginPage
-          onNavigate={navigate}
-        />
+        <LoginPage onNavigate={navigate} />
+        <ToastContainer />
+      </>
+    );
+  }
 
-        <div
-          id="toast-container"
-          aria-live="polite"
+  if (route === "/primeiro-acesso") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (!isOnboarding) {
+      return <Redirect to="/admin" />;
+    }
+
+    return (
+      <>
+        <FirstAccessPage
+          onNavigate={navigate}
+          onCompleted={refreshProfile}
         />
+        <ToastContainer />
       </>
     );
   }
 
   if (route === "/admin") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
     return (
       <>
         <AdminPage
@@ -662,12 +747,9 @@ export function App() {
           onMarkCallAsSeen={
             handleMarkCallAsSeen
           }
+          firebaseLoading={firebaseLoading}
         />
-
-        <div
-          id="toast-container"
-          aria-live="polite"
-        />
+        <ToastContainer />
       </>
     );
   }
@@ -682,19 +764,11 @@ export function App() {
             ) || null
           }
           onSelectTable={selectTable}
-          onContinueSession={
-            continueSession
-          }
-          onNewSession={
-            startNewSession
-          }
+          onContinueSession={continueSession}
+          onNewSession={startNewSession}
           onNavigate={navigate}
         />
-
-        <div
-          id="toast-container"
-          aria-live="polite"
-        />
+        <ToastContainer />
       </>
     );
   }
@@ -713,28 +787,22 @@ export function App() {
         }
         cartCount={cartCount}
         activeOrder={activeOrder}
-        firebaseLoading={
-          firebaseLoading
-        }
+        firebaseLoading={false}
       />
 
       <CartSidebar
         items={cartItems}
         total={cartTotal}
         isOpen={isCartOpen}
+        isSubmitting={isSubmittingOrder}
         onClose={() =>
           setIsCartOpen(false)
         }
-        onUpdateQuantity={
-          updateQuantity
-        }
+        onUpdateQuantity={updateQuantity}
         onFinishOrder={finishOrder}
       />
 
-      <div
-        id="toast-container"
-        aria-live="polite"
-      />
+      <ToastContainer />
     </>
   );
 }
