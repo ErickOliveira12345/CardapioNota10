@@ -64,27 +64,7 @@ export function AdminPage({
 
   return (
     <>
-      <header className="admin-header">
-        <div className="admin-header__brand">
-          <span className="admin-header__brand-icon" aria-hidden="true">
-            🍽️
-          </span>
-          <div>
-            <div className="admin-header__brand-name">Painel Admin</div>
-            <div className="admin-header__brand-sub">Cardápio Nota10</div>
-          </div>
-        </div>
-        <div className="admin-header__actions">
-          <button className="btn-client-view" type="button" onClick={() => onNavigate("/")}>
-            Ver como cliente
-          </button>
-          <button className="btn-clear" type="button" onClick={handleReset}>
-            Resetar dados
-          </button>
-        </div>
-      </header>
-
-      <main className="admin-main">
+      <main className="admin-dashboard">
         <section>
           <div className="stats-grid">
             <StatCard kind="total" icon="📋" value={stats.total} label="Total de pedidos" />

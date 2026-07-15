@@ -7,13 +7,15 @@ import React, {
 import { CartSidebar } from "./components/CartSidebar.jsx";
 import { useAuth } from "./contexts/AuthContext.jsx";
 import { AdminPage } from "./pages/AdminPage.jsx";
+import {AdminLayout} from "./components/AdminLayout.jsx";
 import { FirstAccessPage } from "./pages/FirstAccessPage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { MenuPage } from "./pages/MenuPage.jsx";
 import { RegisterPage } from "./pages/RegisterPage.jsx";
-
+import {ProductsPage} from "./pages/ProductsPage.jsx";
 import { getStatus } from "./services/formatters.js";
+import {CategoriesPage} from "./pages/CategoriesPage.jsx";
 
 import {
   createOrder,
@@ -30,6 +32,11 @@ import {
 } from "./services/storage.js";
 
 import { showToast } from "./services/toast.js";
+
+import {
+  observeMenuCategories,
+  observeMenuProducts,
+} from "./services/menuService.js";
 
 const ACTIVE_ORDER_STATUSES = [
   "aguardando",
@@ -157,6 +164,15 @@ export function App() {
     isSubmittingOrder,
     setIsSubmittingOrder,
   ] = useState(false);
+
+  const [menuCategories, setMenuCategories] =
+    useState([]);
+
+  const [menuProducts, setMenuProducts] =
+    useState([]);
+
+  const [menuLoading, setMenuLoading] =
+    useState(false);
 
   useEffect(() => {
     function handlePopState() {
@@ -723,6 +739,63 @@ export function App() {
     );
   }
 
+  if (route === "/admin/produtos") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="produtos"
+          onNavigate={navigate}
+        >
+          <ProductsPage
+            onNavigate={navigate}
+          />
+        </AdminLayout>
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (
+    route === "/admin/categorias"
+  ) {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="categorias"
+          onNavigate={navigate}
+        >
+          <CategoriesPage
+            onNavigate={navigate}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
   if (route === "/admin") {
     if (!isAuthenticated) {
       return <Redirect to="/login" />;
@@ -736,19 +809,26 @@ export function App() {
 
     return (
       <>
-        <AdminPage
-          orders={orders}
-          calls={calls}
+        <AdminLayout
+          activePage="dashboard"
           onNavigate={navigate}
-          onResetData={resetData}
-          onUpdateOrderStatus={
-            handleUpdateOrderStatus
-          }
-          onMarkCallAsSeen={
-            handleMarkCallAsSeen
-          }
-          firebaseLoading={firebaseLoading}
-        />
+        >
+          <AdminPage
+            orders={orders}
+            calls={calls}
+            onNavigate={navigate}
+            onResetData={resetData}
+            onUpdateOrderStatus={
+              handleUpdateOrderStatus
+            }
+            onMarkCallAsSeen={
+              handleMarkCallAsSeen
+            }
+            firebaseLoading={
+              firebaseLoading
+            }
+          />
+        </AdminLayout>
         <ToastContainer />
       </>
     );

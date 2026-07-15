@@ -1,10 +1,39 @@
 rules_version = '2';
 
-// Craft rules based on data in your Firestore database
-// allow write: if firestore.get(
-//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function ehProprietario(establishmentId) {
+      return estaAutenticado()
+        && firestore.get(
+          /databases/(default)/documents/establishments/$(establishmentId)
+        ).data.ownerId == request.auth.uid;
+    }
+
+    function imagemValida() {
+      return request.resource != null
+        && request.resource.size
+          < 5 * 1024 * 1024
+        && request.resource.contentType.matches(
+          'image/(jpeg|png|webp)'
+        );
+    }
+
+    match /establishments/{establishmentId}/products/{productId}/{fileName} {
+      allow read: if true;
+
+      allow create, update:
+        if ehProprietario(establishmentId)
+        && imagemValida();
+
+      allow delete:
+        if ehProprietario(establishmentId);
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }
