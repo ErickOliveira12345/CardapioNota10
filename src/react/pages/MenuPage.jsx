@@ -5,11 +5,6 @@ import React, {
 } from "react";
 
 import {
-  menuCategories as fallbackCategories,
-  menuItems as fallbackItems,
-} from "../services/menuData.js";
-
-import {
   formatCurrency,
   formatTime,
   getStatus,
@@ -34,11 +29,9 @@ export function MenuPage({
     useState(null);
 
   const availableCategories = useMemo(() => {
-    const source =
-      Array.isArray(categories) &&
-      categories.length > 0
-        ? categories
-        : fallbackCategories;
+     const source = Array.isArray(categories)
+    ? categories
+    : [];
 
     return source
       .filter(
@@ -62,19 +55,31 @@ export function MenuPage({
   }, [categories]);
 
   const availableProducts = useMemo(() => {
-    const source =
-      Array.isArray(products) &&
-      products.length > 0
-        ? products
-        : fallbackItems;
+    const source = Array.isArray(products)
+      ? products
+      : [];
 
-    return source.filter(
-      (product) =>
-        product.ativo !== false &&
-        product.active !== false &&
-        product.disponivel !== false &&
-        product.available !== false,
-    );
+    return source
+      .filter(
+        (product) =>
+          product.ativo !== false &&
+          product.active !== false &&
+          product.disponivel !== false &&
+          product.available !== false,
+      )
+      .sort(
+        (firstProduct, secondProduct) =>
+          Number(
+            firstProduct.ordem ??
+              firstProduct.displayOrder ??
+              0,
+          ) -
+          Number(
+            secondProduct.ordem ??
+              secondProduct.displayOrder ??
+              0,
+          ),
+      );
   }, [products]);
 
   const selectedCategory = useMemo(() => {
@@ -92,6 +97,7 @@ export function MenuPage({
     return availableProducts.filter(
       (product) => {
         const productCategory =
+          product.categoriaId ??
           product.categoria ??
           product.categoryId;
 

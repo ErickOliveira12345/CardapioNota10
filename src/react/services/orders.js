@@ -13,6 +13,71 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../firebase/firebaseConfig.js";
+import {autenticarClienteAnonimo} from "./authService.js";
+
+export function observeCustomerOrders({
+  establishmentId,
+  customerUid,
+  table,
+  onChange,
+  onError,
+}) {
+  if (
+    !establishmentId ||
+    !customerUid ||
+    !table
+  ) {
+    onChange([]);
+    return () => {};
+  }
+
+  const customerOrdersQuery = query(
+    ordersCollection(establishmentId),
+
+    where(
+      "clienteUid",
+      "==",
+      customerUid,
+    ),
+
+    where(
+      "mesa",
+      "==",
+      Number(table),
+    ),
+
+    orderBy(
+      "criadoEmMs",
+      "desc",
+    ),
+  );
+
+  return onSnapshot(
+    customerOrdersQuery,
+
+    (snapshot) => {
+      const customerOrders =
+        snapshot.docs.map(
+          (document) => ({
+            idPedido: document.id,
+            ...document.data(),
+          }),
+        );
+
+      onChange(customerOrders);
+    },
+
+    (error) => {
+      console.error(
+        "Erro ao acompanhar pedido:",
+        error,
+      );
+
+      onError?.(error);
+    },
+  );
+}
+
 
 export const DEFAULT_ESTABLISHMENT_ID =
   "cardapio-nota10-demo";
@@ -252,7 +317,8 @@ export async function createOrder({
 
     emoji: String(item.emoji || ""),
 
-    categoria:
+    categoriaId:
+      item.categoriaId ||
       item.categoria ||
       item.categoryId ||
       "",
@@ -281,10 +347,15 @@ export async function createOrder({
 
   const currentTime = Date.now();
 
+  const customer =
+    await autenticarClienteAnonimo();
+
   const orderReference = await addDoc(
     ordersCollection(establishmentId),
     {
       mesa: tableNumber,
+
+      clienteUid: customer.uid,
 
       itens: normalizedItems,
 

@@ -38,7 +38,6 @@ const menuItems = [
     label: "Mesas",
     icon: "🪑",
     path: "/admin/mesas",
-    disabled: true,
   },
   {
     id: "funcionarios",

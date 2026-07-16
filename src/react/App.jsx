@@ -16,11 +16,15 @@ import { RegisterPage } from "./pages/RegisterPage.jsx";
 import {ProductsPage} from "./pages/ProductsPage.jsx";
 import { getStatus } from "./services/formatters.js";
 import {CategoriesPage} from "./pages/CategoriesPage.jsx";
+import {TablesPage} from "./pages/TablesPage.jsx";
+import {observeMenuCategories,observeMenuProducts} from "./services/menuService.js";
+import {autenticarClienteAnonimo} from "./services/authService.js";
 
 import {
   createOrder,
   markCallAsSeen,
   observeCalls,
+  observeCustomerOrders,
   observeOrders,
   requestService,
   updateOrderStatus,
@@ -32,11 +36,6 @@ import {
 } from "./services/storage.js";
 
 import { showToast } from "./services/toast.js";
-
-import {
-  observeMenuCategories,
-  observeMenuProducts,
-} from "./services/menuService.js";
 
 const ACTIVE_ORDER_STATUSES = [
   "aguardando",
@@ -51,6 +50,28 @@ function getRoute() {
   return pathname === "/"
     ? "/"
     : pathname.replace(/\/$/, "");
+}
+
+function getEstablishmentFromUrl() {
+  const params =
+    new URLSearchParams(
+      window.location.search,
+    );
+
+  return (
+    params.get("est")?.trim() || null
+  );
+}
+
+function getTableTokenFromUrl() {
+  const params =
+    new URLSearchParams(
+      window.location.search,
+    );
+
+  return (
+    params.get("token")?.trim() || null
+  );
 }
 
 function getTableFromUrl() {
@@ -144,6 +165,18 @@ export function App() {
 
   const [route, setRoute] = useState(getRoute);
 
+  const [customerUid,setCustomerUid,] =
+    useState(null);
+
+  const [customerOrders,setCustomerOrders,] =
+    useState([]);
+
+  const [publicEstablishmentId, setPublicEstablishmentId,] = 
+    useState(getEstablishmentFromUrl);
+
+  const [tableToken, setTableToken,] =
+    useState(getTableTokenFromUrl);
+
   const [table, setTable] = useState(
     () => getTableFromUrl() || getSavedTable(),
   );
@@ -179,6 +212,15 @@ export function App() {
       setRoute(getRoute());
     }
 
+    setPublicEstablishmentId(
+      getEstablishmentFromUrl(),
+    );
+
+    setTableToken(
+      getTableTokenFromUrl(),
+    );
+  
+
     window.addEventListener(
       "popstate",
       handlePopState,
@@ -191,6 +233,183 @@ export function App() {
       );
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      route !== "/menu" ||
+      !publicEstablishmentId
+    ) {
+      setCustomerUid(null);
+      setCustomerOrders([]);
+      return undefined;
+    }
+
+    let mounted = true;
+
+    async function iniciarSessaoDaMesa() {
+      try {
+        const customer =
+          await autenticarClienteAnonimo();
+
+        if (mounted) {
+          setCustomerUid(customer.uid);
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao iniciar sessão da mesa:",
+          error,
+        );
+
+        showToast(
+          "Não foi possível acompanhar o pedido.",
+          "error",
+        );
+      }
+    }
+
+    iniciarSessaoDaMesa();
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    route,
+    publicEstablishmentId,
+  ]);
+
+  useEffect(() => {
+    if (
+      route !== "/menu" ||
+      !publicEstablishmentId ||
+      !customerUid ||
+      !table
+    ) {
+      setCustomerOrders([]);
+      return undefined;
+    }
+
+    const unsubscribe =
+      observeCustomerOrders({
+        establishmentId:
+          publicEstablishmentId,
+
+        customerUid,
+
+        table,
+
+        onChange: (firebaseOrders) => {
+          setCustomerOrders(firebaseOrders);
+        },
+
+        onError: (error) => {
+          console.error(
+            "Erro ao acompanhar pedidos da mesa:",
+            error,
+          );
+        },
+      });
+
+    return () => {
+      if (
+        typeof unsubscribe === "function"
+      ) {
+        unsubscribe();
+      }
+    };
+  }, [
+    route,
+    publicEstablishmentId,
+    customerUid,
+    table,
+  ]);
+
+  useEffect(() => {
+    if (
+      route !== "/menu" ||
+      !publicEstablishmentId
+    ) {
+      setCustomerUid(null);
+      setCustomerOrders([]);
+
+      return undefined;
+    }
+
+    let mounted = true;
+
+    async function authenticateCustomer() {
+      try {
+        const customer =
+          await autenticarClienteAnonimo();
+
+        if (mounted) {
+          setCustomerUid(customer.uid);
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao autenticar cliente:",
+          error,
+        );
+
+        showToast(
+          "Não foi possível iniciar a sessão da mesa.",
+          "error",
+        );
+      }
+    }
+
+    authenticateCustomer();
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    route,
+    publicEstablishmentId,
+  ]);
+
+  useEffect(() => {
+    if (
+      route !== "/menu" ||
+      !publicEstablishmentId ||
+      !customerUid ||
+      !table
+    ) {
+      setCustomerOrders([]);
+      return undefined;
+    }
+
+    const unsubscribe =
+      observeCustomerOrders({
+        establishmentId:
+          publicEstablishmentId,
+
+        customerUid,
+
+        table,
+
+        onChange: setCustomerOrders,
+
+        onError: (error) => {
+          console.error(
+            "Erro ao carregar pedido da mesa:",
+            error,
+          );
+        },
+      });
+
+    return () => {
+      if (
+        typeof unsubscribe === "function"
+      ) {
+        unsubscribe();
+      }
+    };
+  }, [
+    route,
+    publicEstablishmentId,
+    customerUid,
+    table,
+  ]);
 
   useEffect(() => {
     if (
@@ -324,6 +543,90 @@ export function App() {
   }, [route, table]);
 
   useEffect(() => {
+    if (
+      route !== "/menu" ||
+      !publicEstablishmentId
+    ) {
+      setMenuCategories([]);
+      setMenuProducts([]);
+      setMenuLoading(false);
+
+      return undefined;
+    }
+
+    setMenuLoading(true);
+
+    let categoriesLoaded = false;
+    let productsLoaded = false;
+
+    function finishLoading() {
+      if (
+        categoriesLoaded &&
+        productsLoaded
+      ) {
+        setMenuLoading(false);
+      }
+    }
+
+    const stopCategories =
+      observeMenuCategories(
+        publicEstablishmentId,
+        (categories) => {
+          setMenuCategories(categories);
+          categoriesLoaded = true;
+          finishLoading();
+        },
+        (error) => {
+          console.error(
+            "Erro nas categorias:",
+            error,
+          );
+
+          categoriesLoaded = true;
+          finishLoading();
+        },
+      );
+
+    const stopProducts =
+      observeMenuProducts(
+        publicEstablishmentId,
+        (products) => {
+          setMenuProducts(products);
+          productsLoaded = true;
+          finishLoading();
+        },
+        (error) => {
+          console.error(
+            "Erro nos produtos:",
+            error,
+          );
+
+          productsLoaded = true;
+          finishLoading();
+        },
+      );
+
+    return () => {
+      if (
+        typeof stopCategories ===
+        "function"
+      ) {
+        stopCategories();
+      }
+
+      if (
+        typeof stopProducts === "function"
+      ) {
+        stopProducts();
+      }
+    };
+  }, [
+    route,
+    publicEstablishmentId,
+  ]);
+
+  useEffect
+  (() => {
     Storage.save(
       STORAGE_KEYS.CARRINHO,
       cartItems,
@@ -331,8 +634,12 @@ export function App() {
   }, [cartItems]);
 
   const activeOrder = useMemo(() => {
+    const sourceOrders =
+      route === "/menu"
+        ? customerOrders
+        : orders;
     return (
-      [...orders]
+      [...sourceOrders]
         .sort(
           (firstOrder, secondOrder) =>
             getTime(secondOrder.criadoEm) -
@@ -348,7 +655,7 @@ export function App() {
             Array.isArray(order.itens),
         ) || null
     );
-  }, [orders, table]);
+  }, [route,customerOrders,orders, table]);
 
   const cartTotal = useMemo(() => {
     return cartItems.reduce(
@@ -371,6 +678,14 @@ export function App() {
   function navigate(path) {
     window.history.pushState({}, "", path);
     setRoute(getRoute());
+
+    setPublicEstablishmentId(
+    getEstablishmentFromUrl(),
+  );
+
+  setTableToken(
+    getTableTokenFromUrl(),
+  );
 
     window.scrollTo({
       top: 0,
@@ -467,6 +782,27 @@ export function App() {
       return;
     }
 
+    if (!publicEstablishmentId) {
+      showToast(
+        "Estabelecimento não identificado.",
+        "error",
+        4000,
+      );
+
+      return;
+    }
+
+    if (!tableToken) {
+      showToast(
+        "O acesso desta mesa é inválido.",
+        "error",
+        4000,
+      );
+
+      return;
+    }
+
+
     try {
       setIsSubmittingOrder(true);
 
@@ -474,6 +810,7 @@ export function App() {
         table,
         items: cartItems,
         total: cartTotal,
+        establishmentId:publicEstablishmentId,
       });
 
       setCartItems([]);
@@ -796,6 +1133,32 @@ export function App() {
     );
   }
 
+  if (route === "/admin/mesas") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="mesas"
+          onNavigate={navigate}
+        >
+          <TablesPage />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+
   if (route === "/admin") {
     if (!isAuthenticated) {
       return <Redirect to="/login" />;
@@ -857,17 +1220,15 @@ export function App() {
     <>
       <MenuPage
         table={table}
+        categories={menuCategories}
+        products={menuProducts}
         onNavigate={navigate}
         onAddItem={addItem}
-        onOpenCart={() =>
-          setIsCartOpen(true)
-        }
-        onRequestService={
-          handleRequestService
-        }
+        onOpenCart={() => setIsCartOpen(true)}
+        onRequestService={handleRequestService}
         cartCount={cartCount}
         activeOrder={activeOrder}
-        firebaseLoading={false}
+        firebaseLoading={menuLoading}
       />
 
       <CartSidebar
@@ -875,9 +1236,7 @@ export function App() {
         total={cartTotal}
         isOpen={isCartOpen}
         isSubmitting={isSubmittingOrder}
-        onClose={() =>
-          setIsCartOpen(false)
-        }
+        onClose={() => setIsCartOpen(false)}
         onUpdateQuantity={updateQuantity}
         onFinishOrder={finishOrder}
       />

@@ -3,6 +3,7 @@ import {
   deleteUser,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -178,6 +179,23 @@ export async function entrar({
   }
 }
 
+export async function autenticarClienteAnonimo() {
+  try {
+    if (auth.currentUser) {
+      return auth.currentUser;
+    }
+
+    const credencial =
+      await signInAnonymously(auth);
+
+    return credencial.user;
+  } catch (error) {
+    throw new Error(
+      traduzirErroAuth(error),
+    );
+  }
+}
+
 /**
  * Encerra a sessão atual.
  */
@@ -262,7 +280,13 @@ function traduzirErroAuth(error) {
       "Falha de conexão. Verifique sua internet.",
 
     "auth/operation-not-allowed":
-      "O login por e-mail e senha não está ativado.",
+      "Este método de autenticação não está ativado no Firebase.",
+
+    "auth/admin-restricted-operation":
+      "A autenticação anônima não está ativada.",
+
+    "auth/operation-not-allowed":
+      "Este método de autenticação não está ativado.",
   };
 
   return (

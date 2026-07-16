@@ -33,7 +33,10 @@ export function AuthProvider({ children }) {
   }
 
   async function refreshProfile() {
-    if (!user?.uid) {
+    if (
+      !user?.uid ||
+      user.isAnonymous
+    ) {
       setProfile(null);
       return null;
     }
@@ -52,6 +55,15 @@ export function AuthProvider({ children }) {
           setUser(authenticatedUser);
 
           if (!authenticatedUser) {
+            setProfile(null);
+            return;
+          }
+
+          /*
+          * O cliente anônimo da mesa não possui
+          * perfil administrativo em users/{uid}.
+          */
+          if (authenticatedUser.isAnonymous) {
             setProfile(null);
             return;
           }
@@ -90,25 +102,40 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const value = useMemo(
-    () => ({
+  const value = useMemo(() => {
+    const isAnonymous =
+      Boolean(user?.isAnonymous);
+
+    const isAuthenticated =
+      Boolean(user) && !isAnonymous;
+
+    const establishmentId =
+      profile?.estabelecimentoId || null;
+
+    const isOnboarding =
+      isAuthenticated &&
+      (
+        profile?.status === "onboarding" ||
+        !establishmentId
+      );
+
+    return {
       user,
       profile,
       loading,
 
-      isAuthenticated: Boolean(user),
-
-      establishmentId:
-        profile?.estabelecimentoId || null,
-
-      isOnboarding:
-        profile?.status === "onboarding" ||
-        !profile?.estabelecimentoId,
+      isAnonymous,
+      isAuthenticated,
+      isOnboarding,
+      establishmentId,
 
       refreshProfile,
-    }),
-    [user, profile, loading],
-  );
+    };
+  }, [
+    user,
+    profile,
+    loading,
+  ]);
 
   return (
     <AuthContext.Provider value={value}>

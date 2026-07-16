@@ -1766,3 +1766,62 @@ details summary {
     display: none;
   }
 }
+
+
+.table-link-box {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f2f4f7;
+}
+
+.table-link-box span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #667085;
+}
+
+.table-link-box code {
+  overflow-wrap: anywhere;
+  font-size: 0.75rem;
+  color: #344054;
+}
+
+
+.table-qrcode {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.table-qrcode img {
+  width: min(100%, 220px);
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.table-qrcode-loading,
+.table-qrcode-error {
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.table-qrcode-loading {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.table-qrcode-error {
+  background: #fef3f2;
+  color: #b42318;
+}
