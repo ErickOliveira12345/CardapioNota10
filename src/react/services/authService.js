@@ -181,6 +181,13 @@ export async function entrar({
 
 export async function autenticarClienteAnonimo() {
   try {
+    await auth.authStateReady();
+
+    /*
+     * Se já existe um proprietário autenticado,
+     * não substitui essa sessão por uma anônima.
+     */
+    
     if (auth.currentUser) {
       return auth.currentUser;
     }

@@ -234,95 +234,114 @@ export function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (
-      route !== "/menu" ||
-      !publicEstablishmentId
-    ) {
-      setCustomerUid(null);
-      setCustomerOrders([]);
-      return undefined;
+ useEffect(() => {
+  if (
+    route !== "/menu" ||
+    !publicEstablishmentId
+  ) {
+    setCustomerUid(null);
+    setCustomerOrders([]);
+    return undefined;
+  }
+
+  let mounted = true;
+
+  async function iniciarSessaoDaMesa() {
+    try {
+      const customer =
+        await autenticarClienteAnonimo();
+
+      if (mounted) {
+        console.log(
+          "Cliente anônimo autenticado:",
+          customer.uid,
+        );
+
+        setCustomerUid(customer.uid);
+      }
+    } catch (error) {
+      console.error(
+        "Erro ao iniciar sessão da mesa:",
+        error,
+      );
+
+      showToast(
+        "Não foi possível acompanhar o pedido.",
+        "error",
+      );
     }
+  }
 
-    let mounted = true;
+  iniciarSessaoDaMesa();
 
-    async function iniciarSessaoDaMesa() {
-      try {
-        const customer =
-          await autenticarClienteAnonimo();
+  return () => {
+    mounted = false;
+  };
+}, [
+  route,
+  publicEstablishmentId,
+]);
 
-        if (mounted) {
-          setCustomerUid(customer.uid);
-        }
-      } catch (error) {
+useEffect(() => {
+  if (
+    route !== "/menu" ||
+    !publicEstablishmentId ||
+    !customerUid ||
+    !table
+  ) {
+    setCustomerOrders([]);
+    return undefined;
+  }
+
+  console.log(
+    "Iniciando listener da mesa:",
+    {
+      establishmentId:
+        publicEstablishmentId,
+      customerUid,
+      table,
+    },
+  );
+
+  const unsubscribe =
+    observeCustomerOrders({
+      establishmentId:
+        publicEstablishmentId,
+
+      customerUid,
+
+      table,
+
+      onChange: (firebaseOrders) => {
+        console.log(
+          "Pedidos da mesa recebidos:",
+          firebaseOrders,
+        );
+
+        setCustomerOrders(firebaseOrders);
+      },
+
+      onError: (error) => {
         console.error(
-          "Erro ao iniciar sessão da mesa:",
+          "Erro ao acompanhar pedidos da mesa:",
           error,
         );
+      },
+    });
 
-        showToast(
-          "Não foi possível acompanhar o pedido.",
-          "error",
-        );
-      }
-    }
-
-    iniciarSessaoDaMesa();
-
-    return () => {
-      mounted = false;
-    };
-  }, [
-    route,
-    publicEstablishmentId,
-  ]);
-
-  useEffect(() => {
+  return () => {
     if (
-      route !== "/menu" ||
-      !publicEstablishmentId ||
-      !customerUid ||
-      !table
+      typeof unsubscribe === "function"
     ) {
-      setCustomerOrders([]);
-      return undefined;
+      unsubscribe();
     }
-
-    const unsubscribe =
-      observeCustomerOrders({
-        establishmentId:
-          publicEstablishmentId,
-
-        customerUid,
-
-        table,
-
-        onChange: (firebaseOrders) => {
-          setCustomerOrders(firebaseOrders);
-        },
-
-        onError: (error) => {
-          console.error(
-            "Erro ao acompanhar pedidos da mesa:",
-            error,
-          );
-        },
-      });
-
-    return () => {
-      if (
-        typeof unsubscribe === "function"
-      ) {
-        unsubscribe();
-      }
-    };
-  }, [
-    route,
-    publicEstablishmentId,
-    customerUid,
-    table,
-  ]);
-
+  };
+}, [
+  route,
+  publicEstablishmentId,
+  customerUid,
+  table,
+]);
   useEffect(() => {
     if (
       route !== "/menu" ||
@@ -638,24 +657,42 @@ export function App() {
       route === "/menu"
         ? customerOrders
         : orders;
+
     return (
       [...sourceOrders]
         .sort(
           (firstOrder, secondOrder) =>
-            getTime(secondOrder.criadoEm) -
-            getTime(firstOrder.criadoEm),
+            Number(
+              secondOrder.criadoEmMs ??
+                getTime(secondOrder.criadoEm) ??
+                0,
+            ) -
+            Number(
+              firstOrder.criadoEmMs ??
+                getTime(firstOrder.criadoEm) ??
+                0,
+            ),
         )
         .find(
           (order) =>
             Number(order.mesa) ===
               Number(table) &&
-            ACTIVE_ORDER_STATUSES.includes(
-              order.status,
-            ) &&
+            [
+              "aguardando",
+              "recebido",
+              "preparando",
+              "saindo",
+              "finalizado",
+            ].includes(order.status) &&
             Array.isArray(order.itens),
         ) || null
     );
-  }, [route,customerOrders,orders, table]);
+  }, [
+    route,
+    customerOrders,
+    orders,
+    table,
+  ]);
 
   const cartTotal = useMemo(() => {
     return cartItems.reduce(

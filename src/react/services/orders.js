@@ -33,40 +33,43 @@ export function observeCustomerOrders({
 
   const customerOrdersQuery = query(
     ordersCollection(establishmentId),
-
     where(
       "clienteUid",
       "==",
       customerUid,
     ),
-
-    where(
-      "mesa",
-      "==",
-      Number(table),
-    ),
-
-    orderBy(
-      "criadoEmMs",
-      "desc",
-    ),
   );
 
   return onSnapshot(
     customerOrdersQuery,
-
     (snapshot) => {
-      const customerOrders =
-        snapshot.docs.map(
-          (document) => ({
-            idPedido: document.id,
-            ...document.data(),
-          }),
+      const customerOrders = snapshot.docs
+        .map((document) => ({
+          idPedido: document.id,
+          ...document.data(),
+        }))
+        .filter(
+          (order) =>
+            Number(order.mesa) ===
+            Number(table),
+        )
+        .sort(
+          (firstOrder, secondOrder) =>
+            Number(
+              secondOrder.criadoEmMs || 0,
+            ) -
+            Number(
+              firstOrder.criadoEmMs || 0,
+            ),
         );
+
+      console.log(
+        "Pedidos acompanhados pela mesa:",
+        customerOrders,
+      );
 
       onChange(customerOrders);
     },
-
     (error) => {
       console.error(
         "Erro ao acompanhar pedido:",
