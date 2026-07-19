@@ -8,6 +8,10 @@ import {
   showToast,
 } from "../services/toast.js";
 
+import {
+  NotificationCenter,
+} from "./NotificationCenter.jsx";
+
 const menuItems = [
   {
     id: "dashboard",
@@ -20,6 +24,12 @@ const menuItems = [
     label: "Pedidos",
     icon: "📦",
     path: "/admin",
+  },
+  {
+    id: "cozinha",
+    label: "Cozinha",
+    icon: "🍳",
+    path: "/admin/cozinha",
   },
   {
     id: "produtos",
@@ -38,6 +48,18 @@ const menuItems = [
     label: "Mesas",
     icon: "🪑",
     path: "/admin/mesas",
+  },
+  {
+    id: "mapa-mesas",
+    label: "Mapa de mesas",
+    icon: "🗺️",
+    path: "/admin/mapa-mesas",
+  },
+  {
+    id: "pedidos",
+    label: "Pedidos",
+    icon: "📦",
+    path: "/admin/pedidos",
   },
   {
     id: "funcionarios",
@@ -66,6 +88,7 @@ export function AdminLayout({
   children,
   activePage,
   onNavigate,
+  orders = [],
 }) {
   const [menuOpen, setMenuOpen] =
     useState(false);
@@ -130,6 +153,11 @@ export function AdminLayout({
             <strong>Cardápio Nota10</strong>
             <small>Painel do estabelecimento</small>
           </div>
+
+          <NotificationCenter
+            orders={orders}
+            onNavigate={onNavigate}
+          />
         </div>
 
         <nav

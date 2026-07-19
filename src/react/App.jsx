@@ -19,6 +19,11 @@ import {CategoriesPage} from "./pages/CategoriesPage.jsx";
 import {TablesPage} from "./pages/TablesPage.jsx";
 import {observeMenuCategories,observeMenuProducts} from "./services/menuService.js";
 import {autenticarClienteAnonimo} from "./services/authService.js";
+import {KitchenPage} from "./pages/KitchenPage.jsx";
+import {DashboardPage} from "./pages/DashboardPage.jsx";
+import {TablesMapPage} from "./pages/TablesMapPage.jsx";
+import {AdminOrdersPage} from "./pages/AdminOrdersPage.jsx";
+
 
 import {
   createOrder,
@@ -1195,8 +1200,7 @@ useEffect(() => {
     );
   }
 
-
-  if (route === "/admin") {
+  if (route === "/admin/mapa-mesas") {
     if (!isAuthenticated) {
       return <Redirect to="/login" />;
     }
@@ -1210,29 +1214,101 @@ useEffect(() => {
     return (
       <>
         <AdminLayout
-          activePage="dashboard"
+          activePage="mapa-mesas"
           onNavigate={navigate}
+          orders={orders}
         >
-          <AdminPage
-            orders={orders}
-            calls={calls}
+          <TablesMapPage
             onNavigate={navigate}
-            onResetData={resetData}
-            onUpdateOrderStatus={
-              handleUpdateOrderStatus
-            }
-            onMarkCallAsSeen={
-              handleMarkCallAsSeen
-            }
-            firebaseLoading={
-              firebaseLoading
-            }
           />
         </AdminLayout>
+
         <ToastContainer />
       </>
     );
   }
+
+  if (route === "/admin/cozinha") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="cozinha"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <KitchenPage />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (route === "/admin/pedidos") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="pedidos"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <AdminOrdersPage />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (route === "/admin") {
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
+  }
+
+  if (isOnboarding) {
+    return (
+      <Redirect to="/primeiro-acesso" />
+    );
+  }
+
+  return (
+    <>
+      <AdminLayout
+        activePage="dashboard"
+        onNavigate={navigate}
+        orders={orders}
+      >
+        <DashboardPage />
+      </AdminLayout>
+
+      <ToastContainer />
+    </>
+  );
+}
 
   if (route !== "/menu") {
     return (
