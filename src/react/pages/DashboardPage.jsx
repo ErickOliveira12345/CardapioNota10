@@ -248,7 +248,10 @@ function getOrderUpdatedTime(order) {
   );
 }
 
-export function DashboardPage() {
+export function DashboardPage({
+  calls = [],
+  onMarkCallAsSeen,
+}) {
   const {
     establishmentId,
   } = useAuth();
@@ -258,6 +261,10 @@ export function DashboardPage() {
 
   const [loading, setLoading] =
     useState(true);
+
+  const activeCalls = calls.filter(
+    (call) => !call.visualizado,
+  );
 
   useEffect(() => {
     if (!establishmentId) {
@@ -957,6 +964,74 @@ export function DashboardPage() {
             ).format(new Date())}
           </strong>
         </div>
+      </section>
+
+      <section className="dashboard-panel dashboard-calls-panel">
+        <header className="dashboard-panel__header">
+          <div>
+            <h2>🔔 Chamados de atendimento</h2>
+
+            <p>
+              Mesas aguardando atendimento.
+            </p>
+          </div>
+
+          <span className="dashboard-panel__count">
+            {activeCalls.length}
+          </span>
+        </header>
+
+        {activeCalls.length === 0 ? (
+          <DashboardEmpty
+            message="Nenhum chamado aguardando atendimento."
+          />
+        ) : (
+          <div className="dashboard-calls-list">
+            {activeCalls.map((call) => (
+              <article
+                className="dashboard-call-card"
+                key={
+                  call.id ||
+                  `${call.mesa}-${call.timestampMs}`
+                }
+              >
+                <div className="dashboard-call-card__icon">
+                  🔔
+                </div>
+
+                <div className="dashboard-call-card__content">
+                  <strong>
+                    Mesa {call.mesa}&nbsp;
+                  </strong>
+
+                  <span>
+                    Solicitou atendimento
+                  </span>
+
+                  <small>
+                    {call.timestampMs
+                      ? formatTime(call.timestampMs)
+                      : "Agora"}
+                  </small>
+                </div>
+
+                <button
+                  type="button"
+                  className="dashboard-call-card__button"
+                  onClick={() =>
+                    onMarkCallAsSeen(
+                      call.mesa,
+                      call.timestampMs ??
+                        call.timestamp,
+                    )
+                  }
+                >
+                  Marcar como atendido
+                </button>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="dashboard-metrics">

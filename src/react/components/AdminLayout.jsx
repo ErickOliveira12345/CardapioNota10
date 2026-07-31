@@ -20,10 +20,16 @@ const menuItems = [
     path: "/admin",
   },
   {
+    id: "caixa",
+    label: "Caixa",
+    icon: "💰",
+    path: "/admin/caixa",
+  },
+  {
     id: "pedidos",
     label: "Pedidos",
     icon: "📦",
-    path: "/admin",
+    path: "/admin/pedidos",
   },
   {
     id: "cozinha",
@@ -54,12 +60,6 @@ const menuItems = [
     label: "Mapa de mesas",
     icon: "🗺️",
     path: "/admin/mapa-mesas",
-  },
-  {
-    id: "pedidos",
-    label: "Pedidos",
-    icon: "📦",
-    path: "/admin/pedidos",
   },
   {
     id: "funcionarios",

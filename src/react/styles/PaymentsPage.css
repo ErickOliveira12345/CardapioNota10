@@ -1,0 +1,33 @@
+.payments-page .super-admin-summary-grid article:nth-child(1) {
+  border-left: 4px solid #f97316;
+}
+
+.payments-page .super-admin-summary-grid article:nth-child(2) {
+  border-left: 4px solid #22c55e;
+}
+
+.payments-page .super-admin-summary-grid article:nth-child(3) {
+  border-left: 4px solid #eab308;
+}
+
+.payments-page .super-admin-summary-grid article:nth-child(4) {
+  border-left: 4px solid #ef4444;
+}
+
+.payments-page .super-admin-table {
+  min-width: 1050px;
+}
+
+.payments-page .super-admin-table td:nth-child(2) {
+  min-width: 220px;
+}
+
+.payments-page .super-admin-table td:nth-child(3) {
+  min-width: 160px;
+}
+
+.payments-page__transaction {
+  color: #f97316;
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+}

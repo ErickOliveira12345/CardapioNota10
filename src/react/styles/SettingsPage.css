@@ -1,0 +1,124 @@
+.super-admin-settings {
+  display: grid;
+  gap: 18px;
+}
+
+.super-admin-settings__section {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.75fr) minmax(0, 1.6fr);
+  gap: 30px;
+  padding: 25px;
+  border: 1px solid #e5eaf0;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgb(15 23 42 / 5%);
+}
+
+.super-admin-settings__section h2 {
+  margin: 0 0 7px;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+.super-admin-settings__section > div:first-child p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.super-admin-settings__fields {
+  display: grid;
+  gap: 17px;
+}
+
+.super-admin-settings__fields > label:not(.super-admin-switch) {
+  display: grid;
+  gap: 7px;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.super-admin-settings__fields input[type="text"],
+.super-admin-settings__fields input[type="email"],
+.super-admin-settings__fields input[type="tel"],
+.super-admin-settings__fields input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid #dbe2ea;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.super-admin-settings__fields input:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 13%);
+}
+
+.super-admin-switch {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 50px;
+  padding: 11px 13px;
+  border: 1px solid #e5eaf0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+}
+
+.super-admin-switch input {
+  width: 18px;
+  height: 18px;
+  accent-color: #f97316;
+  cursor: pointer;
+}
+
+.super-admin-switch span {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.super-admin-settings__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  padding: 18px 0;
+}
+
+.super-admin-settings__footer > span {
+  color: #15803d;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+@media (max-width: 850px) {
+  .super-admin-settings__section {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .super-admin-settings__section {
+    padding: 18px;
+  }
+
+  .super-admin-settings__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .super-admin-settings__footer .super-admin-button {
+    width: 100%;
+  }
+}

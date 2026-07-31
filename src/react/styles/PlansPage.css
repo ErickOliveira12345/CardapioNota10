@@ -1,0 +1,795 @@
+.super-admin-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.super-admin-plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+  padding: 24px;
+  overflow: hidden;
+  border: 1px solid #e5eaf0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgb(15 23 42 / 6%);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.super-admin-plan-card:hover {
+  border-color: #fdba74;
+  box-shadow: 0 15px 38px rgb(15 23 42 / 10%);
+  transform: translateY(-3px);
+}
+
+.super-admin-plan-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: #f97316;
+  content: "";
+}
+
+.super-admin-plan-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.super-admin-plan-card__header h2 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 1.35rem;
+}
+
+.super-admin-plan-card__header p {
+  min-height: 48px;
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.super-admin-plan-card__price {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  margin: 26px 0 8px;
+}
+
+.super-admin-plan-card__price strong {
+  color: #111827;
+  font-size: 2rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.super-admin-plan-card__price span {
+  color: #94a3b8;
+  font-size: 0.84rem;
+}
+
+.super-admin-plan-card__offer {
+  display: inline-flex;
+  align-self: flex-start;
+  margin: 4px 0 14px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.super-admin-plan-card ul {
+  display: grid;
+  gap: 11px;
+  margin: 18px 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+.super-admin-plan-card li {
+  color: #475569;
+  font-size: 0.87rem;
+  line-height: 1.45;
+}
+
+.super-admin-plan-card li::first-letter {
+  color: #22c55e;
+}
+
+.super-admin-plan-card__actions {
+  display: flex;
+  gap: 9px;
+  margin-top: auto;
+}
+
+.super-admin-plan-card__actions button {
+  flex: 1;
+  min-height: 42px;
+  border: 1px solid #dbe2ea;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #475569;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.super-admin-plan-card__actions button:first-child {
+  border-color: #f97316;
+  background: #f97316;
+  color: #ffffff;
+}
+
+.super-admin-plan-card__actions button:first-child:hover {
+  background: #ea580c;
+}
+
+.super-admin-plan-card__actions button:last-child:hover {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1100px) {
+  .super-admin-plan-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .super-admin-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .super-admin-plan-card {
+    min-height: 0;
+  }
+}
+
+
+.plan-edit-modal-overlay {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(4px);
+
+  animation: plan-overlay-enter 0.2s ease;
+}
+
+.plan-edit-modal {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+
+  padding: 28px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  box-shadow:
+    0 30px 80px rgba(15, 23, 42, 0.28),
+    0 8px 24px rgba(15, 23, 42, 0.12);
+
+  animation: plan-modal-enter 0.22s ease;
+}
+
+.plan-edit-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.plan-edit-modal__eyebrow {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #2563eb;
+
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.plan-edit-modal__header h2 {
+  margin: 0;
+
+  color: #0f172a;
+  font-size: 26px;
+}
+
+.plan-edit-modal__close {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: #f1f5f9;
+  color: #64748b;
+
+  font-size: 25px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.plan-edit-modal__close:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.plan-edit-form {
+  display: grid;
+  gap: 18px;
+}
+
+.plan-edit-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.plan-edit-form label > span {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.plan-edit-form label small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.plan-edit-form input,
+.plan-edit-form textarea,
+.plan-edit-form select {
+  box-sizing: border-box;
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font: inherit;
+}
+
+.plan-edit-form textarea {
+  resize: vertical;
+}
+
+.plan-edit-form input:focus,
+.plan-edit-form textarea:focus,
+.plan-edit-form select:focus {
+  border-color: #2563eb;
+  outline: 3px solid rgba(37, 99, 235, 0.14);
+}
+
+.plan-edit-form input:disabled,
+.plan-edit-form textarea:disabled,
+.plan-edit-form select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.plan-edit-form__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.plan-edit-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  margin-top: 10px;
+}
+
+.plan-edit-button {
+  min-height: 44px;
+  padding: 0 18px;
+
+  border: 0;
+  border-radius: 10px;
+
+  font: inherit;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.plan-edit-button--cancel {
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+  color: #334155;
+}
+
+.plan-edit-button--cancel:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.plan-edit-button--save {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.plan-edit-button--save:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.plan-edit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.plans-success-message {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 3500;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: min(420px, calc(100vw - 32px));
+  padding: 16px;
+
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+
+  background: #f0fdf4;
+  color: #166534;
+
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.18),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+
+  animation: plan-toast-enter 0.25s ease;
+}
+
+.plans-success-message__icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+  color: #ffffff;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.plans-success-message > div {
+  flex: 1;
+}
+
+.plans-success-message strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #14532d;
+}
+
+.plans-success-message p {
+  margin: 0;
+
+  color: #166534;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.plans-success-message button {
+  border: 0;
+
+  background: transparent;
+  color: #15803d;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+@keyframes plan-overlay-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes plan-modal-enter {
+  from {
+    opacity: 0;
+    transform:
+      translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0) scale(1);
+  }
+}
+
+@keyframes plan-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 620px) {
+  .plan-edit-modal-overlay {
+    padding: 14px;
+  }
+
+  .plan-edit-modal {
+    padding: 22px;
+  }
+
+  .plan-edit-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-edit-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .plan-edit-button {
+    width: 100%;
+  }
+
+  .plans-success-message {
+    top: 14px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}
+
+
+.plan-edit-form__fieldset {
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+}
+
+.plan-edit-form__fieldset legend {
+  padding: 0 8px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.plan-edit-form__checkbox-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.plan-edit-form label.plan-edit-form__checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  min-height: 44px;
+  padding: 8px 4px;
+
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+}
+
+.plan-edit-form label.plan-edit-form__checkbox:last-child {
+  border-bottom: 0;
+}
+
+.plan-edit-form__checkbox span {
+  flex: 1;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.plan-edit-form__checkbox input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+
+/* ==============================
+   Overlay
+============================== */
+
+.plan-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, .65);
+  /* backdrop-filter: blur(10px); */
+
+  animation: overlayFade .25s ease;
+}
+
+/* ==============================
+   Modal
+============================== */
+
+.plan-confirm-modal {
+  width: 470px;
+  max-width: 100%;
+
+  padding: 34px;
+
+  border-radius: 26px;
+
+  background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f8fafc 100%
+  );
+
+  border: 1px solid rgba(226,232,240,.9);
+
+  box-shadow:
+      0 35px 80px rgba(15,23,42,.18),
+      0 10px 25px rgba(15,23,42,.08);
+
+  text-align: center;
+
+  animation: modalShow .28s ease;
+}
+
+/* ==============================
+   Ícone
+============================== */
+
+.plan-confirm-icon {
+
+  width: 82px;
+  height: 82px;
+
+  margin: 0 auto 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+      135deg,
+      #fee2e2,
+      #fecaca
+  );
+
+  color: #dc2626;
+
+  font-size: 40px;
+
+  box-shadow:
+      inset 0 0 0 1px rgba(239,68,68,.15),
+      0 10px 25px rgba(239,68,68,.18);
+}
+
+/* ==============================
+   Título
+============================== */
+
+.plan-confirm-modal h2 {
+
+  margin: 0;
+
+  font-size: 2rem;
+
+  font-weight: 800;
+
+  color: #0f172a;
+}
+
+/* ==============================
+   Texto
+============================== */
+
+.plan-confirm-modal p {
+
+  margin: 20px 0 8px;
+
+  color: #475569;
+
+  line-height: 1.7;
+
+  font-size: 1rem;
+}
+
+.plan-confirm-modal strong {
+
+  color: #0f172a;
+
+  font-weight: 700;
+}
+
+.plan-confirm-modal span {
+
+  display: block;
+
+  margin-top: 6px;
+
+  color: #94a3b8;
+
+  font-size: .95rem;
+}
+
+/* ==============================
+   Botões
+============================== */
+
+.plan-confirm-actions {
+
+  display: flex;
+
+  gap: 16px;
+
+  margin-top: 34px;
+}
+
+.plan-confirm-actions button {
+
+  flex: 1;
+
+  height: 50px;
+
+  border-radius: 14px;
+
+  font-size: .95rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: .25s;
+
+  border: none;
+}
+
+/* ==============================
+   Cancelar
+============================== */
+
+.plan-confirm-actions button:first-child {
+
+  background: white;
+
+  border: 1px solid #dbe3ed;
+
+  color: #334155;
+}
+
+.plan-confirm-actions button:first-child:hover {
+
+  background: #f8fafc;
+
+  border-color: #94a3b8;
+
+  transform: translateY(-2px);
+}
+
+/* ==============================
+   Excluir
+============================== */
+
+.plan-confirm-actions .danger {
+
+  color: white;
+
+  background: linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+  );
+
+  box-shadow:
+      0 12px 24px rgba(220,38,38,.28);
+}
+
+.plan-confirm-actions .danger:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+      0 18px 32px rgba(220,38,38,.36);
+}
+
+.plan-confirm-actions .danger:active {
+
+  transform: scale(.98);
+}
+
+.plan-confirm-actions button:disabled {
+
+  opacity: .6;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+/* ==============================
+   Animações
+============================== */
+
+@keyframes modalShow {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plan-confirm-modal {
+  animation: modalShow 0.2s ease-out;
+  will-change: transform, opacity;
+}

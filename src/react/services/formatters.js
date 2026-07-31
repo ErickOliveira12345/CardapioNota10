@@ -155,3 +155,10 @@ export function getStatus(key) {
     }
   );
 }
+
+export function formatCurrencyFromCents(value) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(Number(value || 0) / 100);
+}

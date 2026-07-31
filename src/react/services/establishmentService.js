@@ -2,6 +2,10 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
+  updateDoc,
+  query,
+  orderBy,
   serverTimestamp,
   Timestamp,
   writeBatch,
@@ -403,4 +407,105 @@ export async function criarEstruturaInicialEstabelecimento(dados) {
     subscriptionId: establishmentId,
     trialEndsAt: fimTeste,
   };
+}
+
+export async function listarEstabelecimentos() {
+  const establishmentsQuery = query(
+    collection(db, "establishments"),
+    orderBy("nome"),
+  );
+
+  const snapshot = await getDocs(
+    establishmentsQuery,
+  );
+
+  return snapshot.docs.map(
+    (documentSnapshot) => ({
+      id: documentSnapshot.id,
+      ...documentSnapshot.data(),
+    }),
+  );
+}
+
+export async function buscarEstabelecimento(id) {
+  if (!id) {
+    throw new Error(
+      "Informe o estabelecimento.",
+    );
+  }
+
+  const reference = doc(
+    db,
+    "establishments",
+    id,
+  );
+
+  const snapshot = await getDoc(reference);
+
+  if (!snapshot.exists()) {
+    throw new Error(
+      "Estabelecimento não encontrado.",
+    );
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  };
+}
+
+export async function atualizarStatusEstabelecimento(
+  id,
+  status,
+) {
+  const allowedStatuses = [
+    "active",
+    "blocked",
+  ];
+
+  if (!id) {
+    throw new Error(
+      "Informe o estabelecimento.",
+    );
+  }
+
+  if (!allowedStatuses.includes(status)) {
+    throw new Error(
+      "Status de estabelecimento inválido.",
+    );
+  }
+
+  await updateDoc(
+    doc(db, "establishments", id),
+    {
+      status,
+      atualizadoEm: serverTimestamp(),
+    },
+  );
+}
+
+export async function atualizarEstabelecimento(
+  id,
+  dados,
+) {
+  if (!id) {
+    throw new Error(
+      "Informe o estabelecimento.",
+    );
+  }
+
+  const {
+    ownerId,
+    assinaturaId,
+    criadoEm,
+    ...dadosPermitidos
+  } = dados || {};
+
+  await updateDoc(
+    doc(db, "establishments", id),
+    {
+      ...dadosPermitidos,
+      atualizadoEm: serverTimestamp(),
+    },
+  );
 }

@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
@@ -200,4 +201,206 @@ export async function updateProductAvailability({
     disponivel: Boolean(disponivel),
     atualizadoEm: serverTimestamp(),
   });
+}
+
+function normalizePrice(preco) {
+  const value = String(preco ?? "").trim();
+
+  if (!value) {
+    return NaN;
+  }
+
+  // Exemplo brasileiro: 1.299,90
+  if (value.includes(",")) {
+    return Number(
+      value
+        .replace(/\./g, "")
+        .replace(",", "."),
+    );
+  }
+
+  // Também aceita 29.90
+  return Number(value);
+}
+
+export async function updateProduct({
+  establishmentId,
+  productId,
+  nome,
+  descricao,
+  preco,
+  categoriaId,
+  emoji = "🍽️",
+  foto = null,
+  fotoPathAtual = "",
+  removerFoto = false,
+  onUploadProgress,
+}) {
+  if (!establishmentId || !productId) {
+    throw new Error(
+      "Produto ou estabelecimento inválido.",
+    );
+  }
+
+  const normalizedName =
+    String(nome || "").trim();
+
+  const normalizedDescription =
+    String(descricao || "").trim();
+
+  const normalizedCategoryId =
+    String(categoriaId || "").trim();
+
+  const normalizedPrice =
+    normalizePrice(preco);
+
+  if (!normalizedName) {
+    throw new Error(
+      "Informe o nome do produto.",
+    );
+  }
+
+  if (!normalizedCategoryId) {
+    throw new Error(
+      "Selecione uma categoria.",
+    );
+  }
+
+  if (
+    !Number.isFinite(normalizedPrice) ||
+    normalizedPrice <= 0
+  ) {
+    throw new Error(
+      "Informe um preço válido.",
+    );
+  }
+
+  const productReference = doc(
+    db,
+    "establishments",
+    establishmentId,
+    "products",
+    productId,
+  );
+
+  let newImageData = null;
+
+  try {
+    if (foto) {
+      newImageData =
+        await uploadProductImage({
+          establishmentId,
+          productId,
+          file: foto,
+          onProgress:
+            onUploadProgress,
+        });
+    }
+
+    const updatedData = {
+      nome: normalizedName,
+      descricao:
+        normalizedDescription,
+      preco: normalizedPrice,
+      categoriaId:
+        normalizedCategoryId,
+      emoji: String(
+        emoji || "🍽️",
+      ),
+      atualizadoEm:
+        serverTimestamp(),
+    };
+
+    if (newImageData) {
+      updatedData.fotoUrl =
+        newImageData.fotoUrl;
+
+      updatedData.fotoPath =
+        newImageData.fotoPath;
+    } else if (removerFoto) {
+      updatedData.fotoUrl = "";
+      updatedData.fotoPath = "";
+    }
+
+    await updateDoc(
+      productReference,
+      updatedData,
+    );
+
+    if (
+      fotoPathAtual &&
+      (
+        newImageData ||
+        removerFoto
+      )
+    ) {
+      try {
+        await deleteProductImage(
+          fotoPathAtual,
+        );
+      } catch (imageError) {
+        console.error(
+          "Produto atualizado, mas não foi possível remover a imagem antiga:",
+          imageError,
+        );
+      }
+    }
+
+    return {
+      id: productId,
+      ...updatedData,
+    };
+  } catch (error) {
+    // Se o upload novo ocorreu, mas a atualização
+    // do Firestore falhou, remove a imagem nova.
+    if (newImageData?.fotoPath) {
+      try {
+        await deleteProductImage(
+          newImageData.fotoPath,
+        );
+      } catch (cleanupError) {
+        console.error(
+          "Erro ao remover imagem após falha:",
+          cleanupError,
+        );
+      }
+    }
+
+    throw error;
+  }
+}
+
+export async function deleteProduct({
+  establishmentId,
+  productId,
+  fotoPath = "",
+}) {
+  if (!establishmentId || !productId) {
+    throw new Error(
+      "Produto ou estabelecimento inválido.",
+    );
+  }
+
+  const productReference = doc(
+    db,
+    "establishments",
+    establishmentId,
+    "products",
+    productId,
+  );
+
+  await deleteDoc(productReference);
+
+  if (fotoPath) {
+    try {
+      await deleteProductImage(
+        fotoPath,
+      );
+    } catch (imageError) {
+      console.error(
+        "Produto excluído, mas não foi possível remover a imagem:",
+        imageError,
+      );
+    }
+  }
 }

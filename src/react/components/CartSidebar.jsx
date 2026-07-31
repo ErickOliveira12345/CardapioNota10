@@ -1,35 +1,50 @@
 import React from "react";
+
+import { useCart } from "../contexts/CartContext.jsx";
 import { formatCurrency } from "../services/formatters.js";
 
 export function CartSidebar({
-  items = [],
-  total = 0,
-  isOpen,
   isSubmitting = false,
-  onClose,
-  onUpdateQuantity,
   onFinishOrder,
 }) {
+  const {
+    items,
+    total,
+    isCartOpen,
+    closeCart,
+    increaseQuantity,
+    decreaseQuantity,
+  } = useCart();
+
   const safeItems = Array.isArray(items) ? items : [];
   const isEmpty = safeItems.length === 0;
 
   function handleFinishOrder() {
-    if (isEmpty || isSubmitting) return;
-    onFinishOrder();
+    if (isEmpty || isSubmitting) {
+      return;
+    }
+
+    if (typeof onFinishOrder === "function") {
+      onFinishOrder();
+    }
   }
 
   return (
     <>
       <div
-        className={`cart-overlay ${isOpen ? "active" : ""}`}
-        onClick={onClose}
+        className={`cart-overlay ${
+          isCartOpen ? "active" : ""
+        }`}
+        onClick={closeCart}
         aria-hidden="true"
       />
 
       <aside
-        className={`cart-sidebar ${isOpen ? "open" : ""}`}
+        className={`cart-sidebar ${
+          isCartOpen ? "open" : ""
+        }`}
         aria-label="Carrinho de compras"
-        aria-hidden={!isOpen}
+        aria-hidden={!isCartOpen}
       >
         <div className="cart-header">
           <h3>🛒 Carrinho</h3>
@@ -37,7 +52,7 @@ export function CartSidebar({
           <button
             className="btn-close-cart"
             type="button"
-            onClick={onClose}
+            onClick={closeCart}
             aria-label="Fechar carrinho"
           >
             ×
@@ -64,21 +79,44 @@ export function CartSidebar({
             <div>
               {safeItems.map((item) => {
                 const itemId = String(item.id);
-                const itemName = item.nome || "Produto";
+
+                const itemName =
+                  item.nome ||
+                  item.name ||
+                  "Produto";
+
+                const itemQuantity = Number(
+                  item.quantity ??
+                    item.quantidade ??
+                    1,
+                );
+
+                const itemPrice = Number(
+                  item.preco ??
+                    item.price ??
+                    item.precoUnitario ??
+                    0,
+                );
+
                 const itemSubtotal =
-                  Number(item.subtotal) || 0;
-                const itemQuantity =
-                  Number(item.quantidade) || 0;
+                  Number(item.subtotal) ||
+                  itemPrice * itemQuantity;
 
                 return (
                   <div
                     className="cart-item"
                     key={itemId}
                   >
-                    {item.fotoUrl || item.imageUrl ? (
+                    {item.fotoUrl ||
+                    item.imageUrl ||
+                    item.image ? (
                       <img
                         className="cart-item__image"
-                        src={item.fotoUrl || item.imageUrl}
+                        src={
+                          item.fotoUrl ||
+                          item.imageUrl ||
+                          item.image
+                        }
                         alt={itemName}
                         loading="lazy"
                       />
@@ -97,7 +135,9 @@ export function CartSidebar({
                       </span>
 
                       <span className="cart-item__preco">
-                        {formatCurrency(itemSubtotal)}
+                        {formatCurrency(
+                          itemSubtotal,
+                        )}
                       </span>
                     </div>
 
@@ -106,7 +146,7 @@ export function CartSidebar({
                         className="qty-btn"
                         type="button"
                         onClick={() =>
-                          onUpdateQuantity(item.id, -1)
+                          decreaseQuantity(item.id)
                         }
                         aria-label={`Diminuir quantidade de ${itemName}`}
                       >
@@ -121,7 +161,7 @@ export function CartSidebar({
                         className="qty-btn"
                         type="button"
                         onClick={() =>
-                          onUpdateQuantity(item.id, 1)
+                          increaseQuantity(item.id)
                         }
                         aria-label={`Aumentar quantidade de ${itemName}`}
                       >
@@ -139,8 +179,11 @@ export function CartSidebar({
           <div className="cart-footer">
             <div className="cart-total">
               <span>Total do pedido:</span>
+
               <strong>
-                {formatCurrency(Number(total) || 0)}
+                {formatCurrency(
+                  Number(total) || 0,
+                )}
               </strong>
             </div>
 

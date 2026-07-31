@@ -1,0 +1,83 @@
+.super-admin-audit-list {
+  display: grid;
+  gap: 12px;
+}
+
+.super-admin-audit-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  border: 1px solid #e5eaf0;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 5px 18px rgb(15 23 42 / 4%);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.super-admin-audit-item:hover {
+  border-color: #fed7aa;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 7%);
+  transform: translateY(-1px);
+}
+
+.super-admin-audit-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: #fff7ed;
+  color: #ea580c;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.super-admin-audit-item__content {
+  min-width: 0;
+}
+
+.super-admin-audit-item__content strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #1e293b;
+  font-size: 0.92rem;
+}
+
+.super-admin-audit-item__content p {
+  margin: 0 0 5px;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.super-admin-audit-item__content span {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  color: #94a3b8;
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.super-admin-audit-item time {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .super-admin-audit-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .super-admin-audit-item time {
+    grid-column: 2;
+  }
+}

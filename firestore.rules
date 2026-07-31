@@ -9,8 +9,24 @@ service cloud.firestore {
 
     function ehAdministrador() {
       return estaAutenticado()
-        && request.auth.token.admin == true;
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == "super_admin"
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.status == "active";
     }
+
+    /*
+ * Registros de auditoria da plataforma.
+ */
+  match /auditLogs/{logId} {
+    allow read, create: if ehAdministrador();
+    allow update, delete: if false;
+  }
 
     function ehProprioUsuario(userId) {
       return estaAutenticado()
@@ -242,16 +258,46 @@ service cloud.firestore {
       }
 
       /*
-       * Chamados de atendimento.
-       */
+      * Chamados de atendimento.
+      */
       match /serviceCalls/{callId} {
+
+        // Permite criar um chamado
         allow create: if
           request.resource.data.mesa is int
           && request.resource.data.mesa > 0
           && request.resource.data.visualizado == false;
 
-        allow read, update:
-          if podeGerenciarEstabelecimento(
+        // Permite consultar chamados (necessário para verificar
+        // se a mesa já possui um chamado aberto)
+        allow read: if true;
+
+        // Apenas administradores podem marcar como atendido
+        allow update: if
+          podeGerenciarEstabelecimento(
+            establishmentId
+          );
+
+        allow delete: if false;
+      }
+
+      /*
+      * Pagamentos / Caixa.
+      */
+      match /payments/{paymentId} {
+
+        allow create: if
+          podeGerenciarEstabelecimento(
+            establishmentId
+          );
+
+        allow read: if
+          podeGerenciarEstabelecimento(
+            establishmentId
+          );
+
+        allow update: if
+          podeGerenciarEstabelecimento(
             establishmentId
           );
 
@@ -273,6 +319,7 @@ service cloud.firestore {
       allow read: if ehAdministrador();
       allow write: if false;
     }
+
 
     /*
      * Qualquer caminho não descrito acima fica bloqueado.

@@ -30,14 +30,23 @@ export function LoginPage({
         senha,
       });
 
+      const perfil = resultado?.perfil;
+      const role = perfil?.role;
+      const status = perfil?.status;
+
       showToast(
         "Login realizado com sucesso!",
         "success",
       );
 
+      if (role === "super_admin") {
+        onNavigate("/super-admin");
+        return;
+      }
+
       if (
-        resultado.perfil?.status ===
-        "onboarding"
+        status === "onboarding" ||
+        perfil?.onboardingCompleto === false
       ) {
         onNavigate("/primeiro-acesso");
         return;

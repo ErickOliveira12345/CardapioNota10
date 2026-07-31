@@ -11,12 +11,25 @@ import {
   observarAutenticacao,
 } from "../services/authService.js";
 
+import {
+  USER_ROLES,
+  USER_STATUS,
+} from "../constants/roles.js";
+
+import {
+  ROLE_PERMISSIONS,
+} from "../constants/rolePermissions.js";
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] =
+    useState(false);
+  const [authError, setAuthError] =
+    useState(null);
 
   async function carregarPerfil(uid) {
     if (!uid) {
@@ -24,19 +37,35 @@ export function AuthProvider({ children }) {
       return null;
     }
 
-    const userProfile =
-      await buscarPerfilUsuario(uid);
+    try {
+      setProfileLoading(true);
+      setAuthError(null);
 
-    setProfile(userProfile);
+      const userProfile =
+        await buscarPerfilUsuario(uid);
 
-    return userProfile;
+      setProfile(userProfile);
+
+      return userProfile;
+    } catch (error) {
+      console.error(
+        "Erro ao carregar perfil do usuário:",
+        error,
+      );
+
+      setProfile(null);
+      setAuthError(
+        "Não foi possível carregar o perfil do usuário.",
+      );
+
+      throw error;
+    } finally {
+      setProfileLoading(false);
+    }
   }
 
   async function refreshProfile() {
-    if (
-      !user?.uid ||
-      user.isAnonymous
-    ) {
+    if (!user?.uid || user.isAnonymous) {
       setProfile(null);
       return null;
     }
@@ -47,56 +76,60 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true;
 
-    const unsubscribe = observarAutenticacao(
-      async (authenticatedUser) => {
-        try {
-          if (!mounted) return;
+    const unsubscribe =
+      observarAutenticacao(
+        async (authenticatedUser) => {
+          try {
+            if (!mounted) {
+              return;
+            }
 
-          setUser(authenticatedUser);
+            setLoading(true);
+            setAuthError(null);
+            setUser(authenticatedUser);
 
-          if (!authenticatedUser) {
-            setProfile(null);
-            return;
-          }
+            if (
+              !authenticatedUser ||
+              authenticatedUser.isAnonymous
+            ) {
+              setProfile(null);
+              return;
+            }
 
-          /*
-          * O cliente anônimo da mesa não possui
-          * perfil administrativo em users/{uid}.
-          */
-          if (authenticatedUser.isAnonymous) {
-            setProfile(null);
-            return;
-          }
+            const userProfile =
+              await buscarPerfilUsuario(
+                authenticatedUser.uid,
+              );
 
-          const userProfile =
-            await buscarPerfilUsuario(
-              authenticatedUser.uid,
+            if (mounted) {
+              setProfile(userProfile);
+            }
+          } catch (error) {
+            console.error(
+              "Erro ao carregar autenticação:",
+              error,
             );
 
-          if (mounted) {
-            setProfile(userProfile);
+            if (mounted) {
+              setProfile(null);
+              setAuthError(
+                "Não foi possível carregar os dados da conta.",
+              );
+            }
+          } finally {
+            if (mounted) {
+              setLoading(false);
+            }
           }
-        } catch (error) {
-          console.error(
-            "Erro ao carregar autenticação:",
-            error,
-          );
-
-          if (mounted) {
-            setProfile(null);
-          }
-        } finally {
-          if (mounted) {
-            setLoading(false);
-          }
-        }
-      },
-    );
+        },
+      );
 
     return () => {
       mounted = false;
 
-      if (typeof unsubscribe === "function") {
+      if (
+        typeof unsubscribe === "function"
+      ) {
         unsubscribe();
       }
     };
@@ -109,25 +142,144 @@ export function AuthProvider({ children }) {
     const isAuthenticated =
       Boolean(user) && !isAnonymous;
 
+    const role =
+      profile?.role || null;
+
+    const status =
+      profile?.status || null;
+
     const establishmentId =
       profile?.estabelecimentoId || null;
 
+    const permissions =
+      ROLE_PERMISSIONS[role] || [];
+
+    const isSuperAdmin =
+      role === USER_ROLES.SUPER_ADMIN;
+
+    const isSubscriber =
+      role === USER_ROLES.SUBSCRIBER;
+
+    const isManager =
+      role === USER_ROLES.MANAGER;
+
+    const isEmployee =
+      role === USER_ROLES.EMPLOYEE;
+
+    const isWaiter =
+      role === USER_ROLES.WAITER;
+
+    const isKitchen =
+      role === USER_ROLES.KITCHEN;
+
+    const isAdmin =
+      isSuperAdmin ||
+      isSubscriber ||
+      isManager;
+
+    const isActive =
+      status === USER_STATUS.ACTIVE;
+
+    const isBlocked =
+      status === USER_STATUS.BLOCKED;
+
+    const isPending =
+      status === USER_STATUS.PENDING;
+
     const isOnboarding =
       isAuthenticated &&
+      !isSuperAdmin &&
       (
-        profile?.status === "onboarding" ||
+        status ===
+          USER_STATUS.ONBOARDING ||
+        profile?.onboardingCompleto ===
+          false ||
         !establishmentId
       );
+
+    function hasPermission(
+      permission,
+    ) {
+      if (
+        !isAuthenticated ||
+        !isActive ||
+        !permission
+      ) {
+        return false;
+      }
+
+      return permissions.includes(
+        permission,
+      );
+    }
+
+    function hasAnyPermission(
+      requiredPermissions = [],
+    ) {
+      if (
+        !Array.isArray(
+          requiredPermissions,
+        ) ||
+        requiredPermissions.length === 0
+      ) {
+        return false;
+      }
+
+      return requiredPermissions.some(
+        (permission) =>
+          hasPermission(permission),
+      );
+    }
+
+    function hasAllPermissions(
+      requiredPermissions = [],
+    ) {
+      if (
+        !Array.isArray(
+          requiredPermissions,
+        ) ||
+        requiredPermissions.length === 0
+      ) {
+        return false;
+      }
+
+      return requiredPermissions.every(
+        (permission) =>
+          hasPermission(permission),
+      );
+    }
 
     return {
       user,
       profile,
+
       loading,
+      profileLoading,
+      authError,
+
+      role,
+      status,
+      permissions,
+      establishmentId,
 
       isAnonymous,
       isAuthenticated,
+      isActive,
+      isBlocked,
+      isPending,
       isOnboarding,
-      establishmentId,
+
+      isAdmin,
+      isSuperAdmin,
+      isSubscriber,
+      isManager,
+      isEmployee,
+      isWaiter,
+      isKitchen,
+
+      hasPermission,
+      hasAnyPermission,
+      hasAllPermissions,
 
       refreshProfile,
     };
@@ -135,6 +287,8 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
+    profileLoading,
+    authError,
   ]);
 
   return (
@@ -145,13 +299,15 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (!context) {
     throw new Error(
       "useAuth deve ser utilizado dentro de AuthProvider.",
     );
   }
+  
 
   return context;
 }

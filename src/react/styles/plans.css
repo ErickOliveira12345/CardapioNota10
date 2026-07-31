@@ -1,0 +1,287 @@
+/* ===========================================
+   Plans Page
+=========================================== */
+
+.plans-page {
+  min-height: 100vh;
+  padding: 60px 24px;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+}
+
+.plans-header {
+  max-width: 700px;
+  margin: 0 auto 60px;
+  text-align: center;
+}
+
+.plans-header h1 {
+  margin-bottom: 18px;
+  font-size: 42px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.plans-header p {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+/* ===========================================
+   Grid
+=========================================== */
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* ===========================================
+   Card
+=========================================== */
+
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  padding: 36px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 24px;
+
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+
+  transition: all .25s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+}
+
+/* ===========================================
+   Plano recomendado
+=========================================== */
+
+.plan-card.recommended {
+  border: 2px solid #2563eb;
+
+  transform: scale(1.04);
+
+  box-shadow: 0 20px 60px rgba(37, 99, 235, .18);
+}
+
+.plan-card.recommended:hover {
+  transform: scale(1.06);
+}
+
+.plan-badge {
+  position: absolute;
+
+  top: -14px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  padding: 8px 18px;
+
+  background: linear-gradient(
+      90deg,
+      #2563eb,
+      #1d4ed8
+  );
+
+  color: white;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  border-radius: 999px;
+
+  letter-spacing: .4px;
+}
+
+/* ===========================================
+   Conteúdo
+=========================================== */
+
+.plan-card h2 {
+  margin-top: 12px;
+
+  margin-bottom: 12px;
+
+  text-align: center;
+
+  font-size: 30px;
+
+  color: #0f172a;
+}
+
+.plan-description {
+  text-align: center;
+
+  color: #64748b;
+
+  line-height: 1.6;
+
+  margin-bottom: 30px;
+
+  min-height: 48px;
+}
+
+/* ===========================================
+   Preço
+=========================================== */
+
+.plan-price {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-end;
+
+  gap: 6px;
+
+  margin-bottom: 32px;
+}
+
+.plan-price span {
+  font-size: 22px;
+
+  color: #475569;
+}
+
+.plan-price strong {
+  font-size: 54px;
+
+  color: #0f172a;
+
+  line-height: 1;
+}
+
+.plan-price small {
+  color: #64748b;
+
+  margin-bottom: 8px;
+}
+
+/* ===========================================
+   Recursos
+=========================================== */
+
+.plan-features {
+  list-style: none;
+
+  padding: 0;
+
+  margin: 0 0 36px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.plan-features li {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #334155;
+
+  font-size: 15px;
+}
+
+/* ===========================================
+   Botão
+=========================================== */
+
+.plan-button {
+  margin-top: auto;
+
+  width: 100%;
+
+  padding: 16px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  color: white;
+
+  background: linear-gradient(
+      90deg,
+      #2563eb,
+      #1d4ed8
+  );
+
+  transition: .25s;
+}
+
+.plan-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 12px 28px rgba(37,99,235,.35);
+}
+
+/* ===========================================
+   Responsividade
+=========================================== */
+
+@media (max-width: 900px) {
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card.recommended {
+    transform: none;
+  }
+
+  .plan-card.recommended:hover {
+    transform: translateY(-6px);
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .plans-page {
+    padding: 40px 18px;
+  }
+
+  .plans-header h1 {
+    font-size: 32px;
+  }
+
+  .plans-header p {
+    font-size: 16px;
+  }
+
+  .plan-card {
+    padding: 28px;
+  }
+
+  .plan-price strong {
+    font-size: 44px;
+  }
+
+}

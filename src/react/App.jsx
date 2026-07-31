@@ -5,25 +5,81 @@ import React, {
 } from "react";
 
 import { CartSidebar } from "./components/CartSidebar.jsx";
+import { AdminLayout } from "./components/AdminLayout.jsx";
+
+import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
+
 import { useAuth } from "./contexts/AuthContext.jsx";
+
+import { USER_ROLES } from "./constants/roles.js";
+import { PERMISSIONS } from "./constants/permissions.js";
+
 import { AdminPage } from "./pages/AdminPage.jsx";
-import {AdminLayout} from "./components/AdminLayout.jsx";
 import { FirstAccessPage } from "./pages/FirstAccessPage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { MenuPage } from "./pages/MenuPage.jsx";
 import { RegisterPage } from "./pages/RegisterPage.jsx";
-import {ProductsPage} from "./pages/ProductsPage.jsx";
-import { getStatus } from "./services/formatters.js";
-import {CategoriesPage} from "./pages/CategoriesPage.jsx";
-import {TablesPage} from "./pages/TablesPage.jsx";
-import {observeMenuCategories,observeMenuProducts} from "./services/menuService.js";
-import {autenticarClienteAnonimo} from "./services/authService.js";
-import {KitchenPage} from "./pages/KitchenPage.jsx";
-import {DashboardPage} from "./pages/DashboardPage.jsx";
-import {TablesMapPage} from "./pages/TablesMapPage.jsx";
-import {AdminOrdersPage} from "./pages/AdminOrdersPage.jsx";
+import { ProductsPage } from "./pages/ProductsPage.jsx";
+import { CategoriesPage } from "./pages/CategoriesPage.jsx";
+import { TablesPage } from "./pages/TablesPage.jsx";
+import { KitchenPage } from "./pages/KitchenPage.jsx";
+import { DashboardPage } from "./pages/DashboardPage.jsx";
+import { TablesMapPage } from "./pages/TablesMapPage.jsx";
+import { AdminOrdersPage } from "./pages/AdminOrdersPage.jsx";
 
+import CashierPage from "./pages/CashierPage.jsx";
+import BillingPage from "./pages/BillingPage.jsx";
+import PlansPage from "./pages/PlansPage.jsx";
+import SubscriptionRequiredPage from "./pages/SubscriptionRequiredPage.jsx";
+import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage.jsx";
+import SubscriptionPendingPage from "./pages/SubscriptionPendingPage.jsx";
+import SubscriptionCancelledPage from "./pages/SubscriptionCancelledPage.jsx";
+import SuperAdminPage from "./pages/SuperAdminPage.jsx";
+
+import { getStatus } from "./services/formatters.js";
+
+import {
+  observeMenuCategories,
+  observeMenuProducts,
+} from "./services/menuService.js";
+
+import {
+  autenticarClienteAnonimo,
+} from "./services/authService.js";
+
+// import { CartSidebar } from "./components/CartSidebar.jsx";
+// import { useAuth } from "./contexts/AuthContext.jsx";
+// import { AdminPage } from "./pages/AdminPage.jsx";
+// import {AdminLayout} from "./components/AdminLayout.jsx";
+// import { FirstAccessPage } from "./pages/FirstAccessPage.jsx";
+// import { HomePage } from "./pages/HomePage.jsx";
+// import { LoginPage } from "./pages/LoginPage.jsx";
+// import { MenuPage } from "./pages/MenuPage.jsx";
+// import { RegisterPage } from "./pages/RegisterPage.jsx";
+// import {ProductsPage} from "./pages/ProductsPage.jsx";
+// import { getStatus } from "./services/formatters.js";
+// import {CategoriesPage} from "./pages/CategoriesPage.jsx";
+// import {TablesPage} from "./pages/TablesPage.jsx";
+// import {observeMenuCategories,observeMenuProducts} from "./services/menuService.js";
+// import {autenticarClienteAnonimo} from "./services/authService.js";
+// import {KitchenPage} from "./pages/KitchenPage.jsx";
+// import {DashboardPage} from "./pages/DashboardPage.jsx";
+// import {TablesMapPage} from "./pages/TablesMapPage.jsx";
+// import {AdminOrdersPage} from "./pages/AdminOrdersPage.jsx";
+// import CashierPage from "./pages/CashierPage.jsx";
+// import BillingPage from "./pages/BillingPage";
+// import PlansPage from "./pages/PlansPage";
+// import SubscriptionRequiredPage from "./pages/SubscriptionRequiredPage.jsx";
+// import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage.jsx";
+// import SubscriptionPendingPage from "./pages/SubscriptionPendingPage.jsx";
+// import SubscriptionCancelledPage from "./pages/SubscriptionCancelledPage.jsx";
+// import SuperAdminPage from "./pages/SuperAdminPage.jsx";
+// //import SuperAdminPage from "./SuperAdminPage.jsx";
+// import { USER_ROLES } from "./constants/roles.js";
+// import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
+// //import { USER_ROLES } from "./constants/roles.js";
+// import { PERMISSIONS } from "./constants/permissions.js";
 
 import {
   createOrder,
@@ -884,7 +940,10 @@ useEffect(() => {
   async function handleRequestService() {
     try {
       const created =
-        await requestService(table);
+        await requestService(
+          table,
+          publicEstablishmentId,
+        );
 
       showToast(
         created
@@ -1228,6 +1287,34 @@ useEffect(() => {
     );
   }
 
+  if (route === "/admin/caixa") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="caixa"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <CashierPage
+              establishmentId={establishmentId}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
   if (route === "/admin/cozinha") {
     if (!isAuthenticated) {
       return (
@@ -1284,31 +1371,81 @@ useEffect(() => {
     );
   }
 
-  if (route === "/admin") {
-  if (!isAuthenticated) {
-    return <Redirect to="/login" />;
+  if (route === "/planos") {
+    return <PlansPage />;
   }
 
-  if (isOnboarding) {
+  if (route === "/assinatura") {
+    return <BillingPage />;
+  }
+
+  if (route === "/assinatura-necessaria") {
+    return <SubscriptionRequiredPage />;
+  }
+
+  if (route === "/assinatura/sucesso") {
+    return <SubscriptionSuccessPage />;
+  }
+
+  if (route === "/assinatura/pendente") {
+    return <SubscriptionPendingPage />;
+  }
+
+  if (route === "/assinatura/cancelada") {
+    return <SubscriptionCancelledPage />;
+  }
+
+  const superAdminRoutes = [
+    "/super-admin",
+    "/super-admin/estabelecimentos",
+    "/super-admin/usuarios",
+    "/super-admin/planos",
+    "/super-admin/assinaturas",
+    "/super-admin/pagamentos",
+    "/super-admin/auditoria",
+    "/super-admin/configuracoes",
+  ];
+
+  if (superAdminRoutes.includes(route)) {
     return (
-      <Redirect to="/primeiro-acesso" />
+      <ProtectedRoute
+        requiredRole={USER_ROLES.SUPER_ADMIN}
+        requiredPermission={PERMISSIONS.VIEW_GLOBAL_DASHBOARD}
+      >
+        <SuperAdminPage />
+      </ProtectedRoute>
     );
   }
 
-  return (
-    <>
-      <AdminLayout
-        activePage="dashboard"
-        onNavigate={navigate}
-        orders={orders}
-      >
-        <DashboardPage />
-      </AdminLayout>
+  if (route === "/admin") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
 
-      <ToastContainer />
-    </>
-  );
-}
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="dashboard"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <DashboardPage
+            orders={orders}
+            calls={calls}
+            onMarkCallAsSeen={handleMarkCallAsSeen}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
 
   if (route !== "/menu") {
     return (

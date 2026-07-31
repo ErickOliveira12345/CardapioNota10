@@ -19,6 +19,7 @@ export function AdminPage({
   onUpdateOrderStatus,
   onMarkCallAsSeen,
 }) {
+  console.log("Chamados recebidos no AdminPage:", calls);
   const [filter, setFilter] = useState("todos");
   const activeCalls = calls.filter((call) => !call.visualizado);
 
@@ -90,6 +91,7 @@ export function AdminPage({
                     className="btn-visualizado"
                     type="button"
                     onClick={() => onMarkCallAsSeen(call.mesa, call.timestamp)}
+                    
                   >
                     Marcar como atendido
                   </button>

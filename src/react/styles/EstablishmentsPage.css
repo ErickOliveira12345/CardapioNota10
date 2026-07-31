@@ -1,0 +1,31 @@
+.establishments-page .super-admin-table td:first-child {
+  min-width: 250px;
+}
+
+.establishments-page .super-admin-table td:nth-child(2) {
+  min-width: 170px;
+}
+
+.establishments-page .super-admin-table td:last-child {
+  min-width: 220px;
+}
+
+.establishments-page__name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.establishments-page__avatar {
+  display: flex;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #fff7ed;
+  color: #ea580c;
+  font-size: 1.1rem;
+  font-weight: 800;
+}

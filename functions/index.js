@@ -1,5 +1,12 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { initializeApp } = require("firebase-admin/app");
+const {
+  onCall,
+  HttpsError,
+} = require("firebase-functions/v2/https");
+
+const {
+  initializeApp,
+} = require("firebase-admin/app");
+
 const {
   getFirestore,
   FieldValue,
@@ -9,19 +16,32 @@ initializeApp();
 
 const db = getFirestore();
 
+const REGION = "southamerica-east1";
+
+const INITIAL_SETUP_KEY =
+  "cardapio-nota10-configuracao-inicial";
+
+/**
+ * Cria ou atualiza os planos iniciais do sistema.
+ *
+ * Esta função é temporária e deve ser removida
+ * depois da configuração inicial.
+ */
 exports.createInitialPlans = onCall(
   {
-    region: "southamerica-east1",
+    region: REGION,
   },
   async (request) => {
-    /*
-     * Esta chave é temporária.
-     * Depois de criar os planos, removeremos esta função.
-     */
-    const setupKey = request.data?.setupKey;
-    
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "É necessário estar autenticado.",
+      );
+    }
 
-    if (setupKey !== "cardapio-nota10-configuracao-inicial") {
+    const setupKey = request.data?.setupKey;
+
+    if (setupKey !== INITIAL_SETUP_KEY) {
       throw new HttpsError(
         "permission-denied",
         "Chave de configuração inválida.",
@@ -32,10 +52,14 @@ exports.createInitialPlans = onCall(
       basic: {
         code: "basic",
         nome: "Básico",
-        descricao: "Plano inicial para pequenos estabelecimentos",
+        descricao:
+          "Plano inicial para pequenos estabelecimentos",
 
         ativo: true,
         ordem: 1,
+
+        moeda: "BRL",
+        precoMensal: 3990,
 
         teste: {
           habilitado: true,
@@ -48,8 +72,6 @@ exports.createInitialPlans = onCall(
           meses: 0,
           preco: 0,
         },
-
-        precoMensal: 3990,
 
         cobranca: {
           ciclo: "monthly",
@@ -71,16 +93,24 @@ exports.createInitialPlans = onCall(
           suportePrioritario: false,
         },
 
-        mercadoPagoPlanId: null,
+        mercadoPago: {
+          preapprovalPlanId: null,
+          status: "not_configured",
+          sincronizadoEm: null,
+        },
       },
 
       intermediate: {
         code: "intermediate",
         nome: "Intermediário",
-        descricao: "Plano para estabelecimentos em crescimento",
+        descricao:
+          "Plano para estabelecimentos em crescimento",
 
         ativo: true,
         ordem: 2,
+
+        moeda: "BRL",
+        precoMensal: 5990,
 
         teste: {
           habilitado: false,
@@ -93,8 +123,6 @@ exports.createInitialPlans = onCall(
           meses: 1,
           preco: 990,
         },
-
-        precoMensal: 5990,
 
         cobranca: {
           ciclo: "monthly",
@@ -116,16 +144,24 @@ exports.createInitialPlans = onCall(
           suportePrioritario: false,
         },
 
-        mercadoPagoPlanId: null,
+        mercadoPago: {
+          preapprovalPlanId: null,
+          status: "not_configured",
+          sincronizadoEm: null,
+        },
       },
 
       premium: {
         code: "premium",
         nome: "Premium",
-        descricao: "Plano completo para grandes estabelecimentos",
+        descricao:
+          "Plano completo para grandes estabelecimentos",
 
         ativo: true,
         ordem: 3,
+
+        moeda: "BRL",
+        precoMensal: 9990,
 
         teste: {
           habilitado: false,
@@ -138,8 +174,6 @@ exports.createInitialPlans = onCall(
           meses: 1,
           preco: 1990,
         },
-
-        precoMensal: 9990,
 
         cobranca: {
           ciclo: "monthly",
@@ -161,34 +195,104 @@ exports.createInitialPlans = onCall(
           suportePrioritario: true,
         },
 
-        mercadoPagoPlanId: null,
+        mercadoPago: {
+          preapprovalPlanId: null,
+          status: "not_configured",
+          sincronizadoEm: null,
+        },
       },
     };
 
-    const batch = db.batch();
+    try {
+      const planEntries = Object.entries(plans);
 
-    for (const [planId, plan] of Object.entries(plans)) {
-      const planReference = db.collection("plans").doc(planId);
+      const snapshots = await Promise.all(
+        planEntries.map(([planId]) => {
+          return db
+            .collection("plans")
+            .doc(planId)
+            .get();
+        }),
+      );
 
-      batch.set(
-        planReference,
-        {
-          ...plan,
-          criadoEm: FieldValue.serverTimestamp(),
-          atualizadoEm: FieldValue.serverTimestamp(),
-          atualizadoPor: "initial-setup",
+      const batch = db.batch();
+
+      const createdPlans = [];
+      const updatedPlans = [];
+
+      planEntries.forEach(
+        ([planId, plan], index) => {
+          const planReference = db
+            .collection("plans")
+            .doc(planId);
+
+          const existingSnapshot =
+            snapshots[index];
+
+          const planData = {
+            ...plan,
+
+            atualizadoEm:
+              FieldValue.serverTimestamp(),
+
+            atualizadoPor: request.auth.uid,
+
+            /*
+             * Remove o campo antigo caso ele ainda
+             * exista nos documentos do Firestore.
+             */
+            mercadoPagoPlanId:
+              FieldValue.delete(),
+          };
+
+          if (!existingSnapshot.exists) {
+            planData.criadoEm =
+              FieldValue.serverTimestamp();
+
+            planData.criadoPor =
+              request.auth.uid;
+
+            createdPlans.push(planId);
+          } else {
+            updatedPlans.push(planId);
+          }
+
+          batch.set(
+            planReference,
+            planData,
+            {
+              merge: true,
+            },
+          );
         },
+      );
+
+      await batch.commit();
+
+      return {
+        success: true,
+
+        message:
+          "Planos iniciais configurados com sucesso.",
+
+        createdPlans,
+        updatedPlans,
+
+        plans: Object.keys(plans),
+      };
+    } catch (error) {
+      console.error(
+        "Erro ao criar os planos iniciais:",
+        error,
+      );
+
+      throw new HttpsError(
+        "internal",
+        "Não foi possível configurar os planos.",
         {
-          merge: true,
+          originalMessage: error.message,
         },
       );
     }
-
-    await batch.commit();
-
-    return {
-      success: true,
-      createdPlans: Object.keys(plans),
-    };
   },
 );

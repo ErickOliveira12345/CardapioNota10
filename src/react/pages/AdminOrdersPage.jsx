@@ -9,6 +9,7 @@ import {
 } from "../contexts/AuthContext.jsx";
 
 import {
+  createPayment,
   observeOrders,
   updateOrderStatus,
 } from "../services/orders.js";
@@ -109,6 +110,7 @@ function getOrderItems(order) {
 export function AdminOrdersPage() {
   const {
     establishmentId,
+    user,
   } = useAuth();
 
   const [orders, setOrders] =
@@ -435,71 +437,101 @@ export function AdminOrdersPage() {
   }
 
   async function finishTable() {
-    if (
-      !selectedTableData ||
-      closingTable
-    ) {
-      return;
-    }
-
-    const confirmed =
-      window.confirm(
-        `Confirmar o fechamento da Mesa ${selectedTableData.mesa} no valor de ${formatCurrency(
-          finalTotal,
-        )}?`,
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setClosingTable(true);
-
-      const ordersToFinish =
-        selectedTableData.pedidos.filter(
-          (order) =>
-            ACTIVE_STATUSES.includes(
-              normalizeStatus(
-                order.status,
-              ),
-            ),
-        );
-
-      await Promise.all(
-        ordersToFinish.map(
-          (order) =>
-            updateOrderStatus(
-              getOrderId(order),
-              "finalizado",
-              establishmentId,
-            ),
-        ),
-      );
-
-      showToast(
-        `Comanda da Mesa ${selectedTableData.mesa} fechada com sucesso.`,
-        "success",
-        5000,
-      );
-
-      setSelectedTable(null);
-    } catch (error) {
-      console.error(
-        "Erro ao fechar comanda:",
-        error,
-      );
-
-      showToast(
-        error.message ||
-          "Não foi possível fechar a comanda.",
-        "error",
-        5000,
-      );
-    } finally {
-      setClosingTable(false);
-    }
+  if (
+    !selectedTableData ||
+    closingTable
+  ) {
+    return;
   }
+
+  const confirmed = window.confirm(
+    `Confirmar o fechamento da Mesa ${selectedTableData.mesa} no valor de ${formatCurrency(
+      finalTotal,
+    )}?`,
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setClosingTable(true);
+
+    const ordersToFinish =
+      selectedTableData.pedidos.filter(
+        (order) =>
+          ACTIVE_STATUSES.includes(
+            normalizeStatus(
+              order.status,
+            ),
+          ),
+      );
+
+    await createPayment({
+      mesa: selectedTableData.mesa,
+
+      pedidos:
+        selectedTableData.pedidos,
+
+      subtotal,
+
+      taxaServicoPercentual:
+        Number(
+          serviceFeePercentage,
+        ) || 0,
+
+      taxaServicoValor:
+        serviceFee,
+
+      desconto:
+        discountValue,
+
+      totalFinal:
+        finalTotal,
+
+      formaPagamento:
+        paymentMethod,
+
+      fechadoPor:
+        user?.uid || null,
+
+      establishmentId,
+    });
+
+    await Promise.all(
+      ordersToFinish.map(
+        (order) =>
+          updateOrderStatus(
+            getOrderId(order),
+            "finalizado",
+            establishmentId,
+          ),
+      ),
+    );
+
+    showToast(
+      `Comanda da Mesa ${selectedTableData.mesa} fechada com sucesso.`,
+      "success",
+      5000,
+    );
+
+    setSelectedTable(null);
+  } catch (error) {
+    console.error(
+      "Erro ao fechar comanda:",
+      error,
+    );
+
+    showToast(
+      error.message ||
+        "Não foi possível fechar a comanda.",
+      "error",
+      5000,
+    );
+  } finally {
+    setClosingTable(false);
+  }
+}
 
   function renderStatusActions(
     order,

@@ -1,0 +1,359 @@
+.users-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.users-summary__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 14px;
+  background: var(--card-background, #ffffff);
+}
+
+.users-summary__item strong {
+  font-size: 28px;
+}
+
+.users-summary__item span {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.users-filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.users-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.users-filter label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.users-filter input,
+.users-filter select,
+.users-role-select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: #ffffff;
+  font: inherit;
+}
+
+.users-table__identity,
+.users-table__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.users-table small {
+  color: #6b7280;
+}
+
+.users-role-select {
+  min-width: 150px;
+}
+
+.users-role-label {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .users-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .users-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .users-filter--search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .users-summary,
+  .users-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .users-filter--search {
+    grid-column: auto;
+  }
+}
+
+
+.confirmation-modal-overlay {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(4px);
+  animation: confirmation-overlay-in 0.2s ease;
+}
+
+.confirmation-modal {
+  width: min(460px, 100%);
+  padding: 28px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 30px 70px rgba(15, 23, 42, 0.25),
+    0 8px 20px rgba(15, 23, 42, 0.12);
+  animation: confirmation-modal-in 0.22s ease;
+}
+
+.confirmation-modal__icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 20px;
+  place-items: center;
+  border-radius: 16px;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.confirmation-modal__icon--danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.confirmation-modal__icon--success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.confirmation-modal__content h3 {
+  margin: 0 0 12px;
+  color: #0f172a;
+  font-size: 23px;
+}
+
+.confirmation-modal__content p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.confirmation-modal__user {
+  display: block;
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f172a;
+  overflow-wrap: anywhere;
+}
+
+.confirmation-modal__description {
+  font-size: 14px;
+}
+
+.confirmation-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.confirmation-modal__button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.confirmation-modal__button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.confirmation-modal__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.confirmation-modal__button--cancel {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.confirmation-modal__button--cancel:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.confirmation-modal__button--danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.confirmation-modal__button--danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.confirmation-modal__button--success {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.confirmation-modal__button--success:hover:not(:disabled) {
+  background: #15803d;
+}
+
+@keyframes confirmation-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes confirmation-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .confirmation-modal-overlay {
+    padding: 14px;
+  }
+
+  .confirmation-modal {
+    padding: 22px;
+  }
+
+  .confirmation-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirmation-modal__button {
+    width: 100%;
+  }
+}
+
+
+.users-success-message {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 3000;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: min(420px, calc(100vw - 32px));
+  padding: 16px;
+
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+
+  background: #f0fdf4;
+  color: #166534;
+
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.18),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+
+  animation: users-success-enter 0.25s ease;
+}
+
+.users-success-message__icon {
+  display: grid;
+  flex: 0 0 auto;
+
+  width: 34px;
+  height: 34px;
+
+  place-items: center;
+
+  border-radius: 50%;
+  background: #22c55e;
+  color: #ffffff;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.users-success-message > div {
+  flex: 1;
+}
+
+.users-success-message strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #14532d;
+}
+
+.users-success-message p {
+  margin: 0;
+  color: #166534;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.users-success-message button {
+  border: 0;
+  background: transparent;
+  color: #15803d;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@keyframes users-success-enter {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 520px) {
+  .users-success-message {
+    top: 14px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}

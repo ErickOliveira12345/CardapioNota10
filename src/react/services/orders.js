@@ -119,6 +119,15 @@ function callsCollection(establishmentId) {
   );
 }
 
+function paymentsCollection(establishmentId) {
+  return collection(
+    db,
+    "establishments",
+    establishmentId,
+    "payments",
+  );
+}
+
 function timestampToMilliseconds(value, fallback = 0) {
   if (!value) return fallback;
 
@@ -454,6 +463,285 @@ export async function updateOrderStatus(
   );
 
   return true;
+}
+
+/**
+ * Registra o pagamento e o fechamento de uma comanda.
+ */
+export async function createPayment({
+  mesa,
+  pedidos,
+  subtotal,
+  taxaServicoPercentual = 0,
+  taxaServicoValor = 0,
+  desconto = 0,
+  totalFinal,
+  formaPagamento,
+  fechadoPor = null,
+  establishmentId = DEFAULT_ESTABLISHMENT_ID,
+}) {
+  const tableNumber = Number(mesa);
+
+  if (!Number.isInteger(tableNumber)) {
+    throw new Error("Mesa inválida.");
+  }
+
+  if (!Array.isArray(pedidos) || pedidos.length === 0) {
+    throw new Error(
+      "A comanda precisa possuir pelo menos um pedido.",
+    );
+  }
+
+  const orderIds = pedidos
+    .map((pedido) => {
+      if (typeof pedido === "string") {
+        return pedido;
+      }
+
+      return pedido.idPedido || pedido.id;
+    })
+    .filter(Boolean);
+
+  if (orderIds.length === 0) {
+    throw new Error(
+      "Nenhum ID de pedido válido foi informado.",
+    );
+  }
+
+  const normalizedSubtotal =
+    Number(subtotal) || 0;
+
+  const normalizedServicePercentage =
+    Number(taxaServicoPercentual) || 0;
+
+  const normalizedServiceValue =
+    Number(taxaServicoValor) || 0;
+
+  const normalizedDiscount =
+    Number(desconto) || 0;
+
+  const normalizedFinalTotal =
+    Number(totalFinal);
+
+  if (
+    normalizedSubtotal < 0 ||
+    normalizedServicePercentage < 0 ||
+    normalizedServiceValue < 0 ||
+    normalizedDiscount < 0
+  ) {
+    throw new Error(
+      "Os valores da comanda não podem ser negativos.",
+    );
+  }
+
+  if (
+    !Number.isFinite(normalizedFinalTotal) ||
+    normalizedFinalTotal < 0
+  ) {
+    throw new Error(
+      "O total final da comanda é inválido.",
+    );
+  }
+
+  const validPaymentMethods = [
+    "pix",
+    "dinheiro",
+    "credito",
+    "debito",
+    "voucher",
+    "outro",
+  ];
+
+  if (
+    !validPaymentMethods.includes(
+      formaPagamento,
+    )
+  ) {
+    throw new Error(
+      "Forma de pagamento inválida.",
+    );
+  }
+
+  const currentTime = Date.now();
+
+  // ===== DEBUG =====
+  console.log("=== CRIANDO PAGAMENTO ===");
+  console.log({
+    establishmentId,
+    mesa: tableNumber,
+    pedidos: orderIds,
+    subtotal: normalizedSubtotal,
+    taxaServicoPercentual: normalizedServicePercentage,
+    taxaServicoValor: normalizedServiceValue,
+    desconto: normalizedDiscount,
+    totalFinal: normalizedFinalTotal,
+    formaPagamento,
+    fechadoPor,
+  });
+
+  const paymentReference = await addDoc(
+    paymentsCollection(establishmentId),
+    {
+      mesa: tableNumber,
+      pedidos: orderIds,
+      quantidadePedidos: orderIds.length,
+      subtotal: normalizedSubtotal,
+
+      taxaServico: {
+        percentual:
+          normalizedServicePercentage,
+        valor: normalizedServiceValue,
+      },
+
+      desconto: normalizedDiscount,
+
+      totalFinal: normalizedFinalTotal,
+
+      formaPagamento,
+
+      status: "pago",
+
+      fechadoPor,
+
+      criadoEm: serverTimestamp(),
+      criadoEmMs: currentTime,
+
+      atualizadoEm: serverTimestamp(),
+      atualizadoEmMs: currentTime,
+    },
+  );
+
+  console.log(
+    "✅ Pagamento salvo no Firestore!",
+  );
+
+  console.log(
+    "ID:",
+    paymentReference.id,
+  );
+
+  return {
+    idPagamento: paymentReference.id,
+
+    mesa: tableNumber,
+
+    pedidos: orderIds,
+
+    quantidadePedidos: orderIds.length,
+
+    subtotal: normalizedSubtotal,
+
+    taxaServico: {
+      percentual:
+        normalizedServicePercentage,
+      valor:
+        normalizedServiceValue,
+    },
+
+    desconto: normalizedDiscount,
+
+    totalFinal: normalizedFinalTotal,
+
+    formaPagamento,
+
+    status: "pago",
+
+    fechadoPor,
+
+    criadoEm: currentTime,
+  };
+}
+
+
+function normalizePayment(documentSnapshot) {
+  const data = documentSnapshot.data();
+
+  return {
+    ...data,
+
+    idPagamento: documentSnapshot.id,
+
+    mesa: Number(data.mesa) || 0,
+
+    subtotal:
+      Number(data.subtotal) || 0,
+
+    desconto:
+      Number(data.desconto) || 0,
+
+    totalFinal:
+      Number(data.totalFinal) || 0,
+
+    taxaServico: {
+      percentual:
+        Number(
+          data.taxaServico?.percentual,
+        ) || 0,
+
+      valor:
+        Number(
+          data.taxaServico?.valor,
+        ) || 0,
+    },
+
+    quantidadePedidos:
+      Number(
+        data.quantidadePedidos,
+      ) || 0,
+
+    criadoEm:
+      timestampToMilliseconds(
+        data.criadoEm,
+        data.criadoEmMs,
+      ),
+
+    atualizadoEm:
+      timestampToMilliseconds(
+        data.atualizadoEm,
+        data.atualizadoEmMs,
+      ),
+  };
+}
+
+/**
+ * Observa os pagamentos em tempo real.
+ */
+export function observePayments(
+  onChange,
+  onError,
+  establishmentId = DEFAULT_ESTABLISHMENT_ID,
+) {
+  const paymentsQuery = query(
+    paymentsCollection(establishmentId),
+
+    orderBy(
+      "criadoEmMs",
+      "desc",
+    ),
+  );
+
+  return onSnapshot(
+    
+    paymentsQuery,
+
+    (snapshot) => {
+      const payments =
+        snapshot.docs.map(
+          normalizePayment,
+        );
+
+      onChange(payments);
+    },
+
+    (error) => {
+      console.error(
+        "Erro ao observar pagamentos:",
+        error,
+      );
+
+      onError?.(error);
+    },
+  );
 }
 
 /**
