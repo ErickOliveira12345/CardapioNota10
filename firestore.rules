@@ -61,6 +61,42 @@ service cloud.firestore {
         || ehProprietario(establishmentId);
     }
 
+    function pertenceAoEstabelecimento(establishmentId) {
+      return estaAutenticado()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.estabelecimentoId == establishmentId;
+    }
+
+    function podeVerAssinatura() {
+      return estaAutenticado()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && (
+          get(
+            /databases/$(database)/documents/users/$(request.auth.uid)
+          ).data.role == "subscriber"
+
+          || get(
+            /databases/$(database)/documents/users/$(request.auth.uid)
+          ).data.role == "owner"
+
+          || (
+            get(
+              /databases/$(database)/documents/users/$(request.auth.uid)
+            ).data.permissoes is map
+
+            && get(
+              /databases/$(database)/documents/users/$(request.auth.uid)
+            ).data.permissoes.assinatura == true
+          )
+        );
+    }
+
     /*
      * Usuários do Firebase Authentication.
      */
@@ -143,6 +179,12 @@ service cloud.firestore {
           estaAutenticado()
           && resource.data.userId
             == request.auth.uid
+        )
+        || (
+          podeVerAssinatura()
+          && pertenceAoEstabelecimento(
+            resource.data.establishmentId
+          )
         );
 
       allow update, delete: if false;
@@ -152,7 +194,14 @@ service cloud.firestore {
       allow read: if ehAdministrador()
         || (
           estaAutenticado()
-          && resource.data.userId == request.auth.uid
+          && resource.data.userId
+            == request.auth.uid
+        )
+        || (
+          podeVerAssinatura()
+          && pertenceAoEstabelecimento(
+            resource.data.establishmentId
+          )
         );
 
       allow create, update, delete: if false;

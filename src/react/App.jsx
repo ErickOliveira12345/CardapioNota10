@@ -36,6 +36,8 @@ import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage.jsx";
 import SubscriptionPendingPage from "./pages/SubscriptionPendingPage.jsx";
 import SubscriptionCancelledPage from "./pages/SubscriptionCancelledPage.jsx";
 import SuperAdminPage from "./pages/SuperAdminPage.jsx";
+import EstablishmentsUsersPage from "./pages/EstablishmentsUsersPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 import { getStatus } from "./services/formatters.js";
 
@@ -48,38 +50,6 @@ import {
   autenticarClienteAnonimo,
 } from "./services/authService.js";
 
-// import { CartSidebar } from "./components/CartSidebar.jsx";
-// import { useAuth } from "./contexts/AuthContext.jsx";
-// import { AdminPage } from "./pages/AdminPage.jsx";
-// import {AdminLayout} from "./components/AdminLayout.jsx";
-// import { FirstAccessPage } from "./pages/FirstAccessPage.jsx";
-// import { HomePage } from "./pages/HomePage.jsx";
-// import { LoginPage } from "./pages/LoginPage.jsx";
-// import { MenuPage } from "./pages/MenuPage.jsx";
-// import { RegisterPage } from "./pages/RegisterPage.jsx";
-// import {ProductsPage} from "./pages/ProductsPage.jsx";
-// import { getStatus } from "./services/formatters.js";
-// import {CategoriesPage} from "./pages/CategoriesPage.jsx";
-// import {TablesPage} from "./pages/TablesPage.jsx";
-// import {observeMenuCategories,observeMenuProducts} from "./services/menuService.js";
-// import {autenticarClienteAnonimo} from "./services/authService.js";
-// import {KitchenPage} from "./pages/KitchenPage.jsx";
-// import {DashboardPage} from "./pages/DashboardPage.jsx";
-// import {TablesMapPage} from "./pages/TablesMapPage.jsx";
-// import {AdminOrdersPage} from "./pages/AdminOrdersPage.jsx";
-// import CashierPage from "./pages/CashierPage.jsx";
-// import BillingPage from "./pages/BillingPage";
-// import PlansPage from "./pages/PlansPage";
-// import SubscriptionRequiredPage from "./pages/SubscriptionRequiredPage.jsx";
-// import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage.jsx";
-// import SubscriptionPendingPage from "./pages/SubscriptionPendingPage.jsx";
-// import SubscriptionCancelledPage from "./pages/SubscriptionCancelledPage.jsx";
-// import SuperAdminPage from "./pages/SuperAdminPage.jsx";
-// //import SuperAdminPage from "./SuperAdminPage.jsx";
-// import { USER_ROLES } from "./constants/roles.js";
-// import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
-// //import { USER_ROLES } from "./constants/roles.js";
-// import { PERMISSIONS } from "./constants/permissions.js";
 
 import {
   createOrder,
@@ -223,6 +193,22 @@ export function App() {
     isOnboarding,
     refreshProfile,
   } = useAuth();
+
+//   const {
+//   loading: authLoading,
+//   profile,
+//   establishmentId: contextEstablishmentId,
+//   isAuthenticated,
+//   isOnboarding,
+//   refreshProfile,
+// } = useAuth();
+
+// const establishmentId =
+//   contextEstablishmentId ||
+//   profile?.estabelecimentoId ||
+//   profile?.establishmentId ||
+//   null;
+  
 
   const [route, setRoute] = useState(getRoute);
 
@@ -1414,6 +1400,62 @@ useEffect(() => {
       >
         <SuperAdminPage />
       </ProtectedRoute>
+    );
+  }
+
+  if (route === "/admin/funcionarios") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="funcionarios"
+          onNavigate={navigate}
+        >
+          <EstablishmentsUsersPage
+            establishmentId={establishmentId}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (route === "/admin/configuracoes") {
+    if (!isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="configuracoes"
+          onNavigate={navigate}
+        >
+          <SettingsPage
+            establishmentId={
+              establishmentId
+            }
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
     );
   }
 

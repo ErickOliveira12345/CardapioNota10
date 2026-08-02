@@ -1,4 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, } from "react";
+
+import {
+  doc,
+  getDoc,
+} from "firebase/firestore";
+
+import { useAuth } from "../contexts/AuthContext.jsx";
+import { db } from "../firebase/firebaseConfig.js";
 
 import {
   sair,
@@ -66,7 +74,7 @@ const menuItems = [
     label: "Funcionários",
     icon: "👥",
     path: "/admin/funcionarios",
-    disabled: true,
+    disabled: false,
   },
   {
     id: "assinatura",
@@ -80,7 +88,7 @@ const menuItems = [
     label: "Configurações",
     icon: "⚙️",
     path: "/admin/configuracoes",
-    disabled: true,
+    disabled: false,
   },
 ];
 
@@ -90,8 +98,96 @@ export function AdminLayout({
   onNavigate,
   orders = [],
 }) {
+  const {
+    user,
+    profile,
+    establishmentId: contextEstablishmentId,
+  } = useAuth();
+
+  const establishmentId =
+    contextEstablishmentId ||
+    profile?.estabelecimentoId ||
+    profile?.establishmentId ||
+    null;
+
+  const [establishmentName, setEstablishmentName] =
+    useState("Carregando...");
+
   const [menuOpen, setMenuOpen] =
     useState(false);
+
+  const accountEmail =
+    profile?.email ||
+    user?.email ||
+    "E-mail não informado";
+
+  const accountName =
+    profile?.nome ||
+    user?.displayName ||
+    "Usuário";
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadEstablishment() {
+      if (!establishmentId) {
+        setEstablishmentName(
+          "Estabelecimento não identificado",
+        );
+
+        return;
+      }
+
+      try {
+        const establishmentSnapshot =
+          await getDoc(
+            doc(
+              db,
+              "establishments",
+              establishmentId,
+            ),
+          );
+
+        if (!mounted) {
+          return;
+        }
+
+        if (!establishmentSnapshot.exists()) {
+          setEstablishmentName(
+            "Estabelecimento não encontrado",
+          );
+
+          return;
+        }
+
+        const establishmentData =
+          establishmentSnapshot.data();
+
+        setEstablishmentName(
+          establishmentData.nome ||
+            establishmentData.name ||
+            "Estabelecimento",
+        );
+      } catch (error) {
+        console.error(
+          "Erro ao carregar estabelecimento no menu:",
+          error,
+        );
+
+        if (mounted) {
+          setEstablishmentName(
+            "Estabelecimento",
+          );
+        }
+      }
+    }
+
+    loadEstablishment();
+
+    return () => {
+      mounted = false;
+    };
+  }, [establishmentId]);
 
   async function handleLogout() {
     try {
@@ -200,6 +296,24 @@ export function AdminLayout({
         </nav>
 
         <div className="admin-sidebar__footer">
+          <div className="admin-sidebar__account">
+            <div className="admin-sidebar__account-icon">
+              {accountName
+                .trim()
+                .charAt(0)
+                .toUpperCase()}
+            </div>
+
+            <div className="admin-sidebar__account-info">
+              <strong title={establishmentName}>
+                {establishmentName}
+              </strong>
+
+              <span title={accountEmail}>
+                {accountEmail}
+              </span>
+            </div>
+          </div>
           <button
             type="button"
             className="admin-logout-button"
