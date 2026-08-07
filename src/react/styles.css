@@ -10,9 +10,37 @@
 }
 
 :root {
-  --primary: #ff6b35;
-  --primary-dark: #e55a25;
-  --primary-light: #fff0ea;
+  --brand-primary: #ff6b35;
+  --brand-on-primary: #ffffff;
+  --primary: var(--brand-primary);
+  --primary-dark:
+    color-mix(
+      in srgb,
+      var(--brand-primary) 82%,
+      black
+    );
+
+  --primary-light:
+    color-mix(
+      in srgb,
+      var(--brand-primary) 12%,
+      white
+    );
+
+    --brand-border:
+      color-mix(
+        in srgb,
+        var(--brand-primary) 35%,
+        white
+      );
+
+    --brand-shadow:
+      color-mix(
+        in srgb,
+        var(--brand-primary) 28%,
+        transparent
+      );
+
   --secondary: #2c3e50;
   --success: #27ae60;
   --warning: #f39c12;
@@ -54,7 +82,7 @@ button {
   border: 0;
   background: none;
   font: inherit;
-  border: 1px solid #ff6b35;
+  border: 1px solid var(--brand-primary);
   border-radius: 8px;
 }
 
@@ -102,7 +130,12 @@ details summary {
 
 .page-qr {
   min-height: 100dvh;
-  background: linear-gradient(135deg, #ff6b35 0%, #e55a25 40%, #2c3e50 100%);
+  background: linear-gradient(
+    135deg,
+    var(--brand-primary) 0%,
+    var(--primary-dark) 40%,
+    var(--secondary) 100%
+  );
 }
 
 .qr-page {
@@ -255,7 +288,12 @@ details summary {
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(255, 107, 53, .9);
+  background:
+    color-mix(
+      in srgb,
+      var(--brand-primary) 90%,
+      transparent
+    );
   opacity: 0;
   transition: opacity var(--transition);
 }
@@ -316,7 +354,9 @@ details summary {
   justify-content: space-between;
   padding: 0 1rem;
   background: var(--primary);
-  box-shadow: 0 2px 8px rgba(255, 107, 53, .4);
+  box-shadow:
+  0 2px 8px
+  var(--brand-shadow);
 }
 
 .menu-header__left,
@@ -354,6 +394,15 @@ details summary {
   font-size: .8rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.btn-servico:hover {
+  background: color-mix(
+  in srgb,
+  var(--brand-primary) 50%,
+  white
+);
+  color: var(--brand-on-primary);
 }
 
 .categorias-nav {
@@ -395,7 +444,7 @@ details summary {
 .categoria-tab.active {
   border-color: var(--primary);
   background: var(--primary);
-  color: white;
+  color: var(--brand-on-primary);
   font-weight: 700;
 }
 
@@ -571,8 +620,8 @@ details summary {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--primary);
-  color: white;
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
   font-size: 1.4rem;
   font-weight: 300;
   transition: all var(--transition);
@@ -645,9 +694,9 @@ details summary {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--primary);
-  color: white;
-  box-shadow: 0 4px 20px rgba(255, 107, 53, .45);
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+  box-shadow: 0 4px 20px var(--brand-shadow);
   font-size: 1.4rem;
   opacity: 0;
   transform: scale(0);
@@ -714,8 +763,8 @@ details summary {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  background: var(--primary);
-  color: white;
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
 }
 
 .cart-header h3 {
@@ -832,8 +881,8 @@ details summary {
   width: 100%;
   padding: 1rem;
   border-radius: var(--radius);
-  background: var(--primary);
-  color: white;
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -1035,9 +1084,9 @@ details summary {
 }
 
 .filtro-btn.active {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: white;
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
   font-weight: 700;
 }
 
@@ -1260,6 +1309,12 @@ details summary {
   font-size: 1.25rem;
 }
 
+@media (max-Width: 480px){
+  .menu-header{
+    padding: 0 0.1rem;
+  }
+}
+
 @media (min-width: 480px) {
   .itens-grid {
     display: grid;
@@ -1353,7 +1408,7 @@ details summary {
   margin-bottom: 12px;
   font-size: 2rem;
   border-radius: 50%;
-  background: #fff4e6;
+  background: var(--primary-light);
 }
 
 .auth-card__header h1 {
@@ -1391,7 +1446,7 @@ details summary {
 }
 
 .auth-form input:focus {
-  outline: 2px solid #ff8a00;
+  outline: 2px solid var(--brand-primary);
   border-color: transparent;
 }
 
@@ -1404,7 +1459,7 @@ details summary {
 .auth-link-button {
   border: 0;
   background: transparent;
-  color: #d96b00;
+  color: var(--primary-dark);
   cursor: pointer;
   font: inherit;
   font-weight: 700;
@@ -1438,7 +1493,7 @@ details summary {
   justify-self: start;
   border: 0;
   background: transparent;
-  color: #c2410c;
+  color: var(--danger);
   font-weight: 700;
   cursor: pointer;
 }
@@ -1454,7 +1509,7 @@ details summary {
 .upload-progress__bar {
   position: absolute;
   inset: 0 auto 0 0;
-  background: rgba(255, 138, 0, 0.25);
+  background: color-mix( in srgb, var(--brand-primary) 25%, transparent );
   transition: width 0.2s ease;
 }
 
@@ -1618,7 +1673,7 @@ details summary {
   height: 44px;
   flex-shrink: 0;
   border-radius: 12px;
-  background: #f97316;
+  background: #ff6b35;
   font-size: 1.5rem;
 }
 
@@ -1668,8 +1723,9 @@ details summary {
 }
 
 .admin-nav-item--active {
-  background: #f97316;
-  color: #ffffff;
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+  box-shadow: 0 7px 18px var(--brand-shadow);
 }
 
 .admin-nav-item--disabled {
@@ -1701,7 +1757,7 @@ details summary {
   gap: 11px;
 
   min-width: 0;
-  margin-bottom: 12px;
+  
   padding: 12px;
 
   border: 1px solid rgb(255 255 255 / 9%);
@@ -1714,24 +1770,16 @@ details summary {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-
   width: 38px;
   height: 38px;
 
   border-radius: 10px;
-
-  background: linear-gradient(
-    135deg,
-    #f97316,
-    #ea580c
-  );
-
-  color: #ffffff;
+  background: linear-gradient( 135deg, var(--brand-primary), var(--primary-dark));
+  color: var(--brand-on-primary);
   font-size: 15px;
   font-weight: 800;
 
-  box-shadow:
-    0 7px 18px rgb(249 115 22 / 25%);
+  box-shadow: 0 7px 18px var(--brand-shadow);
 }
 
 .admin-sidebar__account-info {
@@ -1756,7 +1804,7 @@ details summary {
 .admin-sidebar__account-info span {
   overflow: hidden;
 
-  color: #94a3b8;
+  color: #ffffff;
   font-size: 11px;
 
   text-overflow: ellipsis;
@@ -1797,6 +1845,7 @@ details summary {
 
 .admin-logout-button {
   width: 100%;
+  margin-top: 10px;
   padding: 11px 14px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9px;
@@ -1855,17 +1904,18 @@ details summary {
 .admin-client-button {
   margin-left: auto;
   padding: 10px 15px;
-  border: 1px solid #f97316;
+  border: 1px solid var(--brand-primary);
   border-radius: 9px;
-  background: #ffffff;
-  color: #c2410c;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
 .admin-client-button:hover {
-  background: #fff7ed;
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
 }
 
 .admin-page-content {
@@ -2040,7 +2090,7 @@ details summary {
 }
 
 .kitchen-header-summary strong {
-  color: #f97316;
+  color: var(--brand-primary);
   font-size: 1.25rem;
 }
 
@@ -2052,7 +2102,7 @@ details summary {
 
 .kitchen-summary strong {
   font-size: 1.4rem;
-  color: #f97316;
+  color: var(--brand-primary)
 }
 
 .kitchen-summary span {
@@ -2174,8 +2224,8 @@ details summary {
 .kitchen-table-badge {
   padding: 6px 9px;
   border-radius: 7px;
-  background: #fff7ed;
-  color: #c2410c;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font-size: 0.78rem;
   font-weight: 800;
 }
@@ -2318,7 +2368,7 @@ details summary {
 .dashboard-header__eyebrow {
   display: inline-block;
   margin-bottom: 6px;
-  color: #f97316;
+  color: var(--brand-primary);
   font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -2386,7 +2436,7 @@ details summary {
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #fff7ed;
+  background: var(--primary-light);
   font-size: 1.35rem;
 }
 
@@ -2456,8 +2506,8 @@ details summary {
   height: 32px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #fff7ed;
-  color: #c2410c;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font-size: 0.78rem;
   font-weight: 800;
 }
@@ -2549,8 +2599,8 @@ details summary {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: #fff7ed;
-  color: #c2410c;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font-size: 0.76rem;
   font-weight: 800;
 }
@@ -2754,12 +2804,7 @@ details summary {
   left: 0;
   min-height: 0;
   border-radius: 10px 10px 0 0;
-  background:
-    linear-gradient(
-      180deg,
-      #fb923c,
-      #f97316
-    );
+  background: linear-gradient( 180deg, var(--brand-primary), var(--primary-dark) );
   transition: height 0.35s ease;
 }
 
@@ -3701,11 +3746,12 @@ details summary {
 .admin-orders-filter:hover {
   border-color: var(--orders-border);
   background: var(--orders-surface-soft);
+  color:var(--brand-primary);
 }
 
 .admin-orders-filter--active {
   border-color: var(--orders-primary);
-  background: var(--orders-primary);
+  background: var(--brand-primary);
   color: #ffffff;
   box-shadow: 0 8px 18px rgba(255, 101, 52, 0.24);
 }

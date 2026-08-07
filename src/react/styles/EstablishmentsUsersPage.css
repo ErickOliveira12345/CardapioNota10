@@ -13,7 +13,7 @@
 .establishment-users-page__eyebrow {
   display: block;
   margin-bottom: 6px;
-  color: #f97316;
+  color: var(--primary-dark);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -36,17 +36,18 @@
 .establishment-users-page__new-button {
   min-height: 44px;
   padding: 0 18px;
-  border: 0;
+  border: 1px solid var(--brand-primary);
   border-radius: 10px;
-  background: #f97316;
-  color: #ffffff;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
 }
 
 .establishment-users-page__new-button:hover {
-  background: #ea580c;
+  background: var(--primary-dark);
+  color: var(--primary-light);
 }
 
 .establishment-users-alert {
@@ -184,10 +185,10 @@
 .establishment-users-empty button {
   min-height: 42px;
   padding: 0 16px;
-  border: 0;
+  border: 1px solid var(--brand-primary);
   border-radius: 9px;
-  background: #f97316;
-  color: #ffffff;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -366,7 +367,7 @@
 .establishment-users-modal__header span {
   display: block;
   margin-bottom: 5px;
-  color: #f97316;
+  color: var(--primary-dark);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -419,9 +420,18 @@
 }
 
 .establishment-users-modal__actions button:last-child {
-  border-color: #f97316;
-  background: #f97316;
-  color: #ffffff;
+  border: 1px solid var(--brand-primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.establishment-users-modal__actions button:last-child:hover {
+  background: var(--primary-dark);
+  color: var(--primary-light);
+}
+
+.establishment-users-modal__actions button:hover {
+  color: var(--danger);
 }
 
 .establishment-users-modal__actions button:disabled {
@@ -579,7 +589,7 @@ FORMULÁRIO DE CADASTRO DE FUNCIONÁRIOS
   margin: 0;
   padding: 0;
 
-  accent-color: #f97316;
+  accent-color: var(--primary-dark);
 }
 
 @media (max-width: 680px) {

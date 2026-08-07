@@ -54,7 +54,7 @@ export async function updateEstablishmentStatus(
     doc(db, "establishments", establishmentId),
     {
       status,
-      atualizadoEm: new Date(),
+      atualizadoEm: serverTimestamp(),
     }
   );
 }
@@ -162,6 +162,94 @@ export async function getAllSubscriptions() {
     id: document.id,
     ...document.data(),
   }));
+}
+
+export async function getSubscriptionById(
+  subscriptionId,
+) {
+  if (!subscriptionId) {
+    throw new Error(
+      "ID da assinatura não informado.",
+    );
+  }
+
+  const snapshot = await getDoc(
+    doc(
+      db,
+      "subscriptions",
+      subscriptionId,
+    ),
+  );
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  };
+}
+
+export async function updateSubscriptionPlan({
+  subscriptionId,
+  planId,
+  planName,
+  valorAtual,
+  proximoValor,
+}) {
+  if (!subscriptionId) {
+    throw new Error(
+      "ID da assinatura não informado.",
+    );
+  }
+
+  if (!planId) {
+    throw new Error(
+      "Plano não informado.",
+    );
+  }
+
+  const subscriptionReference = doc(
+    db,
+    "subscriptions",
+    subscriptionId,
+  );
+
+  await updateDoc(
+    subscriptionReference,
+    {
+      planId,
+
+      planName:
+        String(planName || "").trim(),
+
+      valorAtual:
+        Number(valorAtual || 0),
+
+      proximoValor:
+        Number(proximoValor || 0),
+
+      atualizadoEm:
+        serverTimestamp(),
+    },
+  );
+
+  const updatedSnapshot =
+    await getDoc(
+      subscriptionReference,
+    );
+
+  if (!updatedSnapshot.exists()) {
+    throw new Error(
+      "Assinatura não encontrada após a atualização.",
+    );
+  }
+
+  return {
+    id: updatedSnapshot.id,
+    ...updatedSnapshot.data(),
+  };
 }
 
 // =============================

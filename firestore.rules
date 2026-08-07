@@ -56,9 +56,25 @@ service cloud.firestore {
         );
     }
 
-    function podeGerenciarEstabelecimento(establishmentId) {
+    function podeGerenciarEstabelecimento(
+      establishmentId
+    ) {
       return ehAdministrador()
-        || ehProprietario(establishmentId);
+        || ehProprietario(establishmentId)
+        || (
+          pertenceAoEstabelecimento(
+            establishmentId
+          )
+          && get(
+            /databases/$(database)/documents/users/$(request.auth.uid)
+          ).data.status == "active"
+          && get(
+            /databases/$(database)/documents/users/$(request.auth.uid)
+          ).data.permissoes is map
+          && get(
+            /databases/$(database)/documents/users/$(request.auth.uid)
+          ).data.permissoes.configuracoes == true
+        );
     }
 
     function pertenceAoEstabelecimento(establishmentId) {

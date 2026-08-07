@@ -7,7 +7,7 @@ import {
   where,
 } from "firebase/firestore";
 
-import { db } from "../firebase/firebaseConfig";
+import { db } from "../firebase/firebaseConfig.js";
 
 const PLANS_COLLECTION = "plans";
 const SUBSCRIPTIONS_COLLECTION = "subscriptions";

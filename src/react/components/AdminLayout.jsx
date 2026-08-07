@@ -20,6 +20,14 @@ import {
   NotificationCenter,
 } from "./NotificationCenter.jsx";
 
+import {
+  useEstablishmentBranding,
+} from "../hooks/useEstablishmentBranding.js";
+
+import {
+  EstablishmentBrand,
+} from "./EstablishmentBrand.jsx";
+
 const menuItems = [
   {
     id: "dashboard",
@@ -110,11 +118,20 @@ export function AdminLayout({
     profile?.establishmentId ||
     null;
 
+  useEstablishmentBranding(
+    establishmentId,
+  );  
+
   const [establishmentName, setEstablishmentName] =
     useState("Carregando...");
 
   const [menuOpen, setMenuOpen] =
     useState(false);
+
+  const [
+    establishmentLogoUrl,
+    setEstablishmentLogoUrl,
+  ] = useState("");
 
   const accountEmail =
     profile?.email ||
@@ -129,48 +146,68 @@ export function AdminLayout({
   useEffect(() => {
     let mounted = true;
 
-    async function loadEstablishment() {
+    async function loadEstablishmentData() {
       if (!establishmentId) {
         setEstablishmentName(
           "Estabelecimento não identificado",
         );
 
+        setEstablishmentLogoUrl("");
+
         return;
       }
 
       try {
-        const establishmentSnapshot =
-          await getDoc(
+        const [
+          establishmentSnapshot,
+          settingsSnapshot,
+        ] = await Promise.all([
+          getDoc(
             doc(
               db,
               "establishments",
               establishmentId,
             ),
-          );
+          ),
+
+          getDoc(
+            doc(
+              db,
+              "establishments",
+              establishmentId,
+              "settings",
+              "general",
+            ),
+          ),
+        ]);
 
         if (!mounted) {
           return;
         }
 
-        if (!establishmentSnapshot.exists()) {
-          setEstablishmentName(
-            "Estabelecimento não encontrado",
-          );
-
-          return;
-        }
-
         const establishmentData =
-          establishmentSnapshot.data();
+          establishmentSnapshot.exists()
+            ? establishmentSnapshot.data()
+            : {};
+
+        const settingsData =
+          settingsSnapshot.exists()
+            ? settingsSnapshot.data()
+            : {};
 
         setEstablishmentName(
-          establishmentData.nome ||
+          settingsData.nomeExibicao ||
+            establishmentData.nome ||
             establishmentData.name ||
             "Estabelecimento",
         );
+
+        setEstablishmentLogoUrl(
+          settingsData.logoUrl || "",
+        );
       } catch (error) {
         console.error(
-          "Erro ao carregar estabelecimento no menu:",
+          "Erro ao carregar dados do estabelecimento no menu:",
           error,
         );
 
@@ -178,11 +215,13 @@ export function AdminLayout({
           setEstablishmentName(
             "Estabelecimento",
           );
+
+          setEstablishmentLogoUrl("");
         }
       }
     }
 
-    loadEstablishment();
+    loadEstablishmentData();
 
     return () => {
       mounted = false;
@@ -225,7 +264,7 @@ export function AdminLayout({
     setMenuOpen(false);
     onNavigate(item.path);
   }
-
+  console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
   return (
     <div className="admin-shell">
       <aside
@@ -296,24 +335,12 @@ export function AdminLayout({
         </nav>
 
         <div className="admin-sidebar__footer">
-          <div className="admin-sidebar__account">
-            <div className="admin-sidebar__account-icon">
-              {accountName
-                .trim()
-                .charAt(0)
-                .toUpperCase()}
-            </div>
-
-            <div className="admin-sidebar__account-info">
-              <strong title={establishmentName}>
-                {establishmentName}
-              </strong>
-
-              <span title={accountEmail}>
-                {accountEmail}
-              </span>
-            </div>
-          </div>
+          <EstablishmentBrand
+            logoUrl={establishmentLogoUrl}
+            establishmentName={establishmentName}
+            secondaryText={accountEmail}
+            fallbackText={accountName}
+          />
           <button
             type="button"
             className="admin-logout-button"

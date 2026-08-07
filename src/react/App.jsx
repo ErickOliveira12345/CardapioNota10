@@ -1511,6 +1511,7 @@ useEffect(() => {
   return (
     <>
       <MenuPage
+        establishmentId={establishmentId}
         table={table}
         categories={menuCategories}
         products={menuProducts}

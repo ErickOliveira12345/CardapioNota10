@@ -10,7 +10,20 @@ import {
   getStatus,
 } from "../services/formatters.js";
 
+import {
+  useEstablishmentBranding,
+} from "../hooks/useEstablishmentBranding.js";
+
+import {
+  EstablishmentBrand,
+} from "../components/EstablishmentBrand.jsx";
+
+import {
+  observeEstablishmentBranding,
+} from "../services/infoEstablishmentBranding.js";
+
 export function MenuPage({
+  establishmentId,
   table,
   onNavigate,
   onAddItem,
@@ -25,6 +38,18 @@ export function MenuPage({
 
   firebaseLoading = false,
 }) {
+
+  useEstablishmentBranding(
+  establishmentId,
+);
+
+  const [branding, setBranding] = useState({
+    nome: "Estabelecimento",
+    nomeExibicao: "Estabelecimento",
+    logoUrl: "",
+    logoPath: "",
+  });
+
   const [activeCategory, setActiveCategory] =
     useState(null);
 
@@ -53,6 +78,44 @@ export function MenuPage({
           ),
       );
   }, [categories]);
+
+  useEffect(() => {
+    if (!establishmentId) {
+      return undefined;
+    }
+
+    const unsubscribe =
+      observeEstablishmentBranding(
+        establishmentId,
+        setBranding,
+        (error) => {
+          console.error(
+            "Erro ao acompanhar identidade visual:",
+            error,
+          );
+        },
+      );
+
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
+  }, [establishmentId]);
+
+  const establishmentLogoUrl =
+    branding.logoUrl;
+
+  const establishmentName =
+    branding.nomeExibicao ||
+    branding.nome ||
+    "Estabelecimento";
+
+  const accountEmail =
+    "Cardápio Digital";
+
+  const accountName =
+    establishmentName;
 
   const availableProducts = useMemo(() => {
     const source = Array.isArray(products)
@@ -134,18 +197,18 @@ export function MenuPage({
     activeCategory,
     availableCategories,
   ]);
-
+console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
   return (
     <>
       <header className="menu-header">
         <div className="menu-header__left">
-          <button
-            className="btn-back-home"
-            type="button"
-            onClick={() => onNavigate("/")}
-          >
-            ← Mesas
-          </button>
+          <EstablishmentBrand
+            logoUrl={establishmentLogoUrl}
+            establishmentName={establishmentName}
+            secondaryText={accountEmail}
+            fallbackText={accountName}
+            className="menu-establishment-brand"
+          />
         </div>
 
         <div className="menu-header__center">

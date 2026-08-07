@@ -9,6 +9,9 @@ service firebase.storage {
 
     function ehProprietario(establishmentId) {
       return estaAutenticado()
+        && firestore.exists(
+          /databases/(default)/documents/establishments/$(establishmentId)
+        )
         && firestore.get(
           /databases/(default)/documents/establishments/$(establishmentId)
         ).data.ownerId == request.auth.uid;
@@ -16,22 +19,38 @@ service firebase.storage {
 
     function imagemValida() {
       return request.resource != null
-        && request.resource.size
-          < 5 * 1024 * 1024
+        && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches(
           'image/(jpeg|png|webp)'
         );
     }
 
+    /*
+     * Imagens dos produtos.
+     */
     match /establishments/{establishmentId}/products/{productId}/{fileName} {
       allow read: if true;
 
-      allow create, update:
-        if ehProprietario(establishmentId)
+      allow create, update: if
+        ehProprietario(establishmentId)
         && imagemValida();
 
-      allow delete:
-        if ehProprietario(establishmentId);
+      allow delete: if
+        ehProprietario(establishmentId);
+    }
+
+    /*
+     * Logotipo e identidade visual.
+     */
+    match /establishments/{establishmentId}/branding/{fileName} {
+      allow read: if true;
+
+      allow create, update: if
+        ehProprietario(establishmentId)
+        && imagemValida();
+
+      allow delete: if
+        ehProprietario(establishmentId);
     }
 
     match /{allPaths=**} {
