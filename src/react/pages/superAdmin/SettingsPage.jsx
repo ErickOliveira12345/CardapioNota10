@@ -1,22 +1,87 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  DEFAULT_PLATFORM_SETTINGS,
+  getPlatformSettings,
+  savePlatformSettings,
+} from "../../services/platformSettingsService.js";
+
+import {
+  usePlatformSettings,
+} from "../../contexts/PlatformSettingsContext.jsx";
 
 import "../../styles/superAdminCommon.css";
 import "../../styles/SettingsPage.css";
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState({
-    nomePlataforma: "Cardápio Nota10",
-    emailSuporte:
-      "suporte@cardapionota10.com",
-    telefoneSuporte: "",
-    diasTolerancia: 3,
-    bloquearInadimplente: true,
-    enviarAvisoVencimento: true,
-    permitirNovosCadastros: true,
-    modoManutencao: false,
-  });
 
-  const [saved, setSaved] = useState(false);
+  const {
+    reloadSettings,
+  } = usePlatformSettings();
+  
+  const [settings, setSettings] =
+    useState(
+      DEFAULT_PLATFORM_SETTINGS,
+    );
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [saved, setSaved] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+  
+
+    async function loadSettings() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data =
+          await getPlatformSettings();
+
+        if (!mounted) {
+          return;
+        }
+
+        setSettings(data);
+      } catch (loadError) {
+        console.error(
+          "Erro ao carregar configurações:",
+          loadError,
+        );
+
+        if (mounted) {
+          setError(
+            loadError?.message ||
+              "Não foi possível carregar as configurações da plataforma.",
+          );
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadSettings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   function handleChange(event) {
     const {
@@ -28,24 +93,56 @@ export default function SettingsPage() {
 
     setSettings((current) => ({
       ...current,
+
       [name]:
         type === "checkbox"
           ? checked
-          : value,
+          : type === "number"
+            ? Number(value)
+            : value,
     }));
 
     setSaved(false);
+    setError("");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    console.log(
-      "Configurações salvas:",
-      settings,
-    );
+    try {
+      setSaving(true);
+      setSaved(false);
+      setError("");
 
-    setSaved(true);
+      await savePlatformSettings(
+        settings,
+      );
+
+      await reloadSettings();
+
+      setSaved(true);
+
+    } catch (saveError) {
+      console.error(
+        "Erro ao salvar configurações:",
+        saveError,
+      );
+
+      setError(
+        saveError?.message ||
+          "Não foi possível salvar as configurações.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="super-admin-loading">
+        Carregando configurações...
+      </div>
+    );
   }
 
   return (
@@ -59,11 +156,18 @@ export default function SettingsPage() {
           <h1>Configurações</h1>
 
           <p>
-            Configure regras gerais, cobrança e
-            atendimento da plataforma.
+            Configure regras gerais,
+            cobrança e atendimento da
+            plataforma.
           </p>
         </div>
       </header>
+
+      {error && (
+        <div className="super-admin-alert super-admin-alert--error">
+          {error}
+        </div>
+      )}
 
       <form
         className="super-admin-settings"
@@ -71,7 +175,9 @@ export default function SettingsPage() {
       >
         <section className="super-admin-settings__section">
           <div>
-            <h2>Informações gerais</h2>
+            <h2>
+              Informações gerais
+            </h2>
 
             <p>
               Dados básicos exibidos na
@@ -90,6 +196,7 @@ export default function SettingsPage() {
                   settings.nomePlataforma
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
             </label>
 
@@ -99,8 +206,11 @@ export default function SettingsPage() {
               <input
                 type="email"
                 name="emailSuporte"
-                value={settings.emailSuporte}
+                value={
+                  settings.emailSuporte
+                }
                 onChange={handleChange}
+                disabled={saving}
               />
             </label>
 
@@ -114,6 +224,7 @@ export default function SettingsPage() {
                   settings.telefoneSuporte
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
             </label>
           </div>
@@ -124,7 +235,8 @@ export default function SettingsPage() {
             <h2>Cobrança</h2>
 
             <p>
-              Regras aplicadas às assinaturas.
+              Regras aplicadas às
+              assinaturas.
             </p>
           </div>
 
@@ -135,11 +247,13 @@ export default function SettingsPage() {
               <input
                 type="number"
                 min="0"
+                max="30"
                 name="diasTolerancia"
                 value={
                   settings.diasTolerancia
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
             </label>
 
@@ -148,9 +262,11 @@ export default function SettingsPage() {
                 type="checkbox"
                 name="bloquearInadimplente"
                 checked={
-                  settings.bloquearInadimplente
+                  settings
+                    .bloquearInadimplente
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
 
               <span>
@@ -164,9 +280,11 @@ export default function SettingsPage() {
                 type="checkbox"
                 name="enviarAvisoVencimento"
                 checked={
-                  settings.enviarAvisoVencimento
+                  settings
+                    .enviarAvisoVencimento
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
 
               <span>
@@ -179,7 +297,9 @@ export default function SettingsPage() {
 
         <section className="super-admin-settings__section">
           <div>
-            <h2>Controle da plataforma</h2>
+            <h2>
+              Controle da plataforma
+            </h2>
 
             <p>
               Recursos gerais de acesso e
@@ -193,9 +313,11 @@ export default function SettingsPage() {
                 type="checkbox"
                 name="permitirNovosCadastros"
                 checked={
-                  settings.permitirNovosCadastros
+                  settings
+                    .permitirNovosCadastros
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
 
               <span>
@@ -208,9 +330,11 @@ export default function SettingsPage() {
                 type="checkbox"
                 name="modoManutencao"
                 checked={
-                  settings.modoManutencao
+                  settings
+                    .modoManutencao
                 }
                 onChange={handleChange}
+                disabled={saving}
               />
 
               <span>
@@ -222,7 +346,7 @@ export default function SettingsPage() {
 
         <div className="super-admin-settings__footer">
           {saved && (
-            <span>
+            <span className="super-admin-settings__success">
               Configurações salvas com
               sucesso.
             </span>
@@ -231,8 +355,11 @@ export default function SettingsPage() {
           <button
             type="submit"
             className="super-admin-button"
+            disabled={saving}
           >
-            Salvar configurações
+            {saving
+              ? "Salvando..."
+              : "Salvar configurações"}
           </button>
         </div>
       </form>

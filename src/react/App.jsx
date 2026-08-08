@@ -27,6 +27,7 @@ import { KitchenPage } from "./pages/KitchenPage.jsx";
 import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { TablesMapPage } from "./pages/TablesMapPage.jsx";
 import { AdminOrdersPage } from "./pages/AdminOrdersPage.jsx";
+import { usePlatformSettings } from "./contexts/PlatformSettingsContext.jsx";
 
 import CashierPage from "./pages/CashierPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
@@ -38,6 +39,8 @@ import SubscriptionCancelledPage from "./pages/SubscriptionCancelledPage.jsx";
 import SuperAdminPage from "./pages/SuperAdminPage.jsx";
 import EstablishmentsUsersPage from "./pages/EstablishmentsUsersPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
+import MaintenancePage from "./pages/MaintenancePage.jsx";
+
 
 import { getStatus } from "./services/formatters.js";
 
@@ -188,6 +191,7 @@ function ToastContainer() {
 export function App() {
   const {
     loading: authLoading,
+    profile,
     establishmentId,
     isAuthenticated,
     isOnboarding,
@@ -253,6 +257,15 @@ export function App() {
 
   const [menuLoading, setMenuLoading] =
     useState(false);
+
+  const {
+    settings: platformSettings,
+    loading: platformSettingsLoading,
+  } = usePlatformSettings();
+
+  const isSuperAdmin =
+    profile?.role === "super_admin" &&
+    profile?.status === "active";
 
   useEffect(() => {
     function handlePopState() {
@@ -1099,7 +1112,10 @@ useEffect(() => {
     }
   }
 
-  if (authLoading) {
+  if (
+    authLoading ||
+    platformSettingsLoading
+  ) {
     return (
       <main className="auth-page">
         <section className="auth-card">
@@ -1109,47 +1125,159 @@ useEffect(() => {
     );
   }
 
+  
+  /*
+  * CADASTRO
+  */
   if (route === "/cadastro") {
-    if (isAuthenticated && isOnboarding) {
-      return <Redirect to="/primeiro-acesso" />;
+    if (
+      isAuthenticated &&
+      isOnboarding
+    ) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
     }
 
-    if (isAuthenticated && !isOnboarding) {
-      return <Redirect to="/admin" />;
+    if (
+      isAuthenticated &&
+      !isOnboarding
+    ) {
+      if (isSuperAdmin) {
+        return (
+          <Redirect to="/super-admin" />
+        );
+      }
+
+      if (
+        platformSettings.modoManutencao
+      ) {
+        return <MaintenancePage />;
+      }
+
+      return (
+        <Redirect to="/admin" />
+      );
     }
 
     return (
       <>
-        <RegisterPage onNavigate={navigate} />
+        <RegisterPage
+          onNavigate={navigate}
+        />
+
         <ToastContainer />
       </>
     );
   }
 
+  /*
+  * LOGIN
+  *
+  * Usuário não autenticado sempre
+  * visualiza primeiro a tela de login.
+  */
   if (route === "/login") {
-    if (isAuthenticated && isOnboarding) {
-      return <Redirect to="/primeiro-acesso" />;
+    if (!isAuthenticated) {
+      return (
+        <>
+          <LoginPage
+            onNavigate={navigate}
+          />
+
+          <ToastContainer />
+        </>
+      );
     }
 
-    if (isAuthenticated && !isOnboarding) {
-      return <Redirect to="/admin" />;
+    /*
+    * Super Admin tem prioridade.
+    * Mesmo em manutenção, ele continua
+    * acessando o painel global.
+    */
+    if (isSuperAdmin) {
+      return (
+        <Redirect to="/super-admin" />
+      );
+    }
+
+    /*
+    * Usuário em primeiro acesso.
+    *
+    * Se quiser bloquear também o
+    * primeiro acesso durante manutenção,
+    * mantenha esta verificação depois
+    * da manutenção.
+    */
+    if (
+      platformSettings.modoManutencao
+    ) {
+      return <MaintenancePage />;
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
     }
 
     return (
-      <>
-        <LoginPage onNavigate={navigate} />
-        <ToastContainer />
-      </>
+      <Redirect to="/admin" />
     );
   }
 
+  /*
+  * MODO MANUTENÇÃO
+  *
+  * Daqui para baixo são as demais rotas.
+  *
+  * Somente usuários autenticados
+  * que não sejam Super Admin são
+  * bloqueados.
+  */
+  if (
+    isAuthenticated &&
+    platformSettings.modoManutencao &&
+    !isSuperAdmin
+  ) {
+    return <MaintenancePage />;
+  }
+
+  /*
+  * PRIMEIRO ACESSO
+  */
   if (route === "/primeiro-acesso") {
     if (!isAuthenticated) {
-      return <Redirect to="/login" />;
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    /*
+    * Super Admin não precisa passar
+    * pelo onboarding do estabelecimento.
+    */
+    if (isSuperAdmin) {
+      return (
+        <Redirect to="/super-admin" />
+      );
+    }
+
+    /*
+    * Esta verificação é redundante com
+    * o bloco global acima, mas deixa a
+    * regra explícita nesta rota.
+    */
+    if (
+      platformSettings.modoManutencao
+    ) {
+      return <MaintenancePage />;
     }
 
     if (!isOnboarding) {
-      return <Redirect to="/admin" />;
+      return (
+        <Redirect to="/admin" />
+      );
     }
 
     return (
@@ -1158,6 +1286,7 @@ useEffect(() => {
           onNavigate={navigate}
           onCompleted={refreshProfile}
         />
+
         <ToastContainer />
       </>
     );

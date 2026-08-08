@@ -1,23 +1,23 @@
 const admin = require("firebase-admin");
 
-const {
-  createMercadoPagoSubscription,
-} = require("../services/mercadoPago");
+// const {
+//   createMercadoPagoSubscription,
+// } = require("../services/mercadoPago");
 
 const db = admin.firestore();
 
 /**
- * Cria uma assinatura para um estabelecimento.
+ * Cria uma assinatura.
  *
- * Atualmente cria apenas o registro no Firestore.
- * Posteriormente fará a criação da assinatura no Mercado Pago.
+ * @param {Object} request Requisição da Callable Function.
+ * @return {Promise<Object>} Resultado da criação da assinatura.
  */
 module.exports = async (request) => {
   try {
     const {
       establishmentId,
       planId,
-      customerEmail,
+      // customerEmail,
     } = request.data || {};
 
     if (!establishmentId) {
@@ -40,8 +40,8 @@ module.exports = async (request) => {
     const plan = planSnapshot.data();
 
     const subscriptionRef = db
-      .collection("subscriptions")
-      .doc(establishmentId);
+        .collection("subscriptions")
+        .doc(establishmentId);
 
     const subscription = {
       establishmentId,
@@ -61,7 +61,7 @@ module.exports = async (request) => {
         admin.firestore.FieldValue.serverTimestamp(),
 
       trialEndsAt: new Date(
-        Date.now() + 30 * 24 * 60 * 60 * 1000,
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
       ),
 
       mercadoPagoId: null,

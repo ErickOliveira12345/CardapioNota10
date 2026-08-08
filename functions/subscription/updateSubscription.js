@@ -5,106 +5,105 @@ const db = admin.firestore();
 /**
  * Atualiza o plano de assinatura de um estabelecimento.
  *
- * Recebe:
- * request.data.establishmentId
- * request.data.planId
+ * @param {Object} request Requisição da Callable Function.
+ * @return {Promise<Object>} Resultado da atualização.
  */
 module.exports = async function updateSubscription(request) {
   try {
-    const { establishmentId, planId } =
+    const {establishmentId, planId} =
       request.data || {};
 
     if (!request.auth) {
       throw new Error(
-        "Usuário não autenticado.",
+          "Usuário não autenticado.",
       );
     }
 
     if (!establishmentId) {
       throw new Error(
-        "Estabelecimento não informado.",
+          "Estabelecimento não informado.",
       );
     }
 
     if (!planId) {
       throw new Error(
-        "Novo plano não informado.",
+          "Novo plano não informado.",
       );
     }
 
     const planRef = db
-      .collection("plans")
-      .doc(planId);
+        .collection("plans")
+        .doc(planId);
 
     const subscriptionRef = db
-      .collection("subscriptions")
-      .doc(establishmentId);
+        .collection("subscriptions")
+        .doc(establishmentId);
 
     const result = await db.runTransaction(
-      async (transaction) => {
-        const [planSnapshot, subscriptionSnapshot] =
+        async (transaction) => {
+          const [planSnapshot, subscriptionSnapshot] =
           await Promise.all([
             transaction.get(planRef),
             transaction.get(subscriptionRef),
           ]);
 
-        if (!planSnapshot.exists) {
-          throw new Error(
-            "O plano selecionado não foi encontrado.",
-          );
-        }
+          if (!planSnapshot.exists) {
+            throw new Error(
+                "O plano selecionado não foi encontrado.",
+            );
+          }
 
-        if (!subscriptionSnapshot.exists) {
-          throw new Error(
-            "A assinatura do estabelecimento não foi encontrada.",
-          );
-        }
+          if (!subscriptionSnapshot.exists) {
+            throw new Error(
+                "A assinatura do estabelecimento não foi encontrada.",
+            );
+          }
 
-        const plan = planSnapshot.data();
-        const currentSubscription =
+          const plan = planSnapshot.data();
+          const currentSubscription =
           subscriptionSnapshot.data();
 
-        if (currentSubscription.planId === planId) {
-          throw new Error(
-            "Este plano já está ativo na assinatura.",
-          );
-        }
+          if (currentSubscription.planId === planId) {
+            throw new Error(
+                "Este plano já está ativo na assinatura.",
+            );
+          }
 
-        const previousPlanId =
+          const previousPlanId =
           currentSubscription.planId || null;
 
-        const previousPlanName =
+          const previousPlanName =
           currentSubscription.planName || null;
 
-        const newAmount = Number(
-          plan.preco || 0,
-        );
-
-        if (newAmount <= 0) {
-          throw new Error(
-            "O plano selecionado possui um valor inválido.",
+          const newAmount = Number(
+              plan.preco || 0,
           );
-        }
 
-        const updateData = {
-          planId,
-          planName:
+          if (newAmount <= 0) {
+            throw new Error(
+                "O plano selecionado possui um valor inválido.",
+            );
+          }
+
+          const updateData = {
+            planId,
+            planName:
             plan.nome || plan.name || planId,
-          amount: newAmount,
+            amount: newAmount,
 
-          previousPlanId,
-          previousPlanName,
+            previousPlanId,
+            previousPlanName,
 
-          updatedAt:
+            updatedAt:
             admin.firestore.FieldValue.serverTimestamp(),
 
-          lastPlanChangeAt:
+            lastPlanChangeAt:
             admin.firestore.FieldValue.serverTimestamp(),
 
-          mercadoPagoSyncStatus: "pending",
-        };
+            mercadoPagoSyncStatus: "pending",
+          };
 
-        /*
+          /*
          * Integração futura com o Mercado Pago:
          *
          * const mercadoPagoResult =
@@ -124,22 +123,22 @@ module.exports = async function updateSubscription(request) {
          *   mercadoPagoResult.status;
          */
 
-        transaction.update(
-          subscriptionRef,
-          updateData,
-        );
+          transaction.update(
+              subscriptionRef,
+              updateData,
+          );
 
-        return {
-          previousPlanId,
-          previousPlanName,
-          planId,
-          planName:
+          return {
+            previousPlanId,
+            previousPlanName,
+            planId,
+            planName:
             plan.nome || plan.name || planId,
-          amount: newAmount,
-          status:
+            amount: newAmount,
+            status:
             currentSubscription.status,
-        };
-      },
+          };
+        },
     );
 
     return {
@@ -150,8 +149,8 @@ module.exports = async function updateSubscription(request) {
     };
   } catch (error) {
     console.error(
-      "Erro ao atualizar assinatura:",
-      error,
+        "Erro ao atualizar assinatura:",
+        error,
     );
 
     return {

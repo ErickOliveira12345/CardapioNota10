@@ -203,6 +203,13 @@ service cloud.firestore {
           )
         );
 
+      /*
+      * Somente o Super Admin pode alterar
+      * uma assinatura diretamente.
+      */
+      
+      allow update: if ehAdministrador();
+
       allow update, delete: if false;
     }
 
@@ -375,6 +382,30 @@ service cloud.firestore {
             establishmentId
           );
       }
+    }
+
+    /*
+    * Configuração geral pública.
+    */
+    match /platformSettings/general {
+      allow read: if true;
+
+      allow create, update:
+        if ehAdministrador();
+
+      allow delete: if false;
+    }
+
+    
+    /*
+    * Configurações globais da plataforma.
+    * Somente o Super Admin pode acessar.
+    */
+    match /platformSettings/{settingId} {
+      allow read: if ehAdministrador();
+      allow create: if ehAdministrador();
+      allow update: if ehAdministrador();
+      allow delete: if false;
     }
 
     /*

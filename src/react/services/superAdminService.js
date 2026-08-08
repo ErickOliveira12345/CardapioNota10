@@ -6,6 +6,7 @@ import {
   getDocs,
   orderBy,
   query,
+  runTransaction,
   setDoc,
   serverTimestamp,
   updateDoc,
@@ -193,6 +194,7 @@ export async function getSubscriptionById(
 
 export async function updateSubscriptionPlan({
   subscriptionId,
+  establishmentId,
   planId,
   planName,
   valorAtual,
@@ -204,54 +206,272 @@ export async function updateSubscriptionPlan({
     );
   }
 
-  if (!planId) {
+  if (!establishmentId) {
     throw new Error(
-      "Plano não informado.",
+      "ID do estabelecimento não informado.",
     );
   }
 
-  const subscriptionReference = doc(
+  if (!planId) {
+    throw new Error(
+      "ID do novo plano não informado.",
+    );
+  }
+
+  const subscriptionRef = doc(
     db,
     "subscriptions",
     subscriptionId,
   );
 
-  await updateDoc(
-    subscriptionReference,
-    {
-      planId,
-
-      planName:
-        String(planName || "").trim(),
-
-      valorAtual:
-        Number(valorAtual || 0),
-
-      proximoValor:
-        Number(proximoValor || 0),
-
-      atualizadoEm:
-        serverTimestamp(),
-    },
+  const establishmentRef = doc(
+    db,
+    "establishments",
+    establishmentId,
   );
 
-  const updatedSnapshot =
-    await getDoc(
-      subscriptionReference,
+  const updatedSubscription =
+    await runTransaction(
+      db,
+      async (transaction) => {
+        /*
+         * 1. Lê a assinatura atual.
+         */
+        const subscriptionSnapshot =
+          await transaction.get(
+            subscriptionRef,
+          );
+
+        if (
+          !subscriptionSnapshot.exists()
+        ) {
+          throw new Error(
+            "Assinatura não encontrada.",
+          );
+        }
+
+        const currentSubscription =
+          subscriptionSnapshot.data();
+
+        const oldPlanId =
+          currentSubscription.planId;
+
+        /*
+         * Se escolheu exatamente o mesmo
+         * plano, não precisamos mexer nos
+         * contadores.
+         */
+        const samePlan =
+          oldPlanId === planId;
+
+        /*
+         * 2. Confirma o estabelecimento.
+         */
+        const establishmentSnapshot =
+          await transaction.get(
+            establishmentRef,
+          );
+
+        if (
+          !establishmentSnapshot.exists()
+        ) {
+          throw new Error(
+            "Estabelecimento não encontrado.",
+          );
+        }
+
+        /*
+         * 3. Busca o novo plano.
+         */
+        const newPlanRef = doc(
+          db,
+          "plans",
+          planId,
+        );
+
+        const newPlanSnapshot =
+          await transaction.get(
+            newPlanRef,
+          );
+
+        if (!newPlanSnapshot.exists()) {
+          throw new Error(
+            "Novo plano não encontrado.",
+          );
+        }
+
+        const newPlan =
+          newPlanSnapshot.data();
+
+        if (newPlan.ativo === false) {
+          throw new Error(
+            `O plano "${
+              newPlan.nome || planId
+            }" está desativado.`,
+          );
+        }
+
+        /*
+         * 4. Se realmente mudou de plano,
+         * buscamos também o plano anterior.
+         */
+        let oldPlanRef = null;
+        let oldPlanSnapshot = null;
+
+        if (
+          !samePlan &&
+          oldPlanId
+        ) {
+          oldPlanRef = doc(
+            db,
+            "plans",
+            oldPlanId,
+          );
+
+          oldPlanSnapshot =
+            await transaction.get(
+              oldPlanRef,
+            );
+        }
+
+        /*
+         * IMPORTANTE:
+         * Todas as leituras já foram feitas.
+         * Daqui em diante fazemos apenas
+         * gravações.
+         */
+
+        /*
+         * 5. Atualiza a assinatura.
+         */
+        transaction.update(
+          subscriptionRef,
+          {
+            planId,
+
+            planName:
+              String(
+                planName ||
+                  newPlan.nome ||
+                  planId,
+              ).trim(),
+
+            valorAtual:
+              Number(
+                valorAtual ??
+                  newPlan.precoMensal ??
+                  0,
+              ),
+
+            proximoValor:
+              Number(
+                proximoValor ??
+                  newPlan.precoMensal ??
+                  0,
+              ),
+
+            atualizadoEm:
+              serverTimestamp(),
+          },
+        );
+
+        /*
+         * 6. Atualiza o plano atual
+         * no estabelecimento.
+         */
+        transaction.update(
+          establishmentRef,
+          {
+            planoAtual: planId,
+            atualizadoEm:
+              serverTimestamp(),
+          },
+        );
+
+        /*
+         * 7. Ajusta os contadores somente
+         * quando houve troca real.
+         */
+        if (!samePlan) {
+          if (
+            oldPlanRef &&
+            oldPlanSnapshot?.exists()
+          ) {
+            const oldTotal = Number(
+              oldPlanSnapshot.data()
+                .totalAssinantes ?? 0,
+            );
+
+            transaction.update(
+              oldPlanRef,
+              {
+                totalAssinantes:
+                  Math.max(
+                    oldTotal - 1,
+                    0,
+                  ),
+
+                atualizadoEm:
+                  serverTimestamp(),
+              },
+            );
+          }
+
+          const newTotal = Number(
+            newPlan.totalAssinantes ?? 0,
+          );
+
+          transaction.update(
+            newPlanRef,
+            {
+              totalAssinantes:
+                newTotal + 1,
+
+              atualizadoEm:
+                serverTimestamp(),
+            },
+          );
+        }
+
+        return {
+          id:
+            subscriptionSnapshot.id,
+
+          ...currentSubscription,
+
+          planId,
+
+          planName:
+            String(
+              planName ||
+                newPlan.nome ||
+                planId,
+            ).trim(),
+
+          valorAtual:
+            Number(
+              valorAtual ??
+                newPlan.precoMensal ??
+                0,
+            ),
+
+          proximoValor:
+            Number(
+              proximoValor ??
+                newPlan.precoMensal ??
+                0,
+            ),
+        };
+      },
     );
 
-  if (!updatedSnapshot.exists()) {
-    throw new Error(
-      "Assinatura não encontrada após a atualização.",
-    );
-  }
+  console.log(
+    "Troca de plano concluída:",
+    updatedSubscription,
+  );
 
-  return {
-    id: updatedSnapshot.id,
-    ...updatedSnapshot.data(),
-  };
+  return updatedSubscription;
 }
-
 // =============================
 // PAGAMENTOS
 // =============================

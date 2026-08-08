@@ -9,6 +9,8 @@ import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext.jsx";
 import { CartProvider } from "./contexts/CartContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import { PlatformSettingsProvider } from "./contexts/PlatformSettingsContext.jsx";
+
 
 const rootElement = document.getElementById("root");
 
@@ -23,20 +25,21 @@ try {
     <React.StrictMode>
       <AppErrorBoundary>
         <AuthProvider>
-          <SubscriptionProvider>
+          <PlatformSettingsProvider>
+            <SubscriptionProvider>
 
-            <CartProvider>
+              <CartProvider>
 
-                <ThemeProvider>
+                  <ThemeProvider>
 
-                    <App />
+                      <App />
 
-                </ThemeProvider>
+                  </ThemeProvider>
 
-            </CartProvider>
+              </CartProvider>
 
-        </SubscriptionProvider>
-
+          </SubscriptionProvider>
+        </PlatformSettingsProvider>
         </AuthProvider>
       </AppErrorBoundary>
     </React.StrictMode>,

@@ -402,6 +402,10 @@ export default function SubscriptionsPage() {
           subscriptionId:
             subscriptionToChange.id,
 
+          establishmentId:
+            subscriptionToChange
+              .establishmentId,
+
           planId:
             selectedPlan.id,
 

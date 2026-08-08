@@ -494,18 +494,98 @@ export async function atualizarEstabelecimento(
     );
   }
 
-  const {
-    ownerId,
-    assinaturaId,
-    criadoEm,
-    ...dadosPermitidos
-  } = dados || {};
+  if (!dados) {
+    throw new Error(
+      "Informe os dados do estabelecimento.",
+    );
+  }
+
+  const nome = String(
+    dados.nome || "",
+  ).trim();
+
+  const email = String(
+    dados.email || "",
+  )
+    .trim()
+    .toLowerCase();
+
+  const telefone = String(
+    dados.telefone || "",
+  ).trim();
+
+  const responsavelNome = String(
+    dados.responsavelNome || "",
+  ).trim();
+
+  if (!nome) {
+    throw new Error(
+      "Informe o nome do estabelecimento.",
+    );
+  }
+
+  if (!email) {
+    throw new Error(
+      "Informe o e-mail do estabelecimento.",
+    );
+  }
+
+  const endereco =
+    dados.endereco || {};
 
   await updateDoc(
-    doc(db, "establishments", id),
+    doc(
+      db,
+      "establishments",
+      id,
+    ),
     {
-      ...dadosPermitidos,
-      atualizadoEm: serverTimestamp(),
+      nome,
+      email,
+      telefone,
+
+      "responsavel.nome":
+        responsavelNome,
+
+      "endereco.cep":
+        String(
+          endereco.cep || "",
+        ).trim(),
+
+      "endereco.rua":
+        String(
+          endereco.rua || "",
+        ).trim(),
+
+      "endereco.numero":
+        String(
+          endereco.numero || "",
+        ).trim(),
+
+      "endereco.complemento":
+        String(
+          endereco.complemento || "",
+        ).trim(),
+
+      "endereco.bairro":
+        String(
+          endereco.bairro || "",
+        ).trim(),
+
+      "endereco.cidade":
+        String(
+          endereco.cidade || "",
+        ).trim(),
+
+      "endereco.estado":
+        String(
+          endereco.estado || "",
+        )
+          .trim()
+          .toUpperCase(),
+
+      atualizadoEm:
+        serverTimestamp(),
     },
   );
 }

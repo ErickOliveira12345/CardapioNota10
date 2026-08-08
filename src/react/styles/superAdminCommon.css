@@ -188,11 +188,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+  min-width: 200px;
 }
 
 .super-admin-actions button {
   min-height: 34px;
-  padding: 0 11px;
+  padding: 0 10px;
   border: 1px solid #dbe2ea;
   border-radius: 7px;
   background: #ffffff;
@@ -326,5 +327,23 @@
 
   .super-admin-summary-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .super-admin-actions button {
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 0.7rem;
+  }
+
+  .super-admin-actions {
+    min-width: 160px;
+  }
+
+  .super-admin-table th,
+  .super-admin-table td {
+    padding: 10px 12px;
   }
 }
