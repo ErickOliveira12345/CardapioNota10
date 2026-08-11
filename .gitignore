@@ -8,3 +8,6 @@ react-page*.png
 .chrome-debug*/
 .chrome-cdp/
 serviceAccountKey.json
+.env
+.env.local
+.env.*.local

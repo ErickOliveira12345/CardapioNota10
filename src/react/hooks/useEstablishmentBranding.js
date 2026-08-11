@@ -9,7 +9,18 @@ import {
   db,
 } from "../firebase/firebaseConfig.js";
 
-const DEFAULT_PRIMARY_COLOR = "#f97316";
+const DEFAULT_PRIMARY_COLOR =
+  "#f97316";
+
+const DEFAULT_BRANDING = {
+  nome: "Estabelecimento",
+  nomeExibicao: "Estabelecimento",
+  logoUrl: "",
+  logoPath: "",
+  corPrincipal:
+    DEFAULT_PRIMARY_COLOR,
+  tema: "light",
+};
 
 function isValidHexColor(value) {
   return /^#[0-9a-fA-F]{6}$/.test(
@@ -17,30 +28,42 @@ function isValidHexColor(value) {
   );
 }
 
-function getContrastColor(hexColor) {
-  const normalizedColor = hexColor.replace(
-    "#",
-    "",
-  );
+function getContrastColor(
+  hexColor,
+) {
+  const normalizedColor =
+    hexColor.replace(
+      "#",
+      "",
+    );
 
-  const red = parseInt(
-    normalizedColor.slice(0, 2),
-    16,
-  );
+  const red =
+    parseInt(
+      normalizedColor.slice(
+        0,
+        2,
+      ),
+      16,
+    );
 
-  const green = parseInt(
-    normalizedColor.slice(2, 4),
-    16,
-  );
+  const green =
+    parseInt(
+      normalizedColor.slice(
+        2,
+        4,
+      ),
+      16,
+    );
 
-  const blue = parseInt(
-    normalizedColor.slice(4, 6),
-    16,
-  );
+  const blue =
+    parseInt(
+      normalizedColor.slice(
+        4,
+        6,
+      ),
+      16,
+    );
 
-  /*
-   * Calcula a luminosidade aproximada.
-   */
   const luminance =
     red * 0.299 +
     green * 0.587 +
@@ -59,7 +82,9 @@ function applyBranding({
     document.documentElement;
 
   const normalizedColor =
-    isValidHexColor(primaryColor)
+    isValidHexColor(
+      primaryColor,
+    )
       ? primaryColor
       : DEFAULT_PRIMARY_COLOR;
 
@@ -129,62 +154,256 @@ function applyDefaultBranding() {
   applyBranding({
     primaryColor:
       DEFAULT_PRIMARY_COLOR,
-    theme: "light",
+
+    theme:
+      "light",
   });
 }
 
 export function useEstablishmentBranding(
   establishmentId,
 ) {
-  /*
-   * A escuta acontece em tempo real.
-   * Quando a cor for salva nas configurações,
-   * a interface será atualizada automaticamente.
-   */
+  const [
+    branding,
+    setBranding,
+  ] = React.useState(
+    DEFAULT_BRANDING,
+  );
+
+  const [
+    loading,
+    setLoading,
+  ] = React.useState(true);
+
   React.useEffect(() => {
     if (!establishmentId) {
+      setBranding(
+        DEFAULT_BRANDING,
+      );
+
       applyDefaultBranding();
+
+      setLoading(false);
+
       return undefined;
     }
 
-    const settingsReference = doc(
-      db,
-      "establishments",
+    setLoading(true);
+
+    /*
+     * Dados principais do
+     * estabelecimento.
+     */
+    let establishmentData = {};
+
+    /*
+     * Configurações visuais.
+     */
+    let settingsData = {};
+
+    let establishmentLoaded =
+      false;
+
+    let settingsLoaded =
+      false;
+
+    function updateBranding() {
+  if (
+    !establishmentLoaded ||
+    !settingsLoaded
+  ) {
+    return;
+  }
+
+  const primaryColor =
+    settingsData
+      .corPrincipal ||
+    DEFAULT_PRIMARY_COLOR;
+
+  const theme =
+    settingsData.tema ||
+    "light";
+
+  const nextBranding = {
+    nome:
+      establishmentData.nome ||
+      "Estabelecimento",
+
+    nomeExibicao:
+      settingsData.nomeExibicao ||
+      establishmentData.nome ||
+      "Estabelecimento",
+
+    logoUrl:
+      settingsData.logoUrl ||
+      establishmentData.logoUrl ||
+      "",
+
+    logoPath:
+      settingsData.logoPath ||
+      establishmentData.logoPath ||
+      "",
+
+    corPrincipal:
+      primaryColor,
+
+    tema:
+      theme,
+  };
+
+  console.log(
+    "BRANDING APLICADO:",
+    {
       establishmentId,
-      "settings",
-      "general",
-    );
 
-    const unsubscribe = onSnapshot(
-      settingsReference,
+      establishmentData,
 
-      (snapshot) => {
-        const settings =
-          snapshot.exists()
-            ? snapshot.data()
-            : {};
+      settingsData,
 
-        applyBranding({
-          primaryColor:
-            settings.corPrincipal ||
-            DEFAULT_PRIMARY_COLOR,
+      nextBranding,
+    },
+  );
 
-          theme:
-            settings.tema ||
-            "light",
-        });
-      },
+  setBranding(
+    nextBranding,
+  );
 
-      (error) => {
-        console.error(
-          "Erro ao carregar identidade visual:",
-          error,
-        );
+  applyBranding({
+    primaryColor,
+    theme,
+  });
 
-        applyDefaultBranding();
-      },
-    );
+  console.log(
+    "CSS BRANDING:",
+    {
+      primary:
+        getComputedStyle(
+          document.documentElement,
+        ).getPropertyValue(
+          "--primary",
+        ),
 
-    return unsubscribe;
-  }, [establishmentId]);
+      brandPrimary:
+        getComputedStyle(
+          document.documentElement,
+        ).getPropertyValue(
+          "--brand-primary",
+        ),
+    },
+  );
+
+  setLoading(false);
+}
+
+    /*
+     * establishments/{id}
+     */
+    const establishmentReference =
+      doc(
+        db,
+        "establishments",
+        establishmentId,
+      );
+
+    /*
+     * establishments/{id}
+     * /settings/general
+     */
+    const settingsReference =
+      doc(
+        db,
+        "establishments",
+        establishmentId,
+        "settings",
+        "general",
+      );
+
+    const stopEstablishment =
+      onSnapshot(
+        establishmentReference,
+
+        (snapshot) => {
+          establishmentData =
+            snapshot.exists()
+              ? snapshot.data()
+              : {};
+
+          establishmentLoaded =
+            true;
+
+          updateBranding();
+        },
+
+        (error) => {
+          console.error(
+            "Erro ao carregar estabelecimento:",
+            error,
+          );
+
+          establishmentData = {};
+
+          establishmentLoaded =
+            true;
+
+          updateBranding();
+        },
+      );
+
+    const stopSettings =
+  onSnapshot(
+    settingsReference,
+
+    (snapshot) => {
+      const settings =
+        snapshot.exists()
+          ? snapshot.data()
+          : {};
+
+      console.log(
+        "BRANDING FIRESTORE:",
+        {
+          establishmentId,
+
+          exists:
+            snapshot.exists(),
+
+          settings,
+        },
+      );
+
+      settingsData =
+        settings;
+
+      settingsLoaded =
+        true;
+
+      updateBranding();
+    },
+
+    (error) => {
+      console.error(
+        "Erro ao carregar identidade visual:",
+        error,
+      );
+
+      settingsData = {};
+
+      settingsLoaded =
+        true;
+
+      updateBranding();
+    },
+  );
+    return () => {
+      stopEstablishment();
+      stopSettings();
+    };
+  }, [
+    establishmentId,
+  ]);
+
+  return {
+    branding,
+    loading,
+  };
 }

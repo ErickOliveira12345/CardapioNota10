@@ -28,6 +28,9 @@ import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { TablesMapPage } from "./pages/TablesMapPage.jsx";
 import { AdminOrdersPage } from "./pages/AdminOrdersPage.jsx";
 import { usePlatformSettings } from "./contexts/PlatformSettingsContext.jsx";
+import { calculateDeliveryRoute } from "./services/deliveryRouteService.js";
+import { getEstablishmentById } from "./services/establishmentService.js";
+
 
 import CashierPage from "./pages/CashierPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
@@ -106,6 +109,20 @@ function getTableTokenFromUrl() {
   return (
     params.get("token")?.trim() || null
   );
+}
+
+function getOrderTypeFromUrl() {
+  const params =
+    new URLSearchParams(
+      window.location.search,
+    );
+
+  const type =
+    params.get("tipo");
+
+  return type === "entrega"
+    ? "entrega"
+    : "mesa";
 }
 
 function getTableFromUrl() {
@@ -197,21 +214,6 @@ export function App() {
     isOnboarding,
     refreshProfile,
   } = useAuth();
-
-//   const {
-//   loading: authLoading,
-//   profile,
-//   establishmentId: contextEstablishmentId,
-//   isAuthenticated,
-//   isOnboarding,
-//   refreshProfile,
-// } = useAuth();
-
-// const establishmentId =
-//   contextEstablishmentId ||
-//   profile?.estabelecimentoId ||
-//   profile?.establishmentId ||
-//   null;
   
 
   const [route, setRoute] = useState(getRoute);
@@ -237,7 +239,7 @@ export function App() {
 
   const [isCartOpen, setIsCartOpen] =
     useState(false);
-
+    
   const [orders, setOrders] = useState([]);
   const [calls, setCalls] = useState([]);
 
@@ -258,6 +260,30 @@ export function App() {
   const [menuLoading, setMenuLoading] =
     useState(false);
 
+  const [
+    deliveryAddress,
+    setDeliveryAddress,
+  ] = useState({
+    cep: "",
+    rua: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+    latitude: "",
+    longitude: "",
+  });
+
+  const [
+    customerData,
+    setCustomerData,
+  ] = useState({
+    nome: "",
+    telefone: "",
+    email: "",
+  });
+
   const {
     settings: platformSettings,
     loading: platformSettingsLoading,
@@ -267,11 +293,45 @@ export function App() {
     profile?.role === "super_admin" &&
     profile?.status === "active";
 
+  const [
+    orderType,
+    setOrderType,
+  ] = useState(
+    getOrderTypeFromUrl,
+  );
+
   useEffect(() => {
     function handlePopState() {
-      setRoute(getRoute());
+      setRoute(
+        getRoute(),
+      );
+
+      setPublicEstablishmentId(
+        getEstablishmentFromUrl(),
+      );
+
+      setTableToken(
+        getTableTokenFromUrl(),
+      );
+
+      setOrderType(
+        getOrderTypeFromUrl(),
+      );
+
+      const tableFromUrl =
+        getTableFromUrl();
+
+      if (tableFromUrl) {
+        setTable(
+          tableFromUrl,
+        );
+      }
     }
 
+    /*
+    * Sincroniza os dados da URL
+    * quando o App é carregado.
+    */
     setPublicEstablishmentId(
       getEstablishmentFromUrl(),
     );
@@ -279,7 +339,19 @@ export function App() {
     setTableToken(
       getTableTokenFromUrl(),
     );
-  
+
+    setOrderType(
+      getOrderTypeFromUrl(),
+    );
+
+    const tableFromUrl =
+      getTableFromUrl();
+
+    if (tableFromUrl) {
+      setTable(
+        tableFromUrl,
+      );
+    }
 
     window.addEventListener(
       "popstate",
@@ -346,7 +418,14 @@ useEffect(() => {
   if (
     route !== "/menu" ||
     !publicEstablishmentId ||
-    !customerUid ||
+    !customerUid
+  ) {
+    setCustomerOrders([]);
+    return undefined;
+  }
+
+  if (
+    orderType === "mesa" &&
     !table
   ) {
     setCustomerOrders([]);
@@ -354,12 +433,16 @@ useEffect(() => {
   }
 
   console.log(
-    "Iniciando listener da mesa:",
+    "Iniciando listener do cliente:",
     {
       establishmentId:
         publicEstablishmentId,
       customerUid,
-      table,
+      table:
+        orderType === "mesa"
+          ? table
+          : null,
+      orderType,
     },
   );
 
@@ -370,20 +453,24 @@ useEffect(() => {
 
       customerUid,
 
-      table,
+      table:
+        orderType === "mesa"
+          ? table
+          : null,
 
-      onChange: (firebaseOrders) => {
-        console.log(
-          "Pedidos da mesa recebidos:",
+      orderType,
+
+      onChange: (
+        firebaseOrders,
+      ) => {
+        setCustomerOrders(
           firebaseOrders,
         );
-
-        setCustomerOrders(firebaseOrders);
       },
 
       onError: (error) => {
         console.error(
-          "Erro ao acompanhar pedidos da mesa:",
+          "Erro ao acompanhar pedidos do cliente:",
           error,
         );
       },
@@ -391,7 +478,8 @@ useEffect(() => {
 
   return () => {
     if (
-      typeof unsubscribe === "function"
+      typeof unsubscribe ===
+      "function"
     ) {
       unsubscribe();
     }
@@ -401,94 +489,8 @@ useEffect(() => {
   publicEstablishmentId,
   customerUid,
   table,
+  orderType,
 ]);
-  useEffect(() => {
-    if (
-      route !== "/menu" ||
-      !publicEstablishmentId
-    ) {
-      setCustomerUid(null);
-      setCustomerOrders([]);
-
-      return undefined;
-    }
-
-    let mounted = true;
-
-    async function authenticateCustomer() {
-      try {
-        const customer =
-          await autenticarClienteAnonimo();
-
-        if (mounted) {
-          setCustomerUid(customer.uid);
-        }
-      } catch (error) {
-        console.error(
-          "Erro ao autenticar cliente:",
-          error,
-        );
-
-        showToast(
-          "Não foi possível iniciar a sessão da mesa.",
-          "error",
-        );
-      }
-    }
-
-    authenticateCustomer();
-
-    return () => {
-      mounted = false;
-    };
-  }, [
-    route,
-    publicEstablishmentId,
-  ]);
-
-  useEffect(() => {
-    if (
-      route !== "/menu" ||
-      !publicEstablishmentId ||
-      !customerUid ||
-      !table
-    ) {
-      setCustomerOrders([]);
-      return undefined;
-    }
-
-    const unsubscribe =
-      observeCustomerOrders({
-        establishmentId:
-          publicEstablishmentId,
-
-        customerUid,
-
-        table,
-
-        onChange: setCustomerOrders,
-
-        onError: (error) => {
-          console.error(
-            "Erro ao carregar pedido da mesa:",
-            error,
-          );
-        },
-      });
-
-    return () => {
-      if (
-        typeof unsubscribe === "function"
-      ) {
-        unsubscribe();
-      }
-    };
-  }, [
-    route,
-    publicEstablishmentId,
-    customerUid,
-    table,
-  ]);
 
   useEffect(() => {
     if (
@@ -718,40 +720,71 @@ useEffect(() => {
         ? customerOrders
         : orders;
 
+    const activeStatuses = [
+      "aguardando",
+      "recebido",
+      "preparando",
+      "saindo",
+      "finalizado",
+    ];
+
     return (
       [...sourceOrders]
         .sort(
-          (firstOrder, secondOrder) =>
+          (
+            firstOrder,
+            secondOrder,
+          ) =>
             Number(
               secondOrder.criadoEmMs ??
-                getTime(secondOrder.criadoEm) ??
+                getTime(
+                  secondOrder.criadoEm,
+                ) ??
                 0,
             ) -
             Number(
               firstOrder.criadoEmMs ??
-                getTime(firstOrder.criadoEm) ??
+                getTime(
+                  firstOrder.criadoEm,
+                ) ??
                 0,
             ),
         )
-        .find(
-          (order) =>
+        .find((order) => {
+          if (
+            !activeStatuses.includes(
+              order.status,
+            )
+          ) {
+            return false;
+          }
+
+          if (
+            orderType === "entrega"
+          ) {
+            return (
+              order.tipoPedido ===
+                "entrega" &&
+              order.clienteUid ===
+                customerUid
+            );
+          }
+
+          return (
+            order.tipoPedido !==
+              "entrega" &&
             Number(order.mesa) ===
-              Number(table) &&
-            [
-              "aguardando",
-              "recebido",
-              "preparando",
-              "saindo",
-              "finalizado",
-            ].includes(order.status) &&
-            Array.isArray(order.itens),
-        ) || null
+              Number(table)
+          );
+        }) || null
     );
   }, [
     route,
     customerOrders,
     orders,
     table,
+    orderType,
+    customerUid,
   ]);
 
   const cartTotal = useMemo(() => {
@@ -773,16 +806,36 @@ useEffect(() => {
   }, [cartItems]);
 
   function navigate(path) {
-    window.history.pushState({}, "", path);
-    setRoute(getRoute());
+    window.history.pushState(
+      {},
+      "",
+      path,
+    );
+
+    setRoute(
+      getRoute(),
+    );
 
     setPublicEstablishmentId(
-    getEstablishmentFromUrl(),
-  );
+      getEstablishmentFromUrl(),
+    );
 
-  setTableToken(
-    getTableTokenFromUrl(),
-  );
+    setTableToken(
+      getTableTokenFromUrl(),
+    );
+
+    setOrderType(
+      getOrderTypeFromUrl(),
+    );
+
+    const tableFromUrl =
+      getTableFromUrl();
+
+    if (tableFromUrl) {
+      setTable(
+        tableFromUrl,
+      );
+    }
 
     window.scrollTo({
       top: 0,
@@ -872,69 +925,408 @@ useEffect(() => {
   }
 
   async function finishOrder() {
+  if (
+    cartItems.length === 0 ||
+    isSubmittingOrder
+  ) {
+    return;
+  }
+
+  if (!publicEstablishmentId) {
+    showToast(
+      "Estabelecimento não identificado.",
+      "error",
+      4000,
+    );
+
+    return;
+  }
+
+  /*
+   * Pedido de mesa precisa
+   * possuir token válido.
+   */
+  if (
+    orderType === "mesa" &&
+    !tableToken
+  ) {
+    showToast(
+      "O acesso desta mesa é inválido.",
+      "error",
+      4000,
+    );
+
+    return;
+  }
+
+  /*
+   * Validações específicas
+   * para entrega.
+   */
+  if (
+    orderType === "entrega"
+  ) {
+    const customerName =
+      String(
+        customerData?.nome || "",
+      ).trim();
+
+    const customerPhone =
+      String(
+        customerData?.telefone || "",
+      ).trim();
+
+    if (!customerName) {
+      showToast(
+        "Informe seu nome.",
+        "warning",
+        4000,
+      );
+
+      return;
+    }
+
+    if (!customerPhone) {
+      showToast(
+        "Informe seu telefone.",
+        "warning",
+        4000,
+      );
+
+      return;
+    }
+
+    const customerLatitude =
+      Number(
+        deliveryAddress?.latitude,
+      );
+
+    const customerLongitude =
+      Number(
+        deliveryAddress?.longitude,
+      );
+
     if (
-      cartItems.length === 0 ||
-      isSubmittingOrder
+      !Number.isFinite(
+        customerLatitude,
+      ) ||
+      !Number.isFinite(
+        customerLongitude,
+      )
     ) {
-      return;
-    }
-
-    if (!publicEstablishmentId) {
       showToast(
-        "Estabelecimento não identificado.",
-        "error",
+        "Informe sua localização para calcular a entrega.",
+        "warning",
         4000,
       );
 
       return;
     }
+  }
 
-    if (!tableToken) {
-      showToast(
-        "O acesso desta mesa é inválido.",
-        "error",
-        4000,
+  try {
+    setIsSubmittingOrder(true);
+
+    /*
+     * Cliente identificado apenas
+     * em pedidos de entrega.
+     */
+    const normalizedCustomer =
+      orderType === "entrega"
+        ? {
+            nome:
+              String(
+                customerData?.nome ||
+                  "",
+              ).trim(),
+
+            telefone:
+              String(
+                customerData
+                  ?.telefone || "",
+              ).trim(),
+
+            email:
+              String(
+                customerData?.email ||
+                  "",
+              )
+                .trim()
+                .toLowerCase(),
+          }
+        : null;
+
+    /*
+     * Para pedido na mesa,
+     * permanece null.
+     */
+    let deliveryData = null;
+
+    /*
+     * Toda a lógica da rota
+     * acontece somente em entrega.
+     */
+    if (
+      orderType === "entrega"
+    ) {
+      const customerLatitude =
+        Number(
+          deliveryAddress?.latitude,
+        );
+
+      const customerLongitude =
+        Number(
+          deliveryAddress?.longitude,
+        );
+
+      /*
+       * Obtém localização
+       * do estabelecimento.
+       */
+      const establishment =
+        await getEstablishmentById(
+          publicEstablishmentId,
+        );
+
+      if (!establishment) {
+        throw new Error(
+          "Estabelecimento não encontrado.",
+        );
+      }
+
+      const establishmentLatitude =
+        Number(
+          establishment.localizacao
+            ?.latitude,
+        );
+
+      const establishmentLongitude =
+        Number(
+          establishment.localizacao
+            ?.longitude,
+        );
+
+      if (
+        !Number.isFinite(
+          establishmentLatitude,
+        ) ||
+        !Number.isFinite(
+          establishmentLongitude,
+        )
+      ) {
+        throw new Error(
+          "O estabelecimento ainda não possui localização configurada.",
+        );
+      }
+
+      /*
+       * Calcula rota até o cliente.
+       */
+      const deliveryRoute =
+        await calculateDeliveryRoute({
+          origin: {
+            latitude:
+              establishmentLatitude,
+
+            longitude:
+              establishmentLongitude,
+          },
+
+          destination: {
+            latitude:
+              customerLatitude,
+
+            longitude:
+              customerLongitude,
+          },
+        });
+
+      console.log(
+        "Rota calculada:",
+        deliveryRoute,
       );
 
-      return;
+      /*
+       * Dados completos
+       * da entrega.
+       */
+      deliveryData = {
+        endereco: {
+          cep:
+            deliveryAddress?.cep ||
+            "",
+
+          rua:
+            deliveryAddress?.rua ||
+            "",
+
+          numero:
+            deliveryAddress
+              ?.numero || "",
+
+          complemento:
+            deliveryAddress
+              ?.complemento || "",
+
+          bairro:
+            deliveryAddress
+              ?.bairro || "",
+
+          cidade:
+            deliveryAddress
+              ?.cidade || "",
+
+          estado:
+            deliveryAddress
+              ?.estado || "",
+        },
+
+        localizacao: {
+          latitude:
+            customerLatitude,
+
+          longitude:
+            customerLongitude,
+        },
+
+        rota: {
+          distanciaMetros:
+            Number(
+              deliveryRoute
+                ?.distanceMeters || 0,
+            ),
+
+          distanciaKm:
+            Number(
+              deliveryRoute
+                ?.distanceKm || 0,
+            ),
+
+          duracaoSegundos:
+            Number(
+              deliveryRoute
+                ?.durationSeconds || 0,
+            ),
+
+          duracaoMinutos:
+            Number(
+              deliveryRoute
+                ?.durationMinutes || 0,
+            ),
+
+          encodedPolyline:
+            deliveryRoute
+              ?.encodedPolyline || "",
+        },
+      };
+
+      console.log(
+        "Dados da entrega:",
+        deliveryData,
+      );
     }
 
+    /*
+     * Cria pedido de mesa
+     * ou entrega.
+     */
+    await createOrder({
+      table,
+      items: cartItems,
+      total: cartTotal,
 
-    try {
-      setIsSubmittingOrder(true);
+      establishmentId:
+        publicEstablishmentId,
 
-      await createOrder({
-        table,
-        items: cartItems,
-        total: cartTotal,
-        establishmentId:publicEstablishmentId,
+      tipoPedido:
+        orderType,
+
+      cliente:
+        normalizedCustomer,
+
+      entrega:
+        deliveryData,
+    });
+
+    /*
+     * Limpa carrinho.
+     */
+    setCartItems([]);
+
+    Storage.remove(
+      STORAGE_KEYS.CARRINHO,
+    );
+
+    setIsCartOpen(false);
+
+    /*
+     * Limpa dados específicos
+     * de entrega.
+     */
+    if (
+      orderType === "entrega"
+    ) {
+      setDeliveryAddress({
+        cep: "",
+        rua: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        estado: "",
+        latitude: "",
+        longitude: "",
       });
 
-      setCartItems([]);
-      Storage.remove(STORAGE_KEYS.CARRINHO);
-      setIsCartOpen(false);
+      setCustomerData({
+        nome: "",
+        telefone: "",
+        email: "",
+      });
+    }
 
+    /*
+     * Mensagem específica
+     * conforme o tipo.
+     */
+    if (
+      orderType === "entrega" &&
+      deliveryData
+    ) {
+      showToast(
+        `Pedido enviado! Distância: ${
+          deliveryData.rota
+            .distanciaKm
+        } km · Tempo estimado: ${
+          deliveryData.rota
+            .duracaoMinutos
+        } min.`,
+        "success",
+        5000,
+      );
+    } else {
       showToast(
         "Pedido enviado com sucesso! Aguarde...",
         "success",
         4000,
       );
-    } catch (error) {
-      console.error(
-        "Erro ao finalizar pedido:",
-        error,
-      );
-
-      showToast(
-        error.message ||
-          "Não foi possível enviar o pedido.",
-        "error",
-        5000,
-      );
-    } finally {
-      setIsSubmittingOrder(false);
     }
+  } catch (error) {
+    console.error(
+      "Erro ao finalizar pedido:",
+      error,
+    );
+
+    showToast(
+      error.message ||
+        "Não foi possível enviar o pedido.",
+      "error",
+      5000,
+    );
+  } finally {
+    setIsSubmittingOrder(false);
   }
+}
 
   async function handleRequestService() {
     try {
@@ -1478,7 +1870,10 @@ useEffect(() => {
           onNavigate={navigate}
           orders={orders}
         >
-          <AdminOrdersPage />
+          <AdminOrdersPage
+          establishmentId={
+            establishmentId
+          } />
         </AdminLayout>
 
         <ToastContainer />
@@ -1637,16 +2032,28 @@ useEffect(() => {
     );
   }
 
+  console.log(
+  "DEBUG PEDIDO CLIENTE:",
+  {
+    orderType,
+    table,
+    customerUid,
+    customerOrders,
+    activeOrder,
+  },
+);
+
   return (
     <>
       <MenuPage
-        establishmentId={establishmentId}
+        establishmentId={publicEstablishmentId}
         table={table}
+        orderType={orderType}
         categories={menuCategories}
         products={menuProducts}
         onNavigate={navigate}
         onAddItem={addItem}
-        onOpenCart={() => setIsCartOpen(true)}
+        onOpenCart={() => {setIsCartOpen(true)}}
         onRequestService={handleRequestService}
         cartCount={cartCount}
         activeOrder={activeOrder}
@@ -1661,6 +2068,11 @@ useEffect(() => {
         onClose={() => setIsCartOpen(false)}
         onUpdateQuantity={updateQuantity}
         onFinishOrder={finishOrder}
+        customerData={customerData}
+        onCustomerDataChange={setCustomerData}
+        deliveryAddress={deliveryAddress}
+        onDeliveryAddressChange={setDeliveryAddress}
+        orderType={orderType}
       />
 
       <ToastContainer />

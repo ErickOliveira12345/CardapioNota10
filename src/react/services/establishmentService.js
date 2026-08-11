@@ -589,3 +589,85 @@ export async function atualizarEstabelecimento(
     },
   );
 }
+
+export async function atualizarLocalizacaoEstabelecimento(
+  establishmentId,
+  localizacao,
+) {
+  if (!establishmentId) {
+    throw new Error(
+      "ID do estabelecimento não informado.",
+    );
+  }
+
+  const latitude =
+    Number(localizacao.latitude);
+
+  const longitude =
+    Number(localizacao.longitude);
+
+  if (
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90
+  ) {
+    throw new Error(
+      "Latitude inválida.",
+    );
+  }
+
+  if (
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    throw new Error(
+      "Longitude inválida.",
+    );
+  }
+
+  await updateDoc(
+    doc(
+      db,
+      "establishments",
+      establishmentId,
+    ),
+    {
+      localizacao: {
+        latitude,
+        longitude,
+      },
+
+      atualizadoEm:
+        serverTimestamp(),
+    },
+  );
+}
+
+export async function getEstablishmentById(
+  establishmentId,
+) {
+  if (!establishmentId) {
+    throw new Error(
+      "Estabelecimento não informado.",
+    );
+  }
+
+  const reference = doc(
+    db,
+    "establishments",
+    establishmentId,
+  );
+
+  const snapshot =
+    await getDoc(reference);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  };
+}

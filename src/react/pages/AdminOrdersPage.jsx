@@ -27,6 +27,14 @@ import {
   OrderProgress,
 } from "../components/OrderProgress.jsx";
 
+import {
+  DeliveryMap,
+} from "../components/delivery/DeliveryMap.jsx";
+
+import {
+  getEstablishmentById,
+} from "../services/establishmentService.js";
+
 const ACTIVE_STATUSES = [
   "aguardando",
   "recebido",
@@ -204,6 +212,44 @@ export function AdminOrdersPage() {
   }, [
     establishmentId,
   ]);
+
+  const [
+    establishment,
+    setEstablishment,
+  ] = useState(null);
+
+  useEffect(() => {
+    if (!establishmentId) {
+      setEstablishment(null);
+      return;
+    }
+
+    let active = true;
+
+    async function loadEstablishment() {
+      try {
+        const data =
+          await getEstablishmentById(
+            establishmentId,
+          );
+
+        if (active) {
+          setEstablishment(data);
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao carregar estabelecimento:",
+          error,
+        );
+      }
+    }
+
+    loadEstablishment();
+
+    return () => {
+      active = false;
+    };
+  }, [establishmentId]);
 
   const sortedOrders =
     useMemo(() => {
@@ -757,6 +803,7 @@ export function AdminOrdersPage() {
                   </button>
                 </article>
               ),
+            
             )}
           </div>
         )}
@@ -976,6 +1023,115 @@ export function AdminOrdersPage() {
                       </p>
                     </div>
                   )}
+
+                  {establishment?.localizacao &&
+  order?.entrega?.localizacao &&
+  order?.entrega?.rota
+    ?.encodedPolyline && (
+    <section className="admin-order-delivery">
+      <div className="admin-order-delivery__header">
+        <h3>
+          🚚 Entrega
+        </h3>
+
+        <div className="admin-order-delivery__metrics">
+          <span>
+            Distância:{" "}
+            <strong>
+              {order.entrega.rota
+                .distanciaKm}{" "}
+              km
+            </strong>
+          </span>
+
+          <span>
+            Tempo estimado:{" "}
+            <strong>
+              {order.entrega.rota
+                .duracaoMinutos}{" "}
+              min
+            </strong>
+          </span>
+        </div>
+      </div>
+
+      {order.entrega.endereco && (
+        <div className="admin-order-delivery__address">
+          <strong>
+            Endereço do cliente
+          </strong>
+
+          <span>
+            {
+              order.entrega.endereco
+                .rua
+            }
+            {order.entrega.endereco
+              .numero
+              ? `, ${
+                  order.entrega.endereco
+                    .numero
+                }`
+              : ""}
+          </span>
+
+          <span>
+            {
+              order.entrega.endereco
+                .bairro
+            }
+          </span>
+
+          <span>
+            {
+              order.entrega.endereco
+                .cidade
+            }
+            {order.entrega.endereco
+              .estado
+              ? ` - ${
+                  order.entrega.endereco
+                    .estado
+                }`
+              : ""}
+          </span>
+        </div>
+      )}
+
+      <DeliveryMap
+        origin={{
+          latitude:
+            establishment.localizacao
+              .latitude,
+
+          longitude:
+            establishment.localizacao
+              .longitude,
+        }}
+        destination={{
+          latitude:
+            order.entrega.localizacao
+              .latitude,
+
+          longitude:
+            order.entrega.localizacao
+              .longitude,
+        }}
+        encodedPolyline={
+          order.entrega.rota
+            .encodedPolyline
+        }
+        distanceKm={
+          order.entrega.rota
+            .distanciaKm
+        }
+        durationMinutes={
+          order.entrega.rota
+            .duracaoMinutos
+        }
+      />
+    </section>
+  )}
 
                   <footer className="admin-order-card__footer">
                     <div>

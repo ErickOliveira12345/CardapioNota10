@@ -19,64 +19,126 @@ export function observeCustomerOrders({
   establishmentId,
   customerUid,
   table,
+  orderType = "mesa",
   onChange,
   onError,
 }) {
   if (
     !establishmentId ||
-    !customerUid ||
+    !customerUid
+  ) {
+    onChange([]);
+    return undefined;
+  }
+
+  /*
+   * Mesa somente é obrigatória
+   * para pedidos de mesa.
+   */
+  if (
+    orderType === "mesa" &&
     !table
   ) {
     onChange([]);
-    return () => {};
+    return undefined;
   }
 
-  const customerOrdersQuery = query(
-    ordersCollection(establishmentId),
-    where(
-      "clienteUid",
-      "==",
-      customerUid,
-    ),
-  );
+  let customerOrdersQuery;
+
+  /*
+   * Pedido para entrega.
+   */
+  if (
+    orderType === "entrega"
+  ) {
+    customerOrdersQuery =
+      query(
+        ordersCollection(
+          establishmentId,
+        ),
+
+        where(
+          "clienteUid",
+          "==",
+          customerUid,
+        ),
+
+        where(
+          "tipoPedido",
+          "==",
+          "entrega",
+        ),
+
+      );
+  } else {
+    /*
+     * Pedido feito na mesa.
+     */
+    customerOrdersQuery =
+      query(
+        ordersCollection(
+          establishmentId,
+        ),
+
+        where(
+          "clienteUid",
+          "==",
+          customerUid,
+        ),
+
+        where(
+          "mesa",
+          "==",
+          Number(table),
+        ),
+
+      );
+  }
 
   return onSnapshot(
     customerOrdersQuery,
-    (snapshot) => {
-      const customerOrders = snapshot.docs
-        .map((document) => ({
-          idPedido: document.id,
-          ...document.data(),
-        }))
-        .filter(
-          (order) =>
-            Number(order.mesa) ===
-            Number(table),
-        )
-        .sort(
-          (firstOrder, secondOrder) =>
-            Number(
-              secondOrder.criadoEmMs || 0,
-            ) -
-            Number(
-              firstOrder.criadoEmMs || 0,
-            ),
-        );
 
-      console.log(
-        "Pedidos acompanhados pela mesa:",
+    (snapshot) => {
+      const customerOrders =
+        snapshot.docs
+          .map((document) => ({
+            idPedido:
+              document.id,
+
+            ...document.data(),
+          }))
+          .sort(
+            (
+              firstOrder,
+              secondOrder,
+            ) =>
+              Number(
+                secondOrder
+                  .criadoEmMs || 0,
+              ) -
+              Number(
+                firstOrder
+                  .criadoEmMs || 0,
+              ),
+          );
+
+      onChange(
         customerOrders,
       );
-
-      onChange(customerOrders);
     },
+
     (error) => {
       console.error(
         "Erro ao acompanhar pedido:",
         error,
       );
 
-      onError?.(error);
+      if (
+        typeof onError ===
+        "function"
+      ) {
+        onError(error);
+      }
     },
   );
 }
@@ -304,52 +366,105 @@ export async function createOrder({
   table,
   items,
   total,
-  establishmentId = DEFAULT_ESTABLISHMENT_ID,
+  establishmentId =
+    DEFAULT_ESTABLISHMENT_ID,
+  tipoPedido = "mesa",
+  cliente = null,
+  entrega = null,
 }) {
-  const tableNumber = Number(table);
+  /*
+   * Normaliza o tipo do pedido.
+   */
+  const normalizedOrderType =
+    tipoPedido === "entrega"
+      ? "entrega"
+      : "mesa";
 
-  if (!Number.isInteger(tableNumber)) {
-    throw new Error("Mesa inválida.");
+  /*
+   * Mesa só é obrigatória
+   * para pedidos feitos na mesa.
+   */
+  let tableNumber = null;
+
+  if (
+    normalizedOrderType === "mesa"
+  ) {
+    tableNumber = Number(table);
+
+    if (
+      !Number.isInteger(
+        tableNumber,
+      ) ||
+      tableNumber <= 0
+    ) {
+      throw new Error(
+        "Mesa inválida.",
+      );
+    }
   }
 
-  if (!Array.isArray(items) || items.length === 0) {
+  /*
+   * Valida os produtos.
+   */
+  if (
+    !Array.isArray(items) ||
+    items.length === 0
+  ) {
     throw new Error(
       "Adicione pelo menos um item ao pedido.",
     );
   }
 
-  const normalizedItems = items.map((item) => ({
-    id: String(item.id),
+  const normalizedItems =
+    items.map((item) => ({
+      id: String(item.id),
 
-    nome: String(item.nome || ""),
+      nome: String(
+        item.nome || "",
+      ),
 
-    descricao: String(
-      item.descricao || "",
-    ),
+      descricao: String(
+        item.descricao || "",
+      ),
 
-    emoji: String(item.emoji || ""),
+      emoji: String(
+        item.emoji || "",
+      ),
 
-    categoriaId:
-      item.categoriaId ||
-      item.categoria ||
-      item.categoryId ||
-      "",
+      categoriaId:
+        item.categoriaId ||
+        item.categoria ||
+        item.categoryId ||
+        "",
 
-    preco: Number(item.preco) || 0,
+      preco:
+        Number(item.preco) || 0,
 
-    quantidade:
-      Number(item.quantidade) || 1,
+      quantidade:
+        Number(
+          item.quantidade,
+        ) || 1,
 
-    subtotal:
-      Number(item.subtotal) ||
-      (Number(item.preco) || 0) *
-        (Number(item.quantidade) || 1),
-  }));
+      subtotal:
+        Number(
+          item.subtotal,
+        ) ||
+        (Number(item.preco) || 0) *
+          (Number(
+            item.quantidade,
+          ) || 1),
+    }));
 
-  const orderTotal = Number(total);
+  /*
+   * Valida total.
+   */
+  const orderTotal =
+    Number(total);
 
   if (
-    !Number.isFinite(orderTotal) ||
+    !Number.isFinite(
+      orderTotal,
+    ) ||
     orderTotal < 0
   ) {
     throw new Error(
@@ -357,45 +472,298 @@ export async function createOrder({
     );
   }
 
-  const currentTime = Date.now();
+  /*
+   * Normaliza cliente.
+   *
+   * Cliente identificado só
+   * será salvo em entrega.
+   */
+  const normalizedCustomer =
+    normalizedOrderType ===
+      "entrega"
+      ? {
+          nome: String(
+            cliente?.nome || "",
+          ).trim(),
 
+          telefone: String(
+            cliente?.telefone || "",
+          ).trim(),
+
+          email: String(
+            cliente?.email || "",
+          )
+            .trim()
+            .toLowerCase(),
+        }
+      : null;
+
+  /*
+   * Valida dados mínimos
+   * do cliente para entrega.
+   */
+  if (
+    normalizedOrderType ===
+    "entrega"
+  ) {
+    if (
+      !normalizedCustomer.nome
+    ) {
+      throw new Error(
+        "Nome do cliente não informado.",
+      );
+    }
+
+    if (
+      !normalizedCustomer.telefone
+    ) {
+      throw new Error(
+        "Telefone do cliente não informado.",
+      );
+    }
+  }
+
+  /*
+   * Normaliza entrega.
+   */
+  let normalizedDelivery = null;
+
+  if (
+    normalizedOrderType ===
+      "entrega" &&
+    entrega &&
+    typeof entrega === "object"
+  ) {
+    const latitude = Number(
+      entrega.localizacao
+        ?.latitude,
+    );
+
+    const longitude = Number(
+      entrega.localizacao
+        ?.longitude,
+    );
+
+    normalizedDelivery = {
+      endereco: {
+        cep: String(
+          entrega.endereco
+            ?.cep || "",
+        ),
+
+        rua: String(
+          entrega.endereco
+            ?.rua || "",
+        ),
+
+        numero: String(
+          entrega.endereco
+            ?.numero || "",
+        ),
+
+        complemento: String(
+          entrega.endereco
+            ?.complemento || "",
+        ),
+
+        bairro: String(
+          entrega.endereco
+            ?.bairro || "",
+        ),
+
+        cidade: String(
+          entrega.endereco
+            ?.cidade || "",
+        ),
+
+        estado: String(
+          entrega.endereco
+            ?.estado || "",
+        ),
+      },
+
+      localizacao: {
+        latitude:
+          Number.isFinite(
+            latitude,
+          )
+            ? latitude
+            : null,
+
+        longitude:
+          Number.isFinite(
+            longitude,
+          )
+            ? longitude
+            : null,
+      },
+
+      rota: {
+        distanciaMetros:
+          Number(
+            entrega.rota
+              ?.distanciaMetros,
+          ) || 0,
+
+        distanciaKm:
+          Number(
+            entrega.rota
+              ?.distanciaKm,
+          ) || 0,
+
+        duracaoSegundos:
+          Number(
+            entrega.rota
+              ?.duracaoSegundos,
+          ) || 0,
+
+        duracaoMinutos:
+          Number(
+            entrega.rota
+              ?.duracaoMinutos,
+          ) || 0,
+
+        encodedPolyline:
+          String(
+            entrega.rota
+              ?.encodedPolyline ||
+              "",
+          ),
+      },
+    };
+  }
+
+  /*
+   * Entrega precisa possuir
+   * localização válida.
+   */
+  if (
+    normalizedOrderType ===
+    "entrega"
+  ) {
+    if (
+      !normalizedDelivery ||
+      !Number.isFinite(
+        normalizedDelivery
+          .localizacao.latitude,
+      ) ||
+      !Number.isFinite(
+        normalizedDelivery
+          .localizacao.longitude,
+      )
+    ) {
+      throw new Error(
+        "Localização da entrega inválida.",
+      );
+    }
+  }
+
+  const currentTime =
+    Date.now();
+
+  /*
+   * Obtém UID do cliente
+   * anônimo.
+   */
   const customer =
     await autenticarClienteAnonimo();
 
-  const orderReference = await addDoc(
-    ordersCollection(establishmentId),
-    {
-      mesa: tableNumber,
+  /*
+   * Documento que será
+   * salvo no Firestore.
+   */
+  const orderData = {
+    tipoPedido:
+      normalizedOrderType,
 
-      clienteUid: customer.uid,
+    mesa:
+      normalizedOrderType ===
+      "mesa"
+        ? tableNumber
+        : null,
 
-      itens: normalizedItems,
+    clienteUid:
+      customer.uid,
 
-      total: orderTotal,
+    cliente:
+      normalizedCustomer,
 
-      status: "aguardando",
+    itens:
+      normalizedItems,
 
-      criadoEm: serverTimestamp(),
-      criadoEmMs: currentTime,
+    total:
+      orderTotal,
 
-      atualizadoEm: serverTimestamp(),
-      atualizadoEmMs: currentTime,
-    },
-  );
+    status:
+      "aguardando",
+
+    criadoEm:
+      serverTimestamp(),
+
+    criadoEmMs:
+      currentTime,
+
+    atualizadoEm:
+      serverTimestamp(),
+
+    atualizadoEmMs:
+      currentTime,
+  };
+
+  /*
+   * Só adiciona entrega
+   * para pedidos de entrega.
+   */
+  if (
+    normalizedOrderType ===
+      "entrega" &&
+    normalizedDelivery
+  ) {
+    orderData.entrega =
+      normalizedDelivery;
+  }
+
+  const orderReference =
+    await addDoc(
+      ordersCollection(
+        establishmentId,
+      ),
+      orderData,
+    );
 
   return {
-    idPedido: orderReference.id,
+    idPedido:
+      orderReference.id,
 
-    mesa: tableNumber,
+    tipoPedido:
+      normalizedOrderType,
 
-    itens: normalizedItems,
+    mesa:
+      normalizedOrderType ===
+      "mesa"
+        ? tableNumber
+        : null,
 
-    total: orderTotal,
+    cliente:
+      normalizedCustomer,
 
-    status: "aguardando",
+    itens:
+      normalizedItems,
 
-    criadoEm: currentTime,
-    atualizadoEm: currentTime,
+    total:
+      orderTotal,
+
+    status:
+      "aguardando",
+
+    entrega:
+      normalizedDelivery,
+
+    criadoEm:
+      currentTime,
+
+    atualizadoEm:
+      currentTime,
   };
 }
 

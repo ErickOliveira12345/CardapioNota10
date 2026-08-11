@@ -28,6 +28,10 @@ import {
   EstablishmentBrand,
 } from "./EstablishmentBrand.jsx";
 
+import {
+  calculateDeliveryRoute,
+} from "../services/deliveryRouteService.js";
+
 const menuItems = [
   {
     id: "dashboard",
@@ -264,7 +268,35 @@ export function AdminLayout({
     setMenuOpen(false);
     onNavigate(item.path);
   }
-  console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
+
+  async function testDeliveryRoute() {
+  try {
+    const result =
+      await calculateDeliveryRoute({
+        origin: {
+          latitude:
+            -19.000000,
+
+          longitude:
+            -43.000000,
+        },
+
+        destination: {
+          latitude:
+            -19.010000,
+
+          longitude:
+            -43.010000,
+        },
+      });
+
+  } catch (error) {
+    console.error(
+      "Erro ao calcular rota:",
+      error,
+    );
+  }
+}
   return (
     <div className="admin-shell">
       <aside
@@ -393,6 +425,12 @@ export function AdminLayout({
           >
             Ver como cliente
           </button>
+          <button
+  type="button"
+  onClick={testDeliveryRoute}
+>
+  Testar rota
+</button>
         </header>
 
         <div className="admin-page-content">

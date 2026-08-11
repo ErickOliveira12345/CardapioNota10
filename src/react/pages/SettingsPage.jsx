@@ -40,6 +40,10 @@ const INITIAL_FORM = {
   cidade: "",
   estado: "",
 
+   // Localização geográfica
+  latitude: "",
+  longitude: "",
+
   nomeExibicao: "",
   corPrincipal: "#f97316",
   logoUrl: "",
@@ -463,6 +467,67 @@ async function handleConfirmCrop() {
   }
 }
 
+function handleUseCurrentLocation() {
+  if (!navigator.geolocation) {
+    setError(
+      "Seu navegador não oferece suporte à localização.",
+    );
+
+    return;
+  }
+
+  setError("");
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const {
+        latitude,
+        longitude,
+      } = position.coords;
+
+      setForm((current) => ({
+        ...current,
+        latitude,
+        longitude,
+      }));
+
+      showToast(
+        "Localização atual carregada.",
+        "success",
+        3000,
+      );
+    },
+
+    (locationError) => {
+      console.error(
+        "Erro ao obter localização:",
+        locationError,
+      );
+
+      if (
+        locationError.code ===
+        locationError.PERMISSION_DENIED
+      ) {
+        setError(
+          "Permissão de localização negada. Autorize o acesso no navegador.",
+        );
+
+        return;
+      }
+
+      setError(
+        "Não foi possível obter sua localização atual.",
+      );
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    },
+  );
+}
+
   if (loading) {
     return (
       <div className="settings-page__loading">
@@ -789,6 +854,43 @@ async function handleConfirmCrop() {
                     maxLength={2}
                     placeholder="MG"
                   />
+                </label>
+
+                <label>
+                  <span>Latitude</span>
+
+                  <input
+                    type="number"
+                    step="any"
+                    name="latitude"
+                    value={form.latitude}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                  />
+                </label>
+
+                <label>
+                  <span>Longitude</span>
+
+                  <input
+                    type="number"
+                    step="any"
+                    name="longitude"
+                    value={form.longitude}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                  />
+                </label>
+                <label>
+                  <span>Obter Localização Atual</span>
+                  <button
+                    type="button"
+                    className="settings-location-button"
+                    onClick={handleUseCurrentLocation}
+                    disabled={saving}
+                  >
+                    📍 Usar localização atual
+                  </button>
                 </label>
               </div>
             </section>

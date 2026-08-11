@@ -300,17 +300,78 @@ service cloud.firestore {
       match /orders/{orderId} {
         allow create: if
           estaAutenticado()
+
           && request.resource.data.clienteUid
             == request.auth.uid
-          && request.resource.data.mesa is int
-          && request.resource.data.mesa > 0
-          && request.resource.data.itens is list
-          && request.resource.data.itens.size() > 0
-          && request.resource.data.total is number
-          && request.resource.data.total >= 0
-          && request.resource.data.status
-            == "aguardando";
 
+          && request.resource.data.tipoPedido
+            in ["mesa", "entrega"]
+
+          && request.resource.data.itens is list
+
+          && request.resource.data.itens.size() > 0
+
+          && request.resource.data.total is number
+
+          && request.resource.data.total >= 0
+
+          && request.resource.data.status
+            == "aguardando"
+
+          && (
+            /*
+            * Pedido feito na mesa.
+            */
+            (
+              request.resource.data.tipoPedido
+                == "mesa"
+
+              && request.resource.data.mesa is int
+
+              && request.resource.data.mesa > 0
+            )
+
+            ||
+
+            /*
+            * Pedido para entrega.
+            */
+            (
+              request.resource.data.tipoPedido
+                == "entrega"
+
+              && request.resource.data.mesa == null
+
+              && request.resource.data.cliente is map
+
+              && request.resource.data.cliente.nome
+                is string
+
+              && request.resource.data.cliente.nome
+                != ""
+
+              && request.resource.data.cliente.telefone
+                is string
+
+              && request.resource.data.cliente.telefone
+                != ""
+
+              && request.resource.data.entrega is map
+
+              && request.resource.data.entrega.localizacao
+                is map
+
+              && request.resource.data.entrega.localizacao.latitude
+                is number
+
+              && request.resource.data.entrega.localizacao.longitude
+                is number
+
+              && request.resource.data.entrega.rota
+                is map
+            )
+          );
+          
         allow read: if
           podeGerenciarEstabelecimento(
             establishmentId
@@ -370,6 +431,17 @@ service cloud.firestore {
 
         allow update: if
           podeGerenciarEstabelecimento(
+            establishmentId
+          );
+
+        allow delete: if false;
+      }
+
+      match /settings/general {
+        allow read: if true;
+
+        allow create, update:
+          if podeGerenciarEstabelecimento(
             establishmentId
           );
 

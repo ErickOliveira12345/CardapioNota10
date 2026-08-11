@@ -53,6 +53,13 @@ function normalizeEstablishmentData(
       ? establishment.endereco
       : {};
 
+  const localizacao =
+    establishment.localizacao &&
+    typeof establishment.localizacao ===
+      "object"
+      ? establishment.localizacao
+      : {};
+
   const responsavel =
     establishment.responsavel &&
     typeof establishment.responsavel === "object"
@@ -127,6 +134,15 @@ function normalizeEstablishmentData(
       endereco.estado || "",
 
     /*
+    * Coordenadas geográficas.
+    */
+    latitude:
+      localizacao.latitude ?? "",
+
+    longitude:
+      localizacao.longitude ?? "",
+
+    /*
      * Aparência.
      */
     nomeExibicao:
@@ -148,7 +164,7 @@ function normalizeEstablishmentData(
       settings.tema || "light",
 
     /*
-     * Localização.
+     * Regionalização.
      */
     moeda:
       settings.moeda || "BRL",
@@ -383,6 +399,18 @@ export async function saveEstablishmentSettings({
       )
         .trim()
         .toUpperCase(),
+    },
+
+    localizacao: {
+      latitude:
+        form.latitude !== ""
+          ? Number(form.latitude)
+          : null,
+
+      longitude:
+        form.longitude !== ""
+          ? Number(form.longitude)
+          : null,
     },
 
     atualizadoEm:

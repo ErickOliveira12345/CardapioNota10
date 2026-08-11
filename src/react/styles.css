@@ -568,6 +568,7 @@ details summary {
 
 .item-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: .9rem;
   padding: 1rem;
@@ -762,7 +763,7 @@ details summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 0.6rem 1.25rem;
   background: var(--brand-primary);
   color: var(--brand-on-primary);
 }
@@ -782,8 +783,18 @@ details summary {
 
 .cart-body {
   flex: 1;
+  min-height: 0;
+
   overflow-y: auto;
-  padding: .75rem 1rem;
+  overflow-x: hidden;
+
+  padding: 16px;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* Internet Explorer / Edge antigo */
+  -ms-overflow-style: none;
 }
 
 .cart-empty {
@@ -802,18 +813,25 @@ details summary {
 
 .cart-item {
   display: flex;
-  align-items: center;
+  flex-direction: row;
   gap: .75rem;
   padding: .75rem 0;
   border-bottom: 1px solid var(--border);
 }
 
+.cart-item img {
+  width: 60%;
+}
+
 .cart-item__emoji {
+  
   flex-shrink: 0;
   font-size: 1.8rem;
 }
 
 .cart-item__info {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
 }
@@ -832,6 +850,7 @@ details summary {
 
 .cart-item__qty {
   display: flex;
+  width: 50%;
   align-items: center;
   gap: .4rem;
 }
@@ -856,7 +875,7 @@ details summary {
 }
 
 .cart-footer {
-  padding: 1rem 1.25rem;
+  padding: 0.6rem 1.25rem;
   border-top: 1px solid var(--border);
   background: var(--surface);
 }
@@ -865,7 +884,7 @@ details summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.2rem;
 }
 
 .cart-total span {
@@ -879,12 +898,525 @@ details summary {
 
 .btn-finalizar {
   width: 100%;
-  padding: 1rem;
+  padding: 0.6rem;
   border-radius: var(--radius);
   background: var(--brand-primary);
   color: var(--brand-on-primary);
   font-size: 1rem;
   font-weight: 700;
+}
+
+/* =========================================
+   DADOS DO CLIENTE - PEDIDO PARA ENTREGA
+   ========================================= */
+
+.customer-delivery-form {
+  margin: 6px 0;
+  padding: 2px 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  box-shadow:
+    0 4px 14px
+    rgba(15, 23, 42, 0.06);
+
+  height: 200px;
+}
+
+/* Cabeçalho */
+
+.customer-delivery-form > header {
+  margin-bottom: 18px;
+}
+
+.customer-delivery-form > header h3 {
+  margin: 0 0 6px;
+
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.customer-delivery-form > header p {
+  margin: 0;
+
+  font-size: 0.85rem;
+  line-height: 1.45;
+
+  color: #64748b;
+}
+
+/* =========================================
+   CAMPOS
+   ========================================= */
+
+.customer-delivery-form__fields {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.customer-delivery-form__fields label {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* Nome dos campos */
+
+.customer-delivery-form__fields
+  label
+  > span {
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  color: #374151;
+}
+
+/* Inputs */
+
+.customer-delivery-form__fields input {
+  width: 80%;
+  height: 26px;
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  font-family: inherit;
+  font-size: 0.92rem;
+
+  color: #111827;
+
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+/* Placeholder */
+
+.customer-delivery-form__fields
+  input::placeholder {
+  color: #9ca3af;
+}
+
+/* Hover */
+
+.customer-delivery-form__fields
+  input:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+/* Foco */
+
+.customer-delivery-form__fields
+  input:focus {
+  border-color: var(
+    --primary,
+    #f97316
+  );
+
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(
+        --primary,
+        #f97316
+      ) 15%,
+      transparent
+    );
+}
+
+/* Campo desabilitado */
+
+.customer-delivery-form__fields
+  input:disabled {
+  cursor: not-allowed;
+
+  color: #94a3b8;
+
+  background: #f8fafc;
+
+  opacity: 0.75;
+}
+
+/* =========================================
+   DESTAQUE DO FORMULÁRIO
+   ========================================= */
+
+.customer-delivery-form {
+  position: relative;
+
+  overflow: hidden;
+}
+
+.customer-delivery-form::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 4px;
+  height: 100%;
+
+  background:
+    var(
+      --primary,
+      #f97316
+    );
+}
+
+/* =========================================
+   RESPONSIVO
+   ========================================= */
+
+@media (
+  max-width: 600px
+) {
+
+  .customer-delivery-form__fields {
+    gap: 12px;
+  }
+
+  .customer-delivery-form__fields
+    input {
+
+    font-size: 0.9rem;
+  }
+}
+
+/* =========================================
+   ENDEREÇO DE ENTREGA
+   ========================================= */
+
+.delivery-address {
+  position: relative;
+
+  margin: 5px 0;
+  padding: 10px;
+  height: 400px;
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  box-shadow:
+    0 4px 14px
+    rgba(15, 23, 42, 0.06);
+}
+
+/* Barra lateral usando a cor do estabelecimento */
+
+.delivery-address::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 4px;
+  height: 100%;
+
+  background:
+    var(
+      --primary,
+      #f97316
+    );
+}
+
+/* =========================================
+   CABEÇALHO
+   ========================================= */
+
+.delivery-address__header {
+  margin-bottom: 5px;
+}
+
+.delivery-address__header h3 {
+  margin: 0 0 2px;
+
+  color: #111827;
+
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.delivery-address__header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* =========================================
+   GRID DOS CAMPOS
+   ========================================= */
+
+.delivery-address__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.delivery-address__grid label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  min-width: 0;
+}
+
+/* Campo ocupando largura completa */
+
+.delivery-address__full {
+  grid-column: 1 / -1;
+}
+
+/* Nome dos campos */
+
+.delivery-address__grid
+  label
+  > span {
+  color: #374151;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* =========================================
+   INPUTS
+   ========================================= */
+
+.delivery-address__grid input {
+  width: 100%;
+  height: 26px;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+  color: #111827;
+
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+
+  outline: none;
+
+  font-family: inherit;
+  font-size: 0.92rem;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.delivery-address__grid
+  input::placeholder {
+  color: #9ca3af;
+}
+
+.delivery-address__grid
+  input:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.delivery-address__grid
+  input:focus {
+  border-color:
+    var(
+      --primary,
+      #f97316
+    );
+
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(
+        --primary,
+        #f97316
+      ) 15%,
+      transparent
+    );
+}
+
+.delivery-address__grid
+  input:disabled {
+  cursor: not-allowed;
+
+  background: #f8fafc;
+  color: #94a3b8;
+
+  opacity: 0.75;
+}
+
+/* =========================================
+   ÁREA DE LOCALIZAÇÃO
+   ========================================= */
+
+.delivery-address__location {
+  display: flex;
+  flex-direction: column;
+
+  align-items: stretch;
+
+  gap: 8px;
+
+  margin-top: 18px;
+  padding-top: 16px;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+.delivery-address__location button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 46px;
+
+  padding: 10px 16px;
+
+  border: 1px solid
+    var(
+      --primary,
+      #f97316
+    );
+
+  border-radius: 10px;
+
+  background:
+    var(
+      --primary,
+      #f97316
+    );
+
+  color:
+    var(
+      --brand-on-primary,
+      #ffffff
+    );
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.delivery-address__location
+  button:hover:not(:disabled) {
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 5px 14px
+    color-mix(
+      in srgb,
+      var(
+        --primary,
+        #f97316
+      ) 25%,
+      transparent
+    );
+}
+
+.delivery-address__location
+  button:active:not(:disabled) {
+  transform:
+    translateY(0);
+}
+
+.delivery-address__location
+  button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Mensagem de sucesso */
+
+.delivery-address__location small {
+  display: block;
+
+  color: #15803d;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+/* =========================================
+   ERRO
+   ========================================= */
+
+.delivery-address__error {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+/* =========================================
+   RESPONSIVO
+   ========================================= */
+
+@media (
+  max-width: 600px
+) {
+  .delivery-address__grid {
+    gap: 10px;
+  }
+
+
+  .delivery-address__grid
+    input {
+
+    font-size: 0.9rem;
+  }
+
+  .delivery-address__location
+    button {
+    min-height: 44px;
+
+    font-size: 0.86rem;
+  }
 }
 
 .page-admin {
@@ -4832,4 +5364,56 @@ SUPER ADMINISTRADOR
 
 .sidebar-logout:hover {
     background: #b91c1c;
+}
+
+
+.admin-order-delivery {
+  margin-top: 20px;
+  padding: 18px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  background: #fff;
+}
+
+.admin-order-delivery__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.admin-order-delivery__header h3 {
+  margin: 0;
+}
+
+.admin-order-delivery__metrics {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-order-delivery__metrics span {
+  font-size: 0.9rem;
+}
+
+.admin-order-delivery__address {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-bottom: 16px;
+}
+
+.admin-order-delivery__address span {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .admin-order-delivery__header {
+    flex-direction: column;
+  }
 }

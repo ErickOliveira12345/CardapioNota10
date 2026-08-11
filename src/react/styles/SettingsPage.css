@@ -894,3 +894,35 @@ Modal de recorte de imagem
     width: 100%;
   }
 }
+
+/*
+Botão de preenchimento automático de localização geográfica
+*/
+.settings-location-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 0 16px;
+
+  border-radius: 8px;
+  border: 1px solid var(--brand-primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-location-button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.settings-location-button:hover{
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+  

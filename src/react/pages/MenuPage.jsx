@@ -19,12 +19,17 @@ import {
 } from "../components/EstablishmentBrand.jsx";
 
 import {
-  observeEstablishmentBranding,
-} from "../services/infoEstablishmentBranding.js";
+  DeliveryMap,
+} from "../components/delivery/DeliveryMap.jsx";
+
+import {
+  getEstablishmentById,
+} from "../services/establishmentService.js";
 
 export function MenuPage({
   establishmentId,
   table,
+  orderType = "mesa",
   onNavigate,
   onAddItem,
   onOpenCart,
@@ -39,16 +44,17 @@ export function MenuPage({
   firebaseLoading = false,
 }) {
 
-  useEstablishmentBranding(
+  const {
+  branding,
+  loading: brandingLoading,
+} = useEstablishmentBranding(
   establishmentId,
 );
 
-  const [branding, setBranding] = useState({
-    nome: "Estabelecimento",
-    nomeExibicao: "Estabelecimento",
-    logoUrl: "",
-    logoPath: "",
-  });
+  const [
+    establishment,
+    setEstablishment,
+  ] = useState(null);
 
   const [activeCategory, setActiveCategory] =
     useState(null);
@@ -78,30 +84,36 @@ export function MenuPage({
           ),
       );
   }, [categories]);
+  
 
-  useEffect(() => {
-    if (!establishmentId) {
-      return undefined;
-    }
+  // const [
+  //   deliveryAddress,
+  //   setDeliveryAddress,
+  // ] = useState(null);
 
-    const unsubscribe =
-      observeEstablishmentBranding(
-        establishmentId,
-        setBranding,
-        (error) => {
-          console.error(
-            "Erro ao acompanhar identidade visual:",
-            error,
-          );
-        },
-      );
+  // useEffect(() => {
+  //   if (!establishmentId) {
+  //     return undefined;
+  //   }
 
-    return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
-  }, [establishmentId]);
+  //   const unsubscribe =
+  //     observeEstablishmentBranding(
+  //       establishmentId,
+  //       setBranding,
+  //       (error) => {
+  //         console.error(
+  //           "Erro ao acompanhar identidade visual:",
+  //           error,
+  //         );
+  //       },
+  //     );
+
+  //   return () => {
+  //     if (typeof unsubscribe === "function") {
+  //       unsubscribe();
+  //     }
+  //   };
+  // }, [establishmentId]);
 
   const establishmentLogoUrl =
     branding.logoUrl;
@@ -197,7 +209,50 @@ export function MenuPage({
     activeCategory,
     availableCategories,
   ]);
-console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
+
+  useEffect(() => {
+    if (!establishmentId) {
+      setEstablishment(null);
+      return;
+    }
+
+    let active = true;
+
+    async function loadEstablishment() {
+      try {
+        const data =
+          await getEstablishmentById(
+            establishmentId,
+          );
+
+        if (active) {
+          setEstablishment(data);
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao carregar estabelecimento:",
+          error,
+        );
+
+        if (active) {
+          setEstablishment(null);
+        }
+      }
+    }
+
+    loadEstablishment();
+
+    return () => {
+      active = false;
+    };
+  }, [establishmentId]);
+
+  const isDelivery =
+    orderType === "entrega";
+
+  const isTableOrder =
+    orderType === "mesa";
+
   return (
     <>
       <header className="menu-header">
@@ -212,19 +267,27 @@ console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
         </div>
 
         <div className="menu-header__center">
-          <span className="mesa-badge">
-            Mesa {table}
-          </span>
+          {isTableOrder ? (
+            <span className="mesa-badge">
+              Mesa {table}
+            </span>
+          ) : (
+            <span className="mesa-badge">
+              🛵 Pedido para entrega
+            </span>
+          )}
         </div>
 
         <div className="menu-header__right">
-          <button
-            className="btn-servico"
-            type="button"
-            onClick={onRequestService}
-          >
-            Atendimento
-          </button>
+          {isTableOrder && (
+            <button
+              className="btn-servico"
+              type="button"
+              onClick={onRequestService}
+            >
+              Atendimento
+            </button>
+          )}
         </div>
       </header>
 
@@ -305,11 +368,16 @@ console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
                   🍽️
                 </div>
 
-                <h2>Bem-vindo!</h2>
+                <h2>
+                  {isDelivery
+                    ? "Faça seu pedido"
+                    : "Bem-vindo!"}
+                </h2>
 
                 <p>
-                  Selecione uma categoria para ver
-                  o cardápio
+                  {isDelivery
+                    ? "Escolha seus produtos e receba no seu endereço."
+                    : "Selecione uma categoria para ver o cardápio."}
                 </p>
               </div>
 
@@ -436,7 +504,11 @@ console.log(establishmentName, establishmentLogoUrl, accountEmail, accountName);
           )}
 
         {activeOrder && (
-          <OrderStatus order={activeOrder} />
+          <OrderStatus
+            order={activeOrder}
+            establishment={establishment}
+            orderType={orderType}
+          />
         )}
       </main>
 
@@ -538,7 +610,7 @@ function ProductCard({
   );
 }
 
-function OrderStatus({ order }) {
+function OrderStatus({ order, establishment,orderType }) {
   const status = getStatus(order.status);
 
   const orderItems = Array.isArray(
@@ -549,7 +621,11 @@ function OrderStatus({ order }) {
 
   return (
     <section className="pedido-status-section">
-      <h3>📦 Seu pedido</h3>
+      <h3>
+        {orderType === "entrega"
+          ? "🛵 Seu pedido"
+          : "📦 Seu pedido"}
+      </h3>
 
       <div className="pedido-card">
         <div className="pedido-card__header">
@@ -599,6 +675,45 @@ function OrderStatus({ order }) {
             )}
           </strong>
         </details>
+
+        {establishment?.localizacao &&
+            order?.entrega?.localizacao &&
+            order?.entrega?.rota
+              ?.encodedPolyline && (
+              <DeliveryMap
+                origin={{
+                  latitude:
+                  establishment.localizacao
+                    .latitude,
+
+                longitude:
+                  establishment.localizacao
+                    .longitude,
+              }}
+              destination={{
+                latitude:
+                  order.entrega.localizacao
+                    .latitude,
+
+                longitude:
+                  order.entrega.localizacao
+                    .longitude,
+              }}
+              encodedPolyline={
+                order.entrega.rota
+                  .encodedPolyline
+              }
+              distanceKm={
+                order.entrega.rota
+                  .distanciaKm
+              }
+              durationMinutes={
+                order.entrega.rota
+                  .duracaoMinutos
+              }
+            />
+        )}
+        
       </div>
     </section>
   );

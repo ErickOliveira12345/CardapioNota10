@@ -17,6 +17,12 @@ const {
   getAuth,
 } = require("firebase-admin/auth");
 
+const {
+  defineSecret,
+} = require(
+    "firebase-functions/params",
+);
+
 initializeApp();
 
 const db = getFirestore();
@@ -24,6 +30,11 @@ const db = getFirestore();
 const adminAuth = getAuth();
 
 const REGION = "southamerica-east1";
+
+const GOOGLE_MAPS_ROUTES_API_KEY =
+  defineSecret(
+      "GOOGLE_MAPS_ROUTES_API_KEY",
+  );
 
 /**
  * Obtém e valida o contexto do usuário autenticado.
@@ -1903,5 +1914,204 @@ exports.createEstablishmentByAdmin =
             "Não foi possível criar o estabelecimento.",
           );
         }
+      },
+  );
+
+exports.calculateDeliveryRoute =
+  onCall(
+      {
+        region: REGION,
+
+        secrets: [
+          GOOGLE_MAPS_ROUTES_API_KEY,
+        ],
+      },
+
+      async (request) => {
+        if (!request.auth) {
+          throw new HttpsError(
+              "unauthenticated",
+              "É necessário estar autenticado.",
+          );
+        }
+
+        const {
+          origin,
+          destination,
+        } = request.data || {};
+
+        const originLatitude =
+        Number(
+            origin &&
+          origin.latitude,
+        );
+
+        const originLongitude =
+        Number(
+            origin &&
+          origin.longitude,
+        );
+
+        const destinationLatitude =
+        Number(
+            destination &&
+          destination.latitude,
+        );
+
+        const destinationLongitude =
+        Number(
+            destination &&
+          destination.longitude,
+        );
+
+        if (
+          !Number.isFinite(
+              originLatitude,
+          ) ||
+        !Number.isFinite(
+            originLongitude,
+        )
+        ) {
+          throw new HttpsError(
+              "invalid-argument",
+              "Localização de origem inválida.",
+          );
+        }
+
+        if (
+          !Number.isFinite(
+              destinationLatitude,
+          ) ||
+        !Number.isFinite(
+            destinationLongitude,
+        )
+        ) {
+          throw new HttpsError(
+              "invalid-argument",
+              "Localização de destino inválida.",
+          );
+        }
+
+        const response =
+        await fetch(
+            "https://routes.googleapis.com/directions/v2:computeRoutes",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                "application/json",
+
+                "X-Goog-Api-Key":
+                GOOGLE_MAPS_ROUTES_API_KEY
+                    .value(),
+
+                "X-Goog-FieldMask":
+                [
+                  "routes.distanceMeters",
+                  "routes.duration",
+                  "routes.polyline.encodedPolyline",
+                ].join(","),
+              },
+
+              body: JSON.stringify({
+                origin: {
+                  location: {
+                    latLng: {
+                      latitude:
+                      originLatitude,
+
+                      longitude:
+                      originLongitude,
+                    },
+                  },
+                },
+
+                destination: {
+                  location: {
+                    latLng: {
+                      latitude:
+                      destinationLatitude,
+
+                      longitude:
+                      destinationLongitude,
+                    },
+                  },
+                },
+
+                travelMode: "DRIVE",
+
+                routingPreference:
+                "TRAFFIC_AWARE",
+              }),
+            },
+        );
+
+        if (!response.ok) {
+          const errorBody =
+          await response.text();
+
+          console.error(
+              "Erro Routes API:",
+              response.status,
+              errorBody,
+          );
+
+          throw new HttpsError(
+              "internal",
+              "Não foi possível calcular a rota.",
+          );
+        }
+
+        const data =
+        await response.json();
+
+        const route =
+        data.routes &&
+        data.routes[0] ?
+          data.routes[0] :
+          null;
+
+        if (!route) {
+          throw new HttpsError(
+              "not-found",
+              "Nenhuma rota encontrada.",
+          );
+        }
+
+        const durationSeconds =
+        Number(
+            String(
+                route.duration || "0s",
+            ).replace("s", ""),
+        );
+
+        return {
+          distanceMeters:
+          route.distanceMeters || 0,
+
+          distanceKm:
+          Number(
+              (
+                Number(
+                    route.distanceMeters ||
+                  0,
+                ) / 1000
+              ).toFixed(1),
+          ),
+
+          durationSeconds,
+
+          durationMinutes:
+          Math.ceil(
+              durationSeconds / 60,
+          ),
+
+          encodedPolyline:
+          route.polyline &&
+          route.polyline.encodedPolyline ?
+            route.polyline.encodedPolyline :
+            "",
+        };
       },
   );
