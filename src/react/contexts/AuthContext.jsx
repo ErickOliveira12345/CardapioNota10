@@ -12,6 +12,10 @@ import {
 } from "../services/authService.js";
 
 import {
+  getDriverByUid,
+} from "../services/driverService.js";
+
+import {
   USER_ROLES,
   USER_STATUS,
 } from "../constants/roles.js";
@@ -25,6 +29,8 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [driverProfile, setDriverProfile] = useState(null);
+  const [accountType, setAccountType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] =
     useState(false);
@@ -34,19 +40,79 @@ export function AuthProvider({ children }) {
   async function carregarPerfil(uid) {
     if (!uid) {
       setProfile(null);
+      setDriverProfile(null);
+      setAccountType(null);
       return null;
     }
 
     try {
       setProfileLoading(true);
       setAuthError(null);
-
+      /*
+      * 1. Primeiro procura uma conta
+      * administrativa / estabelecimento.
+      */
       const userProfile =
-        await buscarPerfilUsuario(uid);
+        await buscarPerfilUsuario(
+          uid,
+        );
 
-      setProfile(userProfile);
+      if (userProfile) {
+        setProfile(
+          userProfile,
+        );
+        setDriverProfile(
+          null,
+        );
 
-      return userProfile;
+        const userRole =
+          userProfile?.role ||
+          null;
+
+        if (
+          userRole ===
+          USER_ROLES.SUPER_ADMIN
+        ) {
+          setAccountType(
+            "superAdmin",
+          );
+        } else {
+          setAccountType(
+            "establishment",
+          );
+        }
+        return userProfile;
+      }
+      /*
+      * 2. Se não existir perfil normal,
+      * procura cadastro de entregador.
+      */
+      const driver =
+        await getDriverByUid(
+          uid,
+        );
+
+      if (driver) {
+        setProfile(null);
+        setDriverProfile(
+          driver,
+        );
+
+        setAccountType(
+          "driver",
+        );
+        return driver;
+      }
+
+      /*
+      * Existe autenticação, mas não
+      * encontramos nenhum perfil.
+      */
+      setProfile(null);
+      setDriverProfile(null);
+      setAccountType(null);
+
+      return null;
     } catch (error) {
       console.error(
         "Erro ao carregar perfil do usuário:",
@@ -54,6 +120,9 @@ export function AuthProvider({ children }) {
       );
 
       setProfile(null);
+      setDriverProfile(null);
+      setAccountType(null);
+
       setAuthError(
         "Não foi possível carregar o perfil do usuário.",
       );
@@ -65,12 +134,20 @@ export function AuthProvider({ children }) {
   }
 
   async function refreshProfile() {
-    if (!user?.uid || user.isAnonymous) {
+    if (
+      !user?.uid ||
+      user.isAnonymous
+    ) {
       setProfile(null);
+      setDriverProfile(null);
+      setAccountType(null);
+
       return null;
     }
 
-    return carregarPerfil(user.uid);
+    return carregarPerfil(
+      user.uid,
+    );
   }
 
   useEffect(() => {
@@ -93,25 +170,26 @@ export function AuthProvider({ children }) {
               authenticatedUser.isAnonymous
             ) {
               setProfile(null);
+              setDriverProfile(null);
+              setAccountType(null);
               return;
             }
 
             const userProfile =
-              await buscarPerfilUsuario(
+              await carregarPerfil(
                 authenticatedUser.uid,
+              );
+            } catch (error) {
+              console.error(
+                "Erro ao carregar autenticação:",
+                error,
               );
 
             if (mounted) {
-              setProfile(userProfile);
-            }
-          } catch (error) {
-            console.error(
-              "Erro ao carregar autenticação:",
-              error,
-            );
-
-            if (mounted) {
               setProfile(null);
+              setDriverProfile(null);
+              setAccountType(null);
+
               setAuthError(
                 "Não foi possível carregar os dados da conta.",
               );
@@ -142,6 +220,12 @@ export function AuthProvider({ children }) {
     const isAuthenticated =
       Boolean(user) && !isAnonymous;
 
+    const isDriver = accountType === "driver";
+
+    const isEstablishmentUser = accountType === "establishment";
+
+    const isSuperAdminAccount = accountType === "superAdmin";  
+
     const role =
       profile?.role || null;
 
@@ -154,7 +238,7 @@ export function AuthProvider({ children }) {
     const permissions =
       ROLE_PERMISSIONS[role] || [];
 
-    const isSuperAdmin =
+    const isSuperAdmin = accountType === "superAdmin" ||
       role === USER_ROLES.SUPER_ADMIN;
 
     const isSubscriber =
@@ -188,6 +272,7 @@ export function AuthProvider({ children }) {
 
     const isOnboarding =
       isAuthenticated &&
+      isEstablishmentUser &&
       !isSuperAdmin &&
       (
         status ===
@@ -196,6 +281,21 @@ export function AuthProvider({ children }) {
           false ||
         !establishmentId
       );
+
+    const isDriverApproved =
+      isDriver &&
+      driverProfile?.status ===
+        "approved";
+
+    const isDriverPending =
+      isDriver &&
+      driverProfile?.status ===
+        "pending";
+
+    const isDriverBlocked =
+      isDriver &&
+      driverProfile?.status ===
+        "blocked";
 
     function hasPermission(
       permission,
@@ -252,6 +352,13 @@ export function AuthProvider({ children }) {
     return {
       user,
       profile,
+      driverProfile,
+
+      accountType,
+
+      isDriverApproved,
+      isDriverPending,
+      isDriverBlocked,
 
       loading,
       profileLoading,
@@ -264,6 +371,10 @@ export function AuthProvider({ children }) {
 
       isAnonymous,
       isAuthenticated,
+
+      isDriver,
+      isEstablishmentUser,
+  
       isActive,
       isBlocked,
       isPending,
@@ -286,6 +397,8 @@ export function AuthProvider({ children }) {
   }, [
     user,
     profile,
+    driverProfile,
+    accountType,
     loading,
     profileLoading,
     authError,

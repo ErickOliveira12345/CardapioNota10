@@ -10,6 +10,7 @@ import SubscriptionsPage from "./superAdmin/SubscriptionsPage.jsx";
 import PaymentsPage from "./superAdmin/PaymentsPage.jsx";
 import AuditPage from "./superAdmin/AuditPage.jsx";
 import SettingsPage from "./superAdmin/SettingsPage.jsx";
+import SuperAdminDriversPage from "./superAdmin/SuperAdminDriversPage.jsx";
 
 function getCurrentPage() {
   const path = window.location.pathname;
@@ -38,6 +39,9 @@ function getCurrentPage() {
 
     case "/super-admin/configuracoes":
       return <SettingsPage />;
+
+    case "/super-admin/entregadores":
+      return <SuperAdminDriversPage />;
 
     default:
       return <SuperAdminDashboardPage />;

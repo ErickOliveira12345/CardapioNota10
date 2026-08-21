@@ -688,6 +688,34 @@ export async function createOrder({
     cliente:
       normalizedCustomer,
 
+    tipoPedido:
+      normalizedOrderType,
+
+    entrega:
+      normalizedDelivery,
+
+    /*
+    * Controle da integração
+    * com entregadores.
+    *
+    * O pedido NÃO fica disponível
+    * imediatamente após ser criado.
+    */
+    entregaDisponivel:
+      false,
+
+    entregaPremium:
+      false,
+
+    statusEntrega:
+      normalizedOrderType ===
+      "entrega"
+        ? "preparando"
+        : null,
+
+    entregadorUid:
+      null,
+
     itens:
       normalizedItems,
 

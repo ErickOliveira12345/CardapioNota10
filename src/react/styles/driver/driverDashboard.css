@@ -1,0 +1,434 @@
+.driver-dashboard-page {
+  min-height: 100dvh;
+
+  padding: 30px 18px;
+
+  background: #f8fafc;
+}
+
+.driver-dashboard {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+}
+
+.driver-dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.driver-dashboard__eyebrow {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color:
+    var(
+      --primary,
+      #f97316
+    );
+
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.driver-dashboard__header h1 {
+  margin: 0 0 5px;
+
+  color: #0f172a;
+
+  font-size: 1.7rem;
+}
+
+.driver-dashboard__header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.92rem;
+}
+
+.driver-dashboard__logout {
+  padding: 9px 15px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  font-weight: 600;
+}
+
+.driver-dashboard__error {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+.driver-availability {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 24px;
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  box-shadow:
+    0 5px 18px
+    rgba(15, 23, 42, 0.05);
+}
+
+.driver-availability__label {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #64748b;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.driver-availability strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #0f172a;
+
+  font-size: 1.05rem;
+}
+
+.driver-availability p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.86rem;
+}
+
+.driver-availability__button {
+  min-width: 150px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 11px 16px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+
+  font-weight: 700;
+}
+
+.driver-availability__button--online {
+  background: #ecfdf5;
+  color: #047857;
+
+  border-color: #a7f3d0;
+}
+
+.driver-availability__dot {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: #94a3b8;
+}
+
+.driver-availability__button--online
+.driver-availability__dot {
+  background: #10b981;
+}
+
+.driver-dashboard__content {
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  box-shadow:
+    0 5px 18px
+    rgba(15, 23, 42, 0.05);
+}
+
+.driver-dashboard__content > header {
+  margin-bottom: 20px;
+}
+
+.driver-dashboard__content h2 {
+  margin: 0 0 4px;
+
+  color: #0f172a;
+
+  font-size: 1.15rem;
+}
+
+.driver-dashboard__content header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.86rem;
+}
+
+.driver-dashboard__empty {
+  padding: 48px 20px;
+
+  text-align: center;
+
+  background: #f8fafc;
+
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+}
+
+.driver-dashboard__empty > span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-size: 2rem;
+}
+
+.driver-dashboard__empty h3 {
+  margin: 0 0 5px;
+
+  color: #334155;
+
+  font-size: 1rem;
+}
+
+.driver-dashboard__empty p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.86rem;
+}
+
+.driver-dashboard__loading {
+  padding: 60px;
+
+  text-align: center;
+
+  color: #64748b;
+}
+
+@media (max-width: 650px) {
+  .driver-dashboard-page {
+    padding: 18px 12px;
+  }
+
+  .driver-dashboard__header {
+    align-items: flex-start;
+  }
+
+  .driver-dashboard__header h1 {
+    font-size: 1.4rem;
+  }
+
+  .driver-availability {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    padding: 18px;
+  }
+
+  .driver-availability__button {
+    width: 100%;
+  }
+
+  .driver-dashboard__content {
+    padding: 18px;
+  }
+}
+
+.driver-orders-list {
+  display: grid;
+  gap: 14px;
+}
+
+.driver-order-card {
+  padding: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  box-shadow:
+    0 3px 12px
+    rgba(15, 23, 42, 0.05);
+}
+
+.driver-order-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.driver-order-card__header > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.driver-order-card__header span {
+  color: #64748b;
+
+  font-size: 0.78rem;
+}
+
+.driver-order-card__header strong {
+  color: #0f172a;
+
+  font-size: 1rem;
+}
+
+.driver-order-card__badge {
+  padding: 5px 9px;
+
+  background: #ecfdf5;
+  color: #047857;
+
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+
+  font-weight: 700;
+}
+
+.driver-order-card__info {
+  display: grid;
+
+  grid-template-columns:
+    2fr 1fr 1fr;
+
+  gap: 14px;
+
+  margin-bottom: 18px;
+}
+
+.driver-order-card__info > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.driver-order-card__info span {
+  color: #64748b;
+
+  font-size: 0.76rem;
+}
+
+.driver-order-card__info strong {
+  color: #334155;
+
+  font-size: 0.9rem;
+}
+
+.driver-order-card__info small {
+  color: #94a3b8;
+
+  font-size: 0.75rem;
+}
+
+.driver-order-card__actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.driver-order-card__details,
+.driver-order-card__accept {
+  min-height: 40px;
+
+  padding: 8px 14px;
+
+  border-radius: 10px;
+
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.driver-order-card__details {
+  background: #ffffff;
+  color: #475569;
+
+  border: 1px solid #cbd5e1;
+}
+
+.driver-order-card__accept {
+  background:
+    var(
+      --primary,
+      #f97316
+    );
+
+  color:
+    var(
+      --brand-on-primary,
+      #ffffff
+    );
+
+  border: none;
+}
+
+@media (max-width: 650px) {
+  .driver-order-card__info {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .driver-order-card__info
+  > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .driver-order-card__actions {
+    flex-direction: column;
+  }
+
+  .driver-order-card__details,
+  .driver-order-card__accept {
+    width: 100%;
+  }
+}

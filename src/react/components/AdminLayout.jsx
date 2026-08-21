@@ -93,7 +93,7 @@ const menuItems = [
     label: "Assinatura",
     icon: "💳",
     path: "/admin/assinatura",
-    disabled: true,
+    disabled: false,
   },
   {
     id: "configuracoes",
@@ -425,12 +425,7 @@ export function AdminLayout({
           >
             Ver como cliente
           </button>
-          <button
-  type="button"
-  onClick={testDeliveryRoute}
->
-  Testar rota
-</button>
+          
         </header>
 
         <div className="admin-page-content">

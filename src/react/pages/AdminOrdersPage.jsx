@@ -35,6 +35,10 @@ import {
   getEstablishmentById,
 } from "../services/establishmentService.js";
 
+import {
+  publishOrderForDrivers,
+} from "../services/driverOrdersService.js";
+
 const ACTIVE_STATUSES = [
   "aguardando",
   "recebido",
@@ -417,50 +421,89 @@ export function AdminOrdersPage() {
     );
 
   async function changeOrderStatus(
-    order,
-    nextStatus,
+  order,
+  nextStatus,
+) {
+  const orderId =
+    getOrderId(order);
+
+  if (
+    !orderId ||
+    updatingOrderId
   ) {
-    const orderId =
-      getOrderId(order);
-
-    if (
-      !orderId ||
-      updatingOrderId
-    ) {
-      return;
-    }
-
-    try {
-      setUpdatingOrderId(
-        orderId,
-      );
-
-      await updateOrderStatus(
-        orderId,
-        nextStatus,
-        establishmentId,
-      );
-
-      showToast(
-        `Pedido da Mesa ${order.mesa} atualizado.`,
-        "success",
-      );
-    } catch (error) {
-      console.error(
-        "Erro ao atualizar pedido:",
-        error,
-      );
-
-      showToast(
-        error.message ||
-          "Não foi possível atualizar o pedido.",
-        "error",
-        5000,
-      );
-    } finally {
-      setUpdatingOrderId(null);
-    }
+    return;
   }
+
+  try {
+    setUpdatingOrderId(
+      orderId,
+    );
+
+    /*
+     * Primeiro atualiza o status normal
+     * do pedido.
+     */
+    await updateOrderStatus(
+      orderId,
+      nextStatus,
+      establishmentId,
+    );
+
+    /*
+     * Quando um pedido de ENTREGA
+     * fica pronto, disponibiliza
+     * automaticamente para entregadores.
+     */
+    if (
+      order.tipoPedido === "entrega" &&
+      nextStatus === "saindo" &&
+      !order.entregadorUid &&
+      !order.entregaDisponivel
+    ) {
+      console.log(
+        "PUBLICANDO ENTREGA AUTOMATICAMENTE:",
+        {
+          establishmentId,
+          orderId,
+          tipoPedido:
+            order.tipoPedido,
+        },
+      );
+
+      await publishOrderForDrivers({
+        establishmentId,
+        orderId,
+      });
+    }
+
+    showToast(
+      order.tipoPedido === "entrega" &&
+        nextStatus === "saindo"
+        ? "Pedido pronto e enviado aos entregadores."
+        : `Pedido ${
+            order.tipoPedido === "entrega"
+              ? "de entrega"
+              : `da Mesa ${order.mesa}`
+          } atualizado.`,
+      "success",
+      4000,
+    );
+  } catch (error) {
+    console.error(
+      "Erro ao atualizar pedido:",
+      error,
+    );
+
+    showToast(
+      error?.message ||
+        "Não foi possível atualizar o pedido.",
+      "error",
+      5000,
+    );
+  } finally {
+    setUpdatingOrderId(null);
+  }
+}
 
   function openTableClosing(
     tableNumber,
@@ -704,6 +747,72 @@ export function AdminOrdersPage() {
     );
   }
 
+  async function handlePublishDelivery(
+    order,
+  ) {
+    const orderId =
+      getOrderId(order);
+
+    if (!orderId) {
+      showToast(
+        "Pedido não identificado.",
+        "error",
+        4000,
+      );
+
+      return;
+    }
+
+    if (!establishmentId) {
+      showToast(
+        "Estabelecimento não identificado.",
+        "error",
+        4000,
+      );
+
+      return;
+    }
+
+    try {
+      console.log(
+        "PUBLICANDO ENTREGA:",
+        {
+          establishmentId,
+          orderId,
+          tipoPedido:
+            order.tipoPedido,
+          entregaDisponivel:
+            order.entregaDisponivel,
+          entregadorUid:
+            order.entregadorUid,
+        },
+      );
+
+      await publishOrderForDrivers({
+        establishmentId,
+        orderId,
+      });
+
+      showToast(
+        "Pedido disponibilizado para entregadores.",
+        "success",
+        4000,
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao disponibilizar entrega:",
+        error,
+      );
+
+      showToast(
+        error?.message ||
+          "Não foi possível disponibilizar a entrega.",
+        "error",
+        5000,
+      );
+    }
+  }
+
   return (
     <main className="admin-main admin-orders-page">
       <section className="admin-page-header">
@@ -942,7 +1051,7 @@ export function AdminOrdersPage() {
                   <header className="admin-order-card__header">
                     <div>
                       <span className="admin-order-card__table">
-                        Mesa {order.mesa}
+                        {order.entrega ? "Para Entregar" : `Mesa ${order.mesa}`}
                       </span>
 
                       <small>
@@ -1025,113 +1134,113 @@ export function AdminOrdersPage() {
                   )}
 
                   {establishment?.localizacao &&
-  order?.entrega?.localizacao &&
-  order?.entrega?.rota
-    ?.encodedPolyline && (
-    <section className="admin-order-delivery">
-      <div className="admin-order-delivery__header">
-        <h3>
-          🚚 Entrega
-        </h3>
+                    order?.entrega?.localizacao &&
+                    order?.entrega?.rota
+                      ?.encodedPolyline && (
+                      <section className="admin-order-delivery">
+                        <div className="admin-order-delivery__header">
+                          <h3>
+                            🚚 Entrega
+                          </h3>
 
-        <div className="admin-order-delivery__metrics">
-          <span>
-            Distância:{" "}
-            <strong>
-              {order.entrega.rota
-                .distanciaKm}{" "}
-              km
-            </strong>
-          </span>
+                          <div className="admin-order-delivery__metrics">
+                            <span>
+                              Distância:{" "}
+                              <strong>
+                                {order.entrega.rota
+                                  .distanciaKm}{" "}
+                                km
+                              </strong>
+                            </span>
 
-          <span>
-            Tempo estimado:{" "}
-            <strong>
-              {order.entrega.rota
-                .duracaoMinutos}{" "}
-              min
-            </strong>
-          </span>
-        </div>
-      </div>
+                            <span>
+                              Tempo estimado:{" "}
+                              <strong>
+                                {order.entrega.rota
+                                  .duracaoMinutos}{" "}
+                                min
+                              </strong>
+                            </span>
+                          </div>
+                        </div>
 
-      {order.entrega.endereco && (
-        <div className="admin-order-delivery__address">
-          <strong>
-            Endereço do cliente
-          </strong>
+                        {order.entrega.endereco && (
+                          <div className="admin-order-delivery__address">
+                            <strong>
+                              Endereço do cliente
+                            </strong>
 
-          <span>
-            {
-              order.entrega.endereco
-                .rua
-            }
-            {order.entrega.endereco
-              .numero
-              ? `, ${
-                  order.entrega.endereco
-                    .numero
-                }`
-              : ""}
-          </span>
+                            <span>
+                              {
+                                order.entrega.endereco
+                                  .rua
+                              }
+                              {order.entrega.endereco
+                                .numero
+                                ? `, ${
+                                    order.entrega.endereco
+                                      .numero
+                                  }`
+                                : ""}
+                            </span>
 
-          <span>
-            {
-              order.entrega.endereco
-                .bairro
-            }
-          </span>
+                            <span>
+                              {
+                                order.entrega.endereco
+                                  .bairro
+                              }
+                            </span>
 
-          <span>
-            {
-              order.entrega.endereco
-                .cidade
-            }
-            {order.entrega.endereco
-              .estado
-              ? ` - ${
-                  order.entrega.endereco
-                    .estado
-                }`
-              : ""}
-          </span>
-        </div>
-      )}
+                            <span>
+                              {
+                                order.entrega.endereco
+                                  .cidade
+                              }
+                              {order.entrega.endereco
+                                .estado
+                                ? ` - ${
+                                    order.entrega.endereco
+                                      .estado
+                                  }`
+                                : ""}
+                            </span>
+                          </div>
+                        )}
 
-      <DeliveryMap
-        origin={{
-          latitude:
-            establishment.localizacao
-              .latitude,
+                        <DeliveryMap
+                          origin={{
+                            latitude:
+                              establishment.localizacao
+                                .latitude,
 
-          longitude:
-            establishment.localizacao
-              .longitude,
-        }}
-        destination={{
-          latitude:
-            order.entrega.localizacao
-              .latitude,
+                            longitude:
+                              establishment.localizacao
+                                .longitude,
+                          }}
+                          destination={{
+                            latitude:
+                              order.entrega.localizacao
+                                .latitude,
 
-          longitude:
-            order.entrega.localizacao
-              .longitude,
-        }}
-        encodedPolyline={
-          order.entrega.rota
-            .encodedPolyline
-        }
-        distanceKm={
-          order.entrega.rota
-            .distanciaKm
-        }
-        durationMinutes={
-          order.entrega.rota
-            .duracaoMinutos
-        }
-      />
-    </section>
-  )}
+                            longitude:
+                              order.entrega.localizacao
+                                .longitude,
+                          }}
+                          encodedPolyline={
+                            order.entrega.rota
+                              .encodedPolyline
+                          }
+                          distanceKm={
+                            order.entrega.rota
+                              .distanciaKm
+                          }
+                          durationMinutes={
+                            order.entrega.rota
+                              .duracaoMinutos
+                          }
+                        />
+                      </section>
+                    )}
 
                   <footer className="admin-order-card__footer">
                     <div>
@@ -1156,6 +1265,11 @@ export function AdminOrdersPage() {
                       {renderStatusActions(
                         order,
                       )}
+
+
+                        {/* =========================
+                          CANCELAR PEDIDO
+                          ========================= */}
 
                       {ACTIVE_STATUSES.includes(
                         status,
@@ -1186,6 +1300,50 @@ export function AdminOrdersPage() {
                           Cancelar
                         </button>
                       )}
+
+                      {/* =========================
+                          ENTREGA
+                          ========================= */}
+
+                      {order.tipoPedido ===
+                        "entrega" &&
+                        !order.entregadorUid &&
+                        !order.entregaDisponivel && (
+                          <button
+                            type="button"
+                            className="order-delivery-button"
+                            disabled={
+                              updatingOrderId ===
+                              orderId
+                            }
+                            onClick={() => {
+                              handlePublishDelivery(
+                                order,
+                              );
+                            }}
+                          >
+                            🛵 Solicitar entregador
+                          </button>
+                        )}
+
+                      {order.tipoPedido ===
+                        "entrega" &&
+                        order.entregaDisponivel &&
+                        !order.entregadorUid && (
+                          <span className="order-delivery-waiting">
+                            🛵 Procurando entregador...
+                          </span>
+                        )}
+
+                      {order.tipoPedido ===
+                        "entrega" &&
+                        order.entregadorUid && (
+                          <span className="order-delivery-accepted">
+                            ✓ Entregador encontrado
+                          </span>
+                        )}
+
+
                     </div>
                   </footer>
                 </article>

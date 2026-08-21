@@ -4928,6 +4928,9 @@ SUPER ADMINISTRADOR
   background: #111827;
   color: #ffffff;
   transition: transform 0.25s ease;
+
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .super-admin-brand {
@@ -4966,6 +4969,12 @@ SUPER ADMINISTRADOR
   flex-direction: column;
   gap: 6px;
   padding: 18px 12px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .super-admin-menu__item {

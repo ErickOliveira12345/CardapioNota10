@@ -16,6 +16,34 @@ import {
   db,
 } from "../firebase/firebaseConfig.js";
 
+export async function getEstablishmentGeneralSettings(
+  establishmentId,
+) {
+  if (!establishmentId) {
+    return null;
+  }
+
+  const settingsRef = doc(
+    db,
+    "establishments",
+    establishmentId,
+    "settings",
+    "general",
+  );
+
+  const snapshot =
+    await getDoc(settingsRef);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  };
+}
+
 const INITIAL_CATEGORIES = [
   {
     id: "bebidas",

@@ -140,6 +140,103 @@
 
 }
 
+.subscription-features-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 16px 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.feature-item strong {
+  color: #1e293b;
+}
+
+.feature-check {
+  color: #16a34a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.subscription-limits {
+  margin-top: 28px;
+}
+
+.subscription-limits__header {
+  margin-bottom: 16px;
+}
+
+.subscription-limits__header span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.subscription-limits__header h2 {
+  margin: 5px 0 0;
+  color: #1e293b;
+}
+
+.subscription-limits-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.subscription-limit-item {
+  padding: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.subscription-limit-item span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #64748b;
+  font-size: 13px;
+}
+
+.subscription-limit-item strong {
+  color: #1e293b;
+  font-size: 18px;
+}
+
+@media (max-width: 800px) {
+  .subscription-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subscription-limits-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 500px) {
+  .subscription-limits-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .subscriptions-page .super-admin-summary-grid article:nth-child(1) {
   border-left: 4px solid #22c55e;
 }
@@ -162,4 +259,27 @@
 
 .subscriptions-page .super-admin-table td:last-child {
   min-width: 200px;
+}
+
+@media (max-width: 500px) {
+    .subscription-page{
+        padding: 10px;
+    }
+    .subscription-change-button{
+        padding: 10px;
+        margin-top: 10px;
+    }
+    .subscription-header{
+        display: flex;
+        flex-direction: column;
+    }
+    .subscription-header h1{
+        font-size:28px;
+    }
+    .subscription-actions button{
+        padding:10px;
+    }
+    .subscription-actions{
+        gap: 10px;
+    }
 }

@@ -1,0 +1,228 @@
+.driver-pending-page {
+  min-height: 100dvh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8fafc 0%,
+      #eef2f7 100%
+    );
+}
+
+.driver-pending {
+  width: 100%;
+  max-width: 480px;
+
+  padding: 30px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+
+  box-shadow:
+    0 12px 34px
+    rgba(15, 23, 42, 0.08);
+}
+
+.driver-pending__icon {
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    color-mix(
+      in srgb,
+      var(
+        --primary,
+        #f97316
+      ) 12%,
+      white
+    );
+
+  font-size: 2.2rem;
+}
+
+.driver-pending h1 {
+  margin: 0 0 14px;
+
+  color: #111827;
+
+  font-size: 1.45rem;
+  line-height: 1.25;
+}
+
+.driver-pending__text {
+  margin: 0 0 10px;
+
+  color: #64748b;
+
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.driver-pending__status {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 22px 0;
+
+  padding: 14px 16px;
+
+  text-align: left;
+
+  background: #fffbeb;
+
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+}
+
+.driver-pending__status-dot {
+  width: 12px;
+  height: 12px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #f59e0b;
+
+  box-shadow:
+    0 0 0 5px
+    rgba(245, 158, 11, 0.14);
+}
+
+.driver-pending__status div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.driver-pending__status strong {
+  color: #92400e;
+
+  font-size: 0.84rem;
+}
+
+.driver-pending__status span {
+  color: #b45309;
+
+  font-size: 0.88rem;
+}
+
+.driver-pending__info {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  margin-bottom: 22px;
+
+  padding: 13px 14px;
+
+  text-align: left;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.driver-pending__info span {
+  flex-shrink: 0;
+}
+
+.driver-pending__info p {
+  margin: 0;
+
+  color: #475569;
+
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.driver-pending__login {
+  width: 100%;
+  min-height: 46px;
+
+  padding: 11px 16px;
+
+  border: none;
+  border-radius: 12px;
+
+  background:
+    var(
+      --primary,
+      #f97316
+    );
+
+  color:
+    var(
+      --brand-on-primary,
+      #ffffff
+    );
+
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.driver-pending__login:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 7px 18px
+    color-mix(
+      in srgb,
+      var(
+        --primary,
+        #f97316
+      ) 28%,
+      transparent
+    );
+}
+
+.driver-pending__login:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 520px) {
+  .driver-pending-page {
+    align-items: flex-start;
+
+    padding: 18px 12px;
+  }
+
+  .driver-pending {
+    padding: 22px 16px;
+
+    border-radius: 16px;
+  }
+
+  .driver-pending h1 {
+    font-size: 1.25rem;
+  }
+}

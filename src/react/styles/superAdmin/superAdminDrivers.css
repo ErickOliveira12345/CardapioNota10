@@ -1,0 +1,891 @@
+/* =========================================================
+   SUPER ADMIN - ENTREGADORES
+   ========================================================= */
+
+.super-admin-drivers {
+  width: 100%;
+  min-height: 100vh;
+
+  padding: 28px;
+
+  background: #f8fafc;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   CABEÇALHO
+   ========================================================= */
+
+.super-admin-drivers__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
+.super-admin-drivers__header h1 {
+  margin: 0 0 6px;
+
+  color: #0f172a;
+
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.super-admin-drivers__header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   ESTATÍSTICAS
+   ========================================================= */
+
+.super-admin-drivers__stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-bottom: 24px;
+}
+
+.super-admin-drivers__stats article {
+  padding: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, 0.04);
+}
+
+.super-admin-drivers__stats span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #64748b;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.super-admin-drivers__stats strong {
+  color: #0f172a;
+
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+
+.super-admin-drivers__filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 9px;
+
+  margin-bottom: 22px;
+}
+
+.super-admin-drivers__filters button {
+  min-height: 38px;
+
+  padding: 8px 15px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.super-admin-drivers__filters button:hover {
+  border-color: #94a3b8;
+
+  transform: translateY(-1px);
+}
+
+.super-admin-drivers__filters button.active {
+  background:
+    var(--primary, #f97316);
+
+  color: #ffffff;
+
+  border-color:
+    var(--primary, #f97316);
+}
+
+
+/* =========================================================
+   LISTA
+   ========================================================= */
+
+.super-admin-drivers__list {
+  display: grid;
+
+  gap: 15px;
+}
+
+
+/* =========================================================
+   CARD DO ENTREGADOR
+   ========================================================= */
+
+.driver-admin-card {
+  display: grid;
+
+  grid-template-columns:
+    minmax(220px, 1.4fr)
+    minmax(100px, 0.6fr)
+    minmax(130px, 0.7fr)
+    minmax(130px, auto);
+
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  box-shadow:
+    0 3px 12px
+    rgba(15, 23, 42, 0.05);
+
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.driver-admin-card:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 7px 20px
+    rgba(15, 23, 42, 0.08);
+}
+
+
+/* =========================================================
+   DADOS PRINCIPAIS
+   ========================================================= */
+
+.driver-admin-card__main {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  gap: 13px;
+}
+
+.driver-admin-card__avatar {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  background:
+    var(--primary, #f97316);
+
+  color: #ffffff;
+
+  border-radius: 50%;
+
+  font-size: 1.1rem;
+  font-weight: 800;
+
+  box-shadow:
+    0 4px 10px
+    rgba(15, 23, 42, 0.12);
+}
+
+.driver-admin-card__main > div:last-child {
+  min-width: 0;
+}
+
+.driver-admin-card__main h3 {
+  margin: 0 0 5px;
+
+  color: #0f172a;
+
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.driver-admin-card__main p {
+  margin: 2px 0;
+
+  overflow: hidden;
+
+  color: #64748b;
+
+  font-size: 0.8rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   CPF / DOCUMENTOS
+   ========================================================= */
+
+.driver-admin-card__document {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.driver-admin-card__document strong {
+  color: #94a3b8;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.driver-admin-card__document span {
+  color: #334155;
+
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   VEÍCULO
+   ========================================================= */
+
+.driver-admin-card__vehicle {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.driver-admin-card__vehicle strong {
+  color: #94a3b8;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.driver-admin-card__vehicle span {
+  color: #334155;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  text-transform: capitalize;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.driver-admin-card__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 7px;
+}
+
+.driver-status {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+
+/* Aguardando */
+
+.driver-status--pending {
+  background: #fff7ed;
+
+  color: #c2410c;
+
+  border: 1px solid #fed7aa;
+}
+
+
+/* Aprovado */
+
+.driver-status--approved {
+  background: #ecfdf5;
+
+  color: #047857;
+
+  border: 1px solid #a7f3d0;
+}
+
+
+/* Bloqueado */
+
+.driver-status--blocked {
+  background: #fef2f2;
+
+  color: #b91c1c;
+
+  border: 1px solid #fecaca;
+}
+
+.driver-admin-card__status small {
+  color: #64748b;
+
+  font-size: 0.73rem;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   AÇÕES
+   ========================================================= */
+
+.driver-admin-card__actions {
+  grid-column: 1 / -1;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  padding-top: 14px;
+
+  border-top: 1px solid #f1f5f9;
+}
+
+.driver-admin-card__actions button {
+  min-width: 95px;
+  min-height: 38px;
+
+  padding: 8px 14px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.driver-admin-card__actions button:hover:not(:disabled) {
+  background: #f8fafc;
+
+  border-color: #94a3b8;
+
+  transform: translateY(-1px);
+}
+
+
+/* Primeiro botão:
+   normalmente será "Aprovar" */
+
+.driver-admin-card__actions button:first-child {
+  background: #ecfdf5;
+
+  color: #047857;
+
+  border-color: #a7f3d0;
+}
+
+.driver-admin-card__actions button:first-child:hover:not(:disabled) {
+  background: #d1fae5;
+
+  border-color: #6ee7b7;
+}
+
+
+/* Bloquear */
+
+.driver-admin-card__actions button.danger {
+  background: #fef2f2;
+
+  color: #b91c1c;
+
+  border-color: #fecaca;
+}
+
+.driver-admin-card__actions button.danger:hover:not(:disabled) {
+  background: #fee2e2;
+
+  border-color: #fca5a5;
+}
+
+
+/* Desabilitado */
+
+.driver-admin-card__actions button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   ESTADO VAZIO / CARREGAMENTO
+   ========================================================= */
+
+.super-admin-drivers__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 180px;
+
+  padding: 30px;
+
+  background: #ffffff;
+
+  color: #64748b;
+
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+  .driver-admin-card {
+    grid-template-columns:
+      minmax(220px, 1fr)
+      1fr
+      auto;
+  }
+
+  .driver-admin-card__document {
+    grid-column: 2;
+  }
+
+  .driver-admin-card__vehicle {
+    grid-column: 2;
+  }
+
+  .driver-admin-card__status {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
+
+@media (max-width: 800px) {
+  .super-admin-drivers {
+    padding: 20px;
+  }
+
+  .super-admin-drivers__stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .driver-admin-card {
+    grid-template-columns:
+      1fr 1fr;
+
+    align-items: start;
+  }
+
+  .driver-admin-card__main {
+    grid-column: 1 / -1;
+  }
+
+  .driver-admin-card__document {
+    grid-column: auto;
+  }
+
+  .driver-admin-card__vehicle {
+    grid-column: auto;
+  }
+
+  .driver-admin-card__status {
+    grid-column: 1 / -1;
+    grid-row: auto;
+
+    align-items: flex-start;
+  }
+}
+
+
+@media (max-width: 520px) {
+  .super-admin-drivers {
+    padding: 16px 12px;
+  }
+
+  .super-admin-drivers__header h1 {
+    font-size: 1.45rem;
+  }
+
+  .super-admin-drivers__stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .super-admin-drivers__stats article {
+    padding: 14px;
+  }
+
+  .super-admin-drivers__filters {
+    gap: 6px;
+  }
+
+  .super-admin-drivers__filters button {
+    padding: 7px 11px;
+
+    font-size: 0.75rem;
+  }
+
+  .driver-admin-card {
+    grid-template-columns: 1fr;
+
+    padding: 16px;
+  }
+
+  .driver-admin-card__main,
+  .driver-admin-card__document,
+  .driver-admin-card__vehicle,
+  .driver-admin-card__status {
+    grid-column: 1;
+  }
+
+  .driver-admin-card__actions {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .driver-admin-card__actions button {
+    width: 100%;
+  }
+}
+
+/* =========================================
+   MODAL DE CONFIRMAÇÃO
+   ========================================= */
+
+.driver-confirm-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(3px);
+
+  z-index: 9999;
+}
+
+
+/* Modal */
+
+.driver-confirm-modal {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 28px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  box-shadow:
+    0 24px 60px
+    rgba(15, 23, 42, 0.22);
+
+  animation:
+    driverConfirmOpen
+    0.2s ease;
+}
+
+
+/* Ícone */
+
+.driver-confirm-modal__icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 18px;
+
+  background: #dcfce7;
+
+  color: #15803d;
+
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+
+/* Conteúdo */
+
+.driver-confirm-modal__content h2 {
+  margin: 0 0 10px;
+
+  color: #0f172a;
+
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.driver-confirm-modal__content p {
+  margin: 0 0 8px;
+
+  color: #475569;
+
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.driver-confirm-modal__content p strong {
+  color: #0f172a;
+}
+
+.driver-confirm-modal__content small {
+  display: block;
+
+  color: #64748b;
+
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+
+/* Botões */
+
+.driver-confirm-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 24px;
+}
+
+.driver-confirm-modal__actions button {
+  min-height: 42px;
+
+  padding: 9px 17px;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+
+/* Cancelar */
+
+.driver-confirm-modal__cancel {
+  background: #ffffff;
+
+  color: #475569;
+
+  border: 1px solid #cbd5e1;
+}
+
+.driver-confirm-modal__cancel:hover {
+  background: #f8fafc;
+
+  border-color: #94a3b8;
+}
+
+
+/* Aprovar */
+
+.driver-confirm-modal__approve {
+  background: #16a34a;
+
+  color: #ffffff;
+
+  border: 1px solid #16a34a;
+}
+
+.driver-confirm-modal__approve:hover {
+  background: #15803d;
+
+  border-color: #15803d;
+
+  transform: translateY(-1px);
+}
+
+
+/* Desabilitado */
+
+.driver-confirm-modal__actions button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* Animação */
+
+@keyframes driverConfirmOpen {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(10px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* Mobile */
+
+@media (max-width: 520px) {
+  .driver-confirm-modal {
+    padding: 22px;
+  }
+
+  .driver-confirm-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .driver-confirm-modal__actions button {
+    width: 100%;
+  }
+}
+
+.driver-confirm-modal__icon--approve {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.driver-confirm-modal__icon--block {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.driver-confirm-modal__icon--pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.driver-confirm-modal__block {
+  background: #dc2626;
+  color: #ffffff;
+  border: 1px solid #dc2626;
+}
+
+.driver-confirm-modal__block:hover:not(:disabled) {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.driver-confirm-modal__pending {
+  background: #f59e0b;
+  color: #ffffff;
+  border: 1px solid #f59e0b;
+}
+
+.driver-confirm-modal__pending:hover:not(:disabled) {
+  background: #d97706;
+  border-color: #d97706;
+}

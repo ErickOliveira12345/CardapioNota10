@@ -20,6 +20,151 @@ service cloud.firestore {
         ).data.status == "active";
     }
 
+    function ehEntregadorAprovado() {
+      return estaAutenticado()
+        && exists(
+          /databases/$(database)/documents/deliveryDrivers/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/deliveryDrivers/$(request.auth.uid)
+        ).data.uid == request.auth.uid
+        && get(
+          /databases/$(database)/documents/deliveryDrivers/$(request.auth.uid)
+        ).data.status == "approved";
+    }
+
+    function podeAceitarEntrega() {
+      return ehEntregadorAprovado()
+
+        /*
+        * Estado atual do pedido.
+        */
+        && resource.data.tipoPedido
+          == "entrega"
+
+        && resource.data.entregaPremium
+          == true
+
+        && resource.data.entregaDisponivel
+          == true
+
+        && resource.data.statusEntrega
+          == "aguardando_entregador"
+
+        && resource.data.entregadorUid
+          == null
+
+        /*
+        * Estado novo do pedido.
+        */
+        && request.resource.data.entregadorUid
+          == request.auth.uid
+
+        && request.resource.data.entregaDisponivel
+          == false
+
+        && request.resource.data.statusEntrega
+          == "aceita"
+
+        /*
+        * O entregador só pode modificar
+        * estes campos.
+        */
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            "entregadorUid",
+            "entregaDisponivel",
+            "statusEntrega",
+            "aceitoEm",
+            "atualizadoEm",
+            "atualizadoEmMs"
+          ]);
+    }
+
+    function podeAtualizarEntregaAceita() {
+      return ehEntregadorAprovado()
+
+        && resource.data.tipoPedido
+          == "entrega"
+
+        && resource.data.entregadorUid
+          == request.auth.uid
+
+        && request.resource.data.entregadorUid
+          == resource.data.entregadorUid
+
+        && (
+          /*
+          * aceita -> retirado
+          */
+          (
+            resource.data.statusEntrega
+              == "aceita"
+
+            && request.resource.data.statusEntrega
+              == "retirado"
+
+            && request.resource.data.status
+              == resource.data.status
+          )
+
+          ||
+
+          /*
+          * retirado -> em_rota
+          */
+          (
+            resource.data.statusEntrega
+              == "retirado"
+
+            && request.resource.data.statusEntrega
+              == "em_rota"
+
+            && request.resource.data.status
+              == resource.data.status
+          )
+
+          ||
+
+          /*
+          * em_rota -> entregue
+          *
+          * Aqui também finaliza o pedido
+          * para cliente e estabelecimento.
+          */
+          (
+            resource.data.statusEntrega
+              == "em_rota"
+
+            && request.resource.data.statusEntrega
+              == "entregue"
+
+            && request.resource.data.status
+              == "finalizado"
+
+            && request.resource.data.entregaDisponivel
+              == false
+          )
+        )
+
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            "statusEntrega",
+            "status",
+            "entregaDisponivel",
+            "atualizadoEm",
+            "atualizadoEmMs",
+            "entregueEm",
+            "entregueEmMs",
+            "finalizadoEm",
+            "finalizadoEmMs"
+          ]);
+    }
+
     /*
  * Registros de auditoria da plataforma.
  */
@@ -371,21 +516,61 @@ service cloud.firestore {
                 is map
             )
           );
-          
+
         allow read: if
           podeGerenciarEstabelecimento(
             establishmentId
           )
+
           || (
             estaAutenticado()
             && resource.data.clienteUid
               == request.auth.uid
+          )
+
+          || (
+            ehEntregadorAprovado()
+            &&
+            (
+              /*
+              * Entregas disponíveis.
+              */
+              (
+                resource.data.tipoPedido
+                  == "entrega"
+
+                && resource.data.entregaPremium
+                  == true
+
+                && resource.data.entregaDisponivel
+                  == true
+
+                && resource.data.statusEntrega
+                  == "aguardando_entregador"
+              )
+
+              ||
+
+              /*
+              * Entregas já aceitas pelo
+              * entregador autenticado.
+              */
+              (
+                resource.data.tipoPedido
+                  == "entrega"
+
+                && resource.data.entregadorUid
+                  == request.auth.uid
+              )
+            )
           );
 
         allow update: if
           podeGerenciarEstabelecimento(
             establishmentId
-          );
+          )
+          || podeAceitarEntrega()
+          || podeAtualizarEntregaAceita();
 
         allow delete: if false;
       }
@@ -454,6 +639,157 @@ service cloud.firestore {
             establishmentId
           );
       }
+    }
+
+    /*
+    * Consulta global de pedidos
+    * para entregadores.
+    *
+    * Necessário para:
+    * collectionGroup(db, "orders")
+    */
+    match /{path=**}/orders/{orderId} {
+
+      /*
+      * Entregas disponíveis.
+      */
+      allow read: if
+        ehEntregadorAprovado()
+
+        && resource.data.tipoPedido
+          == "entrega"
+
+        && resource.data.entregaPremium
+          == true
+
+        && resource.data.entregaDisponivel
+          == true
+
+        && resource.data.statusEntrega
+          == "aguardando_entregador";
+
+
+      /*
+      * Entregas que já pertencem
+      * ao entregador autenticado.
+      */
+      allow read: if
+        ehEntregadorAprovado()
+
+        && resource.data.tipoPedido
+          == "entrega"
+
+        && resource.data.entregadorUid
+          == request.auth.uid;
+    }
+
+
+    /*
+    * Entregadores globais.
+    */
+    match /deliveryDrivers/{driverId} {
+
+      /*
+      * Cadastro do entregador.
+      */
+      allow create: if
+        estaAutenticado()
+
+        && request.auth.uid
+          == driverId
+
+        && request.resource.data.uid
+          == request.auth.uid
+
+        && request.resource.data.status
+          == "pending"
+
+        && request.resource.data.disponivel
+          == false
+
+        && request.resource.data.nome
+          is string
+
+        && request.resource.data.telefone
+          is string
+
+        && request.resource.data.email
+          is string
+
+        && request.resource.data.cpf
+          is string
+
+        && request.resource.data.veiculo
+          is map;
+
+
+      /*
+      * O entregador pode consultar
+      * somente o próprio cadastro.
+      *
+      * Super Admin pode consultar todos.
+      */
+      allow read: if
+        (
+          estaAutenticado()
+
+          && request.auth.uid
+            == driverId
+        )
+
+        || ehAdministrador();
+
+
+      /*
+      * Atualizações do cadastro.
+      */
+      allow update: if
+
+        /*
+        * Super Admin pode alterar normalmente.
+        */
+        ehAdministrador()
+
+        ||
+
+        /*
+        * O entregador pode alterar
+        * somente sua disponibilidade.
+        */
+        (
+          estaAutenticado()
+
+          && request.auth.uid
+            == driverId
+
+          /*
+          * Não permite alterar o UID.
+          */
+          && request.resource.data.uid
+            == resource.data.uid
+
+          /*
+          * Não permite alterar a própria
+          * aprovação ou bloqueio.
+          */
+          && request.resource.data.status
+            == resource.data.status
+
+          /*
+          * Permite somente estes campos.
+          */
+          && request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              "disponivel",
+              "atualizadoEm",
+              "atualizadoEmMs"
+            ])
+        );
+
+
+      allow delete: if false;
     }
 
     /*

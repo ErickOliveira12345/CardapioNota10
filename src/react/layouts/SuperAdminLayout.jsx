@@ -48,6 +48,11 @@ const MENU_ITEMS = [
     icon: "⚙️",
     path: "/super-admin/configuracoes",
   },
+  {
+    label: "Entregadores",
+    icon: "🛵",
+    path: "/super-admin/entregadores",
+  },
 ];
 
 function navigateTo(path) {

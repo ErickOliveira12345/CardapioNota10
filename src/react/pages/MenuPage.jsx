@@ -24,6 +24,7 @@ import {
 
 import {
   getEstablishmentById,
+  getEstablishmentGeneralSettings,
 } from "../services/establishmentService.js";
 
 export function MenuPage({
@@ -45,15 +46,20 @@ export function MenuPage({
 }) {
 
   const {
-  branding,
-  loading: brandingLoading,
-} = useEstablishmentBranding(
-  establishmentId,
-);
+    branding,
+    loading: brandingLoading,
+  } = useEstablishmentBranding(
+    establishmentId,
+  );
 
   const [
     establishment,
     setEstablishment,
+  ] = useState(null);
+
+  const [
+    generalSettings,
+    setGeneralSettings,
   ] = useState(null);
 
   const [activeCategory, setActiveCategory] =
@@ -213,6 +219,7 @@ export function MenuPage({
   useEffect(() => {
     if (!establishmentId) {
       setEstablishment(null);
+      setGeneralSettings(null);
       return;
     }
 
@@ -220,13 +227,27 @@ export function MenuPage({
 
     async function loadEstablishment() {
       try {
-        const data =
-          await getEstablishmentById(
+        const [
+          establishmentData,
+          generalSettingsData,
+        ] = await Promise.all([
+          getEstablishmentById(
             establishmentId,
-          );
+          ),
+
+          getEstablishmentGeneralSettings(
+            establishmentId,
+          ),
+        ]);
 
         if (active) {
-          setEstablishment(data);
+          setEstablishment(
+            establishmentData,
+          );
+
+          setGeneralSettings(
+            generalSettingsData,
+          );
         }
       } catch (error) {
         console.error(
@@ -236,6 +257,7 @@ export function MenuPage({
 
         if (active) {
           setEstablishment(null);
+          setGeneralSettings(null);
         }
       }
     }
@@ -508,6 +530,13 @@ export function MenuPage({
             order={activeOrder}
             establishment={establishment}
             orderType={orderType}
+            preparationMinutes={
+              Number(
+                generalSettings
+                  ?.tempoMedioPreparo ||
+                0,
+              )
+            }
           />
         )}
       </main>
@@ -610,7 +639,7 @@ function ProductCard({
   );
 }
 
-function OrderStatus({ order, establishment,orderType }) {
+function OrderStatus({ order, establishment,orderType,preparationMinutes }) {
   const status = getStatus(order.status);
 
   const orderItems = Array.isArray(
@@ -618,6 +647,18 @@ function OrderStatus({ order, establishment,orderType }) {
   )
     ? order.itens
     : [];
+
+  const routeMinutes =
+    Number(
+      order?.entrega
+        ?.rota
+        ?.duracaoMinutos ||
+      0,
+    );
+
+  const totalEstimatedMinutes =
+    Number(preparationMinutes) +
+    routeMinutes;
 
   return (
     <section className="pedido-status-section">
@@ -642,6 +683,27 @@ function OrderStatus({ order, establishment,orderType }) {
             {formatTime(order.criadoEm)}
           </span>
         </div>
+
+        {orderType === "entrega" &&
+          totalEstimatedMinutes > 0 && (
+            <div className="pedido-estimativa">
+              <span>
+                ⏱ Tempo estimado {" "}
+              </span>
+
+              <strong>
+                {totalEstimatedMinutes} min{" "}
+              </strong>
+
+              <small>
+                Preparo:{" "}
+                {preparationMinutes} min
+                {" · "}
+                Entrega:{" "}
+                {routeMinutes} min
+              </small>
+            </div>
+        )}
 
         <details className="pedido-detalhes">
           <summary>

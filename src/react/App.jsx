@@ -43,7 +43,12 @@ import SuperAdminPage from "./pages/SuperAdminPage.jsx";
 import EstablishmentsUsersPage from "./pages/EstablishmentsUsersPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import MaintenancePage from "./pages/MaintenancePage.jsx";
-
+import DriverRegisterPage from "./pages/driver/DriverRegisterPage.jsx";
+import DriverLoginPage from "./pages/driver/DriverLoginPage.jsx";
+import DriverPendingApprovalPage from "./pages/driver/DriverPendingApprovalPage.jsx";
+import DriverDashboardPage from "./pages/driver/DriverDashboardPage.jsx";
+import MinhasEntregasPage from "./pages/MinhasEntregasPage";
+import MySubscriptionPage from "./pages/MySubscriptionPage.jsx";
 
 import { getStatus } from "./services/formatters.js";
 
@@ -207,12 +212,28 @@ function ToastContainer() {
 
 export function App() {
   const {
-    loading: authLoading,
     profile,
-    establishmentId,
+    driverProfile,
+
+    accountType,
+
     isAuthenticated,
+    isSuperAdmin,
+
+    isDriver,
+    isDriverApproved,
+    isDriverPending,
+    isDriverBlocked,
+
+    isEstablishmentUser,
+
     isOnboarding,
+
+    loading: authLoading,
+
     refreshProfile,
+    establishmentId,
+
   } = useAuth();
   
 
@@ -288,10 +309,6 @@ export function App() {
     settings: platformSettings,
     loading: platformSettingsLoading,
   } = usePlatformSettings();
-
-  const isSuperAdmin =
-    profile?.role === "super_admin" &&
-    profile?.status === "active";
 
   const [
     orderType,
@@ -1424,6 +1441,38 @@ useEffect(() => {
     );
   }
 
+  function PremiumRequiredPage({
+    onNavigate,
+  }) {
+    return (
+      <main className="premium-required">
+        <section>
+          <span>💎</span>
+
+          <h1>
+            Recurso Premium
+          </h1>
+
+          <p>
+            O sistema de entregadores
+            está disponível somente
+            para estabelecimentos com
+            o plano Premium.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              onNavigate?.("/")
+            }
+          >
+            Voltar
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   async function handleUpdateOrderStatus(
     orderId,
     status,
@@ -1583,62 +1632,68 @@ useEffect(() => {
     }
 
     /*
-    * Super Admin tem prioridade.
-    * Mesmo em manutenção, ele continua
-    * acessando o painel global.
+    * Entregador autenticado:
+    * permite abrir a tela de login
+    * do estabelecimento para trocar
+    * de conta.
     */
+    if (isDriver) {
+      return (
+        <>
+          <LoginPage
+            onNavigate={navigate}
+          />
+
+          <ToastContainer />
+        </>
+      );
+    }
+
     if (isSuperAdmin) {
       return (
         <Redirect to="/super-admin" />
       );
     }
 
-    /*
-    * Usuário em primeiro acesso.
-    *
-    * Se quiser bloquear também o
-    * primeiro acesso durante manutenção,
-    * mantenha esta verificação depois
-    * da manutenção.
-    */
     if (
-      platformSettings.modoManutencao
+      isEstablishmentUser &&
+      isOnboarding
     ) {
-      return <MaintenancePage />;
-    }
-
-    if (isOnboarding) {
       return (
         <Redirect to="/primeiro-acesso" />
       );
     }
 
-    return (
-      <Redirect to="/admin" />
-    );
-  }
+    if (
+      isEstablishmentUser &&
+      platformSettings.modoManutencao
+    ) {
+      return (
+        <MaintenancePage />
+      );
+    }
 
-  /*
-  * MODO MANUTENÇÃO
-  *
-  * Daqui para baixo são as demais rotas.
-  *
-  * Somente usuários autenticados
-  * que não sejam Super Admin são
-  * bloqueados.
-  */
-  if (
-    isAuthenticated &&
-    platformSettings.modoManutencao &&
-    !isSuperAdmin
-  ) {
-    return <MaintenancePage />;
+    if (isEstablishmentUser) {
+      return (
+        <Redirect to="/admin" />
+      );
+    }
+
+    return (
+      <>
+        <LoginPage
+          onNavigate={navigate}
+        />
+
+        <ToastContainer />
+      </>
+    );
   }
 
   /*
   * PRIMEIRO ACESSO
   */
-  if (route === "/primeiro-acesso") {
+  if ( route === "/primeiro-acesso" ) {
     if (!isAuthenticated) {
       return (
         <Redirect to="/login" />
@@ -1646,24 +1701,25 @@ useEffect(() => {
     }
 
     /*
-    * Super Admin não precisa passar
-    * pelo onboarding do estabelecimento.
+    * Entregador nunca entra
+    * no onboarding do estabelecimento.
     */
+    if (isDriver) {
+      return (
+        <Redirect to="/entregador" />
+      );
+    }
+
     if (isSuperAdmin) {
       return (
         <Redirect to="/super-admin" />
       );
     }
 
-    /*
-    * Esta verificação é redundante com
-    * o bloco global acima, mas deixa a
-    * regra explícita nesta rota.
-    */
-    if (
-      platformSettings.modoManutencao
-    ) {
-      return <MaintenancePage />;
+    if (!isEstablishmentUser) {
+      return (
+        <Redirect to="/login" />
+      );
     }
 
     if (!isOnboarding) {
@@ -1676,7 +1732,9 @@ useEffect(() => {
       <>
         <FirstAccessPage
           onNavigate={navigate}
-          onCompleted={refreshProfile}
+          onCompleted={
+            refreshProfile
+          }
         />
 
         <ToastContainer />
@@ -1881,6 +1939,66 @@ useEffect(() => {
     );
   }
 
+  if (route === "/admin/assinatura") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="assinatura"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <MySubscriptionPage
+            onNavigate={navigate}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (route === "/planos") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="assinatura"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <PlansPage
+            onNavigate={navigate}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
   if (route === "/planos") {
     return <PlansPage />;
   }
@@ -1914,7 +2032,11 @@ useEffect(() => {
     "/super-admin/pagamentos",
     "/super-admin/auditoria",
     "/super-admin/configuracoes",
+    "/super-admin/entregadores",
   ];
+
+
+  
 
   if (superAdminRoutes.includes(route)) {
     return (
@@ -1977,6 +2099,215 @@ useEffect(() => {
             }
           />
         </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if ( route === "/entregador/cadastro" ) {
+    return (
+      <>
+        <DriverRegisterPage
+          onNavigate={navigate}
+        />
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if ( route === "/entregador/login" ) {
+    if (!isAuthenticated) {
+      return (
+        <>
+          <DriverLoginPage
+            onNavigate={navigate}
+          />
+
+          <ToastContainer />
+        </>
+      );
+    }
+
+    if (isDriver) {
+      if (
+        driverProfile?.status ===
+        "pending"
+      ) {
+        return (
+          <Redirect
+            to="/entregador/aguardando-aprovacao"
+          />
+        );
+      }
+
+      if (
+        driverProfile?.status ===
+        "approved"
+      ) {
+        return (
+          <Redirect
+            to="/entregador"
+          />
+        );
+      }
+
+      return (
+        <>
+          <DriverLoginPage
+            onNavigate={navigate}
+          />
+
+          <ToastContainer />
+        </>
+      );
+    }
+
+    /*
+    * Se estiver autenticado como
+    * estabelecimento ou Super Admin,
+    * ainda mostramos o login do entregador
+    * para permitir trocar de conta.
+    */
+    return (
+      <>
+        <DriverLoginPage
+          onNavigate={navigate}
+        />
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (route === "/entregador") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect
+          to="/entregador/login"
+        />
+      );
+    }
+
+    if (!isDriver) {
+      return (
+        <Redirect
+          to="/entregador/login"
+        />
+      );
+    }
+
+    if (isDriverPending) {
+      return (
+        <Redirect
+          to="/entregador/aguardando-aprovacao"
+        />
+      );
+    }
+
+    if (isDriverBlocked) {
+      return (
+        <Redirect
+          to="/entregador/login"
+        />
+      );
+    }
+
+    if (!isDriverApproved) {
+      return (
+        <Redirect
+          to="/entregador/login"
+        />
+      );
+    }
+
+    return (
+      <>
+        <DriverDashboardPage
+          onNavigate={navigate}
+        />
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if ( route === "/entregador/aguardando-aprovacao" ) {
+    if (!isAuthenticated) {
+      return (
+        <Redirect
+          to="/entregador/login"
+        />
+      );
+    }
+
+    if (!isDriver) {
+      return (
+        <Redirect
+          to="/entregador/login"
+        />
+      );
+    }
+
+    if (
+      driverProfile?.status ===
+      "approved"
+    ) {
+      return (
+        <Redirect
+          to="/entregador"
+        />
+      );
+    }
+
+    return (
+      <>
+        <DriverPendingApprovalPage
+          onNavigate={navigate}
+        />
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (route === "/minhas-entregas") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/entregador/login" />
+      );
+    }
+
+    if (!isDriver) {
+      return (
+        <Redirect to="/entregador/login" />
+      );
+    }
+
+    if (isDriverPending) {
+      return (
+        <Redirect to="/entregador/aguardando-aprovacao" />
+      );
+    }
+
+    if (isDriverBlocked) {
+      return (
+        <Redirect to="/entregador/login" />
+      );
+    }
+
+    if (!isDriverApproved) {
+      return (
+        <Redirect to="/entregador/login" />
+      );
+    }
+
+    return (
+      <>
+        <MinhasEntregasPage
+          onNavigate={navigate}
+        />
 
         <ToastContainer />
       </>

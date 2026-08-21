@@ -286,7 +286,7 @@ export function FirstAccessPage({
               value={form.endereco.estado}
               onChange={updateAddress}
               maxLength={2}
-              placeholder="SP"
+              placeholder="MG"
               required
             />
           </label>
