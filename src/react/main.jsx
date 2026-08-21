@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-import { App } from "./react/App.jsx";
+import { App } from "./App.jsx";
 import { AppErrorBoundary } from "./components/AppErrorBoundary.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext.jsx";
