@@ -298,35 +298,6 @@ details summary {
   transition: opacity var(--transition);
 }
 
-.qr-card:hover .qr-card__overlay,
-.qr-card:focus-visible .qr-card__overlay {
-  opacity: 1;
-}
-
-.qr-scan-icon {
-  color: white;
-  font-size: .9rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.qr-card__footer {
-  display: flex;
-  flex-direction: column;
-  gap: .15rem;
-  padding: .75rem 1rem;
-}
-
-.qr-card__mesa {
-  color: var(--text);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.qr-card__desc {
-  color: var(--text-light);
-  font-size: .78rem;
-}
 
 .qr-admin-link {
   color: rgba(255, 255, 255, .65);
