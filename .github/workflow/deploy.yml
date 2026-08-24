@@ -3,7 +3,7 @@ name: Deploy Vite to GitHub Pages
 
 on:
   push:
-    branches: ["implementacao-localizacao"]
+    branches: ["ajuste-pagina-inicial"]
 
   workflow_dispatch:
 
