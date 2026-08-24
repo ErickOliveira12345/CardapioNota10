@@ -323,39 +323,116 @@ service cloud.firestore {
      * pelo administrador e pelas Cloud Functions.
      */
     match /subscriptions/{subscriptionId} {
-      allow create: if estaAutenticado()
+
+      /*
+      * Criação inicial da assinatura.
+      */
+      allow create: if
+        estaAutenticado()
+
         && request.resource.data.userId
           == request.auth.uid
+
         && request.resource.data.establishmentId
           == subscriptionId
+
         && request.resource.data.planId
-          == 'basic'
+          == "basic"
+
         && request.resource.data.status
-          == 'trial'
+          == "trial"
+
         && request.resource.data.valorAtual
           == 0;
 
-      allow read: if ehAdministrador()
-        || (
+
+      /*
+      * Leitura da assinatura.
+      */
+      allow read: if
+        ehAdministrador()
+
+        ||
+
+        (
           estaAutenticado()
+
           && resource.data.userId
             == request.auth.uid
         )
-        || (
+
+        ||
+
+        (
           podeVerAssinatura()
+
           && pertenceAoEstabelecimento(
             resource.data.establishmentId
           )
         );
 
-      /*
-      * Somente o Super Admin pode alterar
-      * uma assinatura diretamente.
-      */
-      
-      allow update: if ehAdministrador();
 
-      allow update, delete: if false;
+      /*
+      * Atualização da assinatura.
+      *
+      * O Super Admin pode atualizar
+      * normalmente.
+      *
+      * O estabelecimento pode alterar
+      * apenas seu próprio plano.
+      */
+      allow update: if
+
+        ehAdministrador()
+
+        ||
+
+        (
+          estaAutenticado()
+
+          /*
+          * Confirma que a assinatura
+          * pertence ao estabelecimento
+          * do usuário autenticado.
+          */
+          && pertenceAoEstabelecimento(
+            resource.data.establishmentId
+          )
+
+          /*
+          * Não permite trocar a assinatura
+          * para outro estabelecimento.
+          */
+          && request.resource.data.establishmentId
+            == resource.data.establishmentId
+
+          /*
+          * Não permite trocar o usuário
+          * proprietário.
+          */
+          && request.resource.data.userId
+            == resource.data.userId
+
+          /*
+          * Somente estes campos podem
+          * ser alterados pelo estabelecimento.
+          */
+          && request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              "planId",
+              "atualizadoEm",
+              "atualizadoEmMs"
+            ])
+        );
+
+
+      /*
+      * Assinaturas não podem ser
+      * excluídas pelo cliente.
+      */
+      allow delete: if false;
     }
 
     match /subscriptionPayments/{paymentId} {

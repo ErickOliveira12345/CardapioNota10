@@ -8,8 +8,17 @@ import PlanCard from "../components/PlanCard";
 import "../styles/plans.css";
 
 import {
+  changeSubscriptionPlan,
   observePlans,
 } from "../services/subscriptionService";
+
+import {
+  useSubscription,
+} from "../contexts/SubscriptionContext";
+
+import {
+  useAuth,
+} from "../contexts/AuthContext";
 
 export default function PlansPage({
   onNavigate,
@@ -22,6 +31,21 @@ export default function PlansPage({
 
   const [error, setError] =
     useState("");
+
+  const {
+    establishmentId,
+  } = useAuth();
+
+  const {
+    subscription,
+    plan: currentPlan,
+    reloadSubscription,
+  } = useSubscription();
+
+  const [
+    changingPlanId,
+    setChangingPlanId,
+  ] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -80,18 +104,81 @@ export default function PlansPage({
     };
   }, []);
 
-  function handleSelect(plan) {
-    console.log(
-      "PLANO SELECIONADO:",
-      plan,
-    );
+    async function handleSelect(
+      selectedPlan,
+    ) {
+      if (changingPlanId) {
+        console.log(
+          "Alteração de plano já está em andamento.",
+        );
 
-    /*
-     * Próxima etapa:
-     * integração com Mercado Pago.
-     */
-  }
+        return;
+      }
 
+      if (!establishmentId) {
+        console.error(
+          "Estabelecimento não identificado.",
+        );
+
+        return;
+      }
+
+      if (!selectedPlan?.id) {
+        return;
+      }
+
+      if (
+        selectedPlan.id ===
+        currentPlan?.id
+      ) {
+        console.log(
+          "Este já é o plano atual.",
+        );
+
+        return;
+      }
+
+      try {
+        setChangingPlanId(
+          selectedPlan.id,
+        );
+
+        console.log(
+          "ALTERANDO PLANO:",
+          {
+            atual:
+              currentPlan?.id,
+
+            novo:
+              selectedPlan.id,
+
+            establishmentId,
+          },
+        );
+
+        await changeSubscriptionPlan({
+          establishmentId,
+
+          planId:
+            selectedPlan.id,
+        });
+
+        await reloadSubscription();
+
+        console.log(
+          "PLANO ALTERADO COM SUCESSO",
+        );
+      } catch (error) {
+        console.error(
+          "Erro ao alterar plano:",
+          error,
+        );
+      } finally {
+        setChangingPlanId(null);
+      }
+    }
+
+    
   if (loading) {
     return (
       <div className="plans-page">

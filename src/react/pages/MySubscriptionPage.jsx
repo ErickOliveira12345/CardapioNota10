@@ -254,7 +254,7 @@ export default function MySubscriptionPage({
               type="button"
               onClick={() =>
                 onNavigate?.(
-                  "/billing",
+                  "/admin/assinatura/cobrancas",
                 )
               }
             >
@@ -274,7 +274,11 @@ export default function MySubscriptionPage({
 
             <button
               type="button"
-              disabled
+              onClick={() =>
+                onNavigate?.(
+                  "/admin/assinatura/historico",
+                )
+              }
             >
               🕘 Histórico
             </button>

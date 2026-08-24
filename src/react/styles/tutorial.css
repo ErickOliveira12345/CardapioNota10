@@ -1,0 +1,384 @@
+.tutorial-page {
+  min-height: 100vh;
+  padding: 32px 20px 60px;
+  background: #f8fafc;
+}
+
+.tutorial-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tutorial-back-button {
+  margin-bottom: 30px;
+
+  padding: 10px 16px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.tutorial-back-button:hover {
+  background: #f1f5f9;
+}
+
+.tutorial-hero__content {
+  max-width: 760px;
+  margin: 0 auto;
+
+  text-align: center;
+}
+
+.tutorial-eyebrow {
+  color: #f97316;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tutorial-hero h1 {
+  margin: 8px 0 14px;
+
+  color: #0f172a;
+
+  font-size: clamp(
+    32px,
+    5vw,
+    48px
+  );
+
+  line-height: 1.1;
+}
+
+.tutorial-hero p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.tutorial-intro {
+  max-width: 900px;
+
+  margin: 50px auto 30px;
+
+  padding: 30px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  text-align: center;
+}
+
+.tutorial-intro span {
+  font-size: 40px;
+}
+
+.tutorial-intro h2 {
+  margin: 12px 0 8px;
+
+  color: #1e293b;
+}
+
+.tutorial-intro p {
+  max-width: 650px;
+
+  margin: 0 auto;
+
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.tutorial-steps {
+  max-width: 1200px;
+
+  margin: 35px auto 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 20px;
+}
+
+.tutorial-step-card {
+  padding: 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tutorial-step-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 30px
+    rgba(15, 23, 42, 0.08);
+}
+
+.tutorial-step-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.tutorial-step-number {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #fff7ed;
+  color: #ea580c;
+
+  font-weight: 800;
+}
+
+.tutorial-step-icon {
+  font-size: 30px;
+}
+
+.tutorial-step-card h2 {
+  margin: 0 0 10px;
+
+  color: #1e293b;
+
+  font-size: 20px;
+}
+
+.tutorial-step-card p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tutorial-flow {
+  max-width: 1200px;
+
+  margin: 60px auto 0;
+}
+
+.tutorial-flow header {
+  margin-bottom: 25px;
+
+  text-align: center;
+}
+
+.tutorial-flow header span {
+  color: #f97316;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.tutorial-flow header h2 {
+  margin: 6px 0 0;
+
+  color: #1e293b;
+}
+
+.tutorial-flow__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+}
+
+.tutorial-flow__content > div {
+  flex: 1;
+
+  min-height: 150px;
+
+  padding: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  text-align: center;
+}
+
+.tutorial-flow__content > div > span {
+  width: 32px;
+  height: 32px;
+
+  margin: 0 auto 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #f97316;
+  color: #ffffff;
+
+  font-weight: 800;
+}
+
+.tutorial-flow__content strong {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #1e293b;
+}
+
+.tutorial-flow__content p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+.tutorial-flow__arrow {
+  color: #94a3b8;
+
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.tutorial-cta {
+  max-width: 900px;
+
+  margin: 60px auto 0;
+
+  padding: 45px 25px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+
+  text-align: center;
+}
+
+.tutorial-cta > span {
+  font-size: 45px;
+}
+
+.tutorial-cta h2 {
+  margin: 10px 0;
+
+  color: #1e293b;
+}
+
+.tutorial-cta p {
+  max-width: 600px;
+
+  margin: 0 auto 24px;
+
+  color: #64748b;
+
+  line-height: 1.6;
+}
+
+.tutorial-cta__actions {
+  display: flex;
+  justify-content: center;
+
+  gap: 12px;
+
+  flex-wrap: wrap;
+}
+
+.tutorial-primary-button,
+.tutorial-secondary-button {
+  padding: 12px 20px;
+
+  border-radius: 10px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.tutorial-primary-button {
+  border: none;
+
+  background: #f97316;
+  color: #ffffff;
+}
+
+.tutorial-secondary-button {
+  border: 1px solid #e2e8f0;
+
+  background: #ffffff;
+  color: #334155;
+}
+
+@media (
+  max-width: 800px
+) {
+  .tutorial-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .tutorial-flow__content {
+    flex-direction: column;
+  }
+
+  .tutorial-flow__content > div {
+    width: 100%;
+  }
+
+  .tutorial-flow__arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (
+  max-width: 500px
+) {
+  .tutorial-page {
+    padding: 20px 14px 40px;
+  }
+
+  .tutorial-cta__actions {
+    flex-direction: column;
+  }
+
+  .tutorial-primary-button,
+  .tutorial-secondary-button {
+    width: 100%;
+  }
+}

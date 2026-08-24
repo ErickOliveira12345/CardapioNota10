@@ -528,6 +528,59 @@ function handleUseCurrentLocation() {
   );
 }
 
+function gerarLinkEntrega(establishmentId) {
+  if (!establishmentId) {
+    return "";
+  }
+
+  const origin =
+    window.location.origin;
+
+  return `${origin}/menu?est=${encodeURIComponent(
+    establishmentId,
+  )}&tipo=entrega`;
+}
+
+const deliveryMenuLink =
+  gerarLinkEntrega(
+    establishmentId,
+  );
+
+  async function copiarLinkEntrega() {
+  if (!deliveryMenuLink) {
+    showToast(
+      "Link de entrega não disponível.",
+      "error",
+      3000,
+    );
+
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(
+      deliveryMenuLink,
+    );
+
+    showToast(
+      "Link de entrega copiado.",
+      "success",
+      3000,
+    );
+  } catch (copyError) {
+    console.error(
+      "Erro ao copiar link de entrega:",
+      copyError,
+    );
+
+    showToast(
+      "Não foi possível copiar o link.",
+      "error",
+      4000,
+    );
+  }
+}
+
   if (loading) {
     return (
       <div className="settings-page__loading">
@@ -734,6 +787,61 @@ function handleUseCurrentLocation() {
                     tela.
                   </small>
                 </label>
+
+                {/* LINK DE ENTREGA */}
+
+                <div className="settings-form-grid__full">
+                  <span className="settings-delivery-link__label">
+                    Link para pedidos de entrega
+                  </span>
+
+                  <p className="settings-field-description">
+                    Compartilhe este link com seus
+                    clientes para que eles acessem
+                    diretamente o cardápio no modo
+                    de entrega.
+                  </p>
+
+                  <div className="settings-delivery-link">
+                    <input
+                      type="text"
+                      value={deliveryMenuLink}
+                      readOnly
+                    />
+
+                    <button
+                      type="button"
+                      onClick={copiarLinkEntrega}
+                      disabled={
+                        !deliveryMenuLink
+                      }
+                    >
+                      📋 Copiar
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="settings-open-delivery-link"
+                    disabled={
+                      !deliveryMenuLink
+                    }
+                    onClick={() => {
+                      if (!deliveryMenuLink) {
+                        return;
+                      }
+
+                      window.open(
+                        deliveryMenuLink,
+                        "_blank",
+                        "noopener,noreferrer",
+                      );
+                    }}
+                  >
+                    🔗 Abrir página de entrega
+                  </button>
+                </div>
+
               </div>
             </section>
           )}

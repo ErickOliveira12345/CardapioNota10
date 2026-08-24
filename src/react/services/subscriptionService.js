@@ -5,6 +5,8 @@ import {
   getDocs,
   onSnapshot,
   query,
+  serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 
@@ -152,36 +154,112 @@ export async function getSubscription(
     return null;
   }
 
-  const subscriptionQuery =
-    query(
-      collection(
-        db,
-        SUBSCRIPTIONS_COLLECTION,
-      ),
-
-      where(
-        "establishmentId",
-        "==",
-        establishmentId,
-      ),
+  const subscriptionReference =
+    doc(
+      db,
+      SUBSCRIPTIONS_COLLECTION,
+      establishmentId,
     );
 
   const snapshot =
-    await getDocs(
-      subscriptionQuery,
+    await getDoc(
+      subscriptionReference,
     );
 
-  if (snapshot.empty) {
+  if (!snapshot.exists()) {
     return null;
   }
 
-  const subscription =
-    snapshot.docs[0];
-
   return {
-    id:
-      subscription.id,
-
-    ...subscription.data(),
+    id: snapshot.id,
+    ...snapshot.data(),
   };
+}
+
+export async function changeSubscriptionPlan({
+  establishmentId,
+  planId,
+}) {
+  if (!establishmentId) {
+    throw new Error(
+      "Estabelecimento não identificado.",
+    );
+  }
+
+  if (!planId) {
+    throw new Error(
+      "Plano não identificado.",
+    );
+  }
+
+  const agora = Date.now();
+
+  const subscriptionReference =
+    doc(
+      db,
+      SUBSCRIPTIONS_COLLECTION,
+      establishmentId,
+    );
+
+  const establishmentReference =
+    doc(
+      db,
+      "establishments",
+      establishmentId,
+    );
+
+  console.log(
+    "ATUALIZANDO PLANO:",
+    {
+      establishmentId,
+      planId,
+    },
+  );
+
+  /*
+   * Atualiza a assinatura.
+   */
+  await updateDoc(
+    subscriptionReference,
+    {
+      planId,
+
+      atualizadoEm:
+        serverTimestamp(),
+
+      atualizadoEmMs:
+        agora,
+    },
+  );
+
+  /*
+   * Mantém o estabelecimento
+   * sincronizado com a assinatura.
+   */
+  await updateDoc(
+    establishmentReference,
+    {
+      planoAtual:
+        planId,
+
+      atualizadoEm:
+        serverTimestamp(),
+
+      atualizadoEmMs:
+        agora,
+    },
+  );
+
+  console.log(
+    "PLANO ATUALIZADO NOS DOIS DOCUMENTOS:",
+    {
+      subscription:
+        planId,
+
+      estabelecimento:
+        planId,
+    },
+  );
+
+  return true;
 }

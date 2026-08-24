@@ -139,7 +139,7 @@ details summary {
 }
 
 .qr-page {
-  max-width: 480px;
+  max-width: 680px;
   margin: 0 auto;
   padding: 2rem 1rem 4rem;
   display: flex;
@@ -199,13 +199,6 @@ details summary {
   font-weight: 700;
 }
 
-.btn-new-session {
-  padding: .6rem 1rem;
-  border: 1px solid rgba(255, 255, 255, .5);
-  border-radius: var(--radius-sm);
-  color: white;
-}
-
 .qr-instructions {
   display: flex;
   flex-direction: column;
@@ -232,70 +225,203 @@ details summary {
   font-weight: 700;
 }
 
-.instruction-step span:last-child {
-  font-size: .9rem;
-  opacity: .9;
+.home-hero-actions {
+  margin-top: 24px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 12px;
+
+  flex-wrap: wrap;
 }
 
-.qr-section-title {
-  color: rgba(255, 255, 255, .82);
+.home-primary-button,
+.home-tutorial-button {
+  padding: 13px 22px;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.home-primary-button {
+  border: none;
+
+  background: #f97316;
+  color: #ffffff;
+}
+
+.home-tutorial-button {
+  border: 1px solid #e2e8f0;
+
+  background: #ffffff;
+  color: #334155;
+}
+
+.home-primary-button:hover,
+.home-tutorial-button:hover {
+  transform: translateY(-2px);
+}
+
+
+/* =============================== */
+/* PLANOS */
+/* =============================== */
+
+.home-plans-section {
+  width: 100%;
+
+  max-width: 1200px;
+
+  margin: 60px auto 0;
+
+  padding: 0 20px;
+}
+
+.home-plans-header {
+  margin-bottom: 30px;
+
   text-align: center;
 }
 
-.qr-grid {
+.home-plans-header > span {
+  color: #fff;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.home-plans-header h2 {
+  margin: 6px 0 10px;
+  font-size: 30px;
+  color: #1e293b;
+}
+
+.home-plans-header p {
+  max-width: 650px;
+  font-size: 20px;
+  margin: 0 auto;
+
+  color: #1e293b;
+
+  line-height: 1.6;
+}
+
+.home-plans-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 22px;
+
+  align-items: stretch;
 }
 
-.qr-card {
-  overflow: hidden;
-  border-radius: var(--radius);
-  background: white;
-  box-shadow: var(--shadow-lg);
-  transition: transform var(--transition), box-shadow var(--transition);
+.home-plans-loading,
+.home-plans-error,
+.home-plans-empty {
+  padding: 30px;
+
+  text-align: center;
+
+  border-radius: 12px;
+
+  background: #ffffff;
 }
 
-.qr-card:hover,
-.qr-card:focus-visible {
-  outline: 3px solid white;
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, .2);
+.home-plans-error {
+  color: #b91c1c;
+
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
 }
 
-.qr-card-button {
-  width: 100%;
-  text-align: left;
+
+/* =============================== */
+/* CTA FINAL */
+/* =============================== */
+
+.home-final-cta {
+  max-width: 1000px;
+
+  margin: 60px auto 30px;
+
+  padding: 40px 25px;
+
+  text-align: center;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
 }
 
-.qr-card__img-wrapper {
-  position: relative;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: #f9f9f9;
+.home-final-cta h2 {
+  margin: 0 0 8px;
+
+  color: #1e293b;
 }
 
-.qr-card__img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.home-final-cta p {
+  margin: 0 0 22px;
+
+  color: #64748b;
 }
 
-.qr-card__overlay {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background:
-    color-mix(
-      in srgb,
-      var(--brand-primary) 90%,
-      transparent
-    );
-  opacity: 0;
-  transition: opacity var(--transition);
+.home-final-cta button {
+  padding: 13px 22px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #f97316;
+  color: #ffffff;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* =============================== */
+/* RESPONSIVO */
+/* =============================== */
+
+@media (max-width: 900px) {
+  .home-plans-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .home-plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero-actions {
+    flex-direction: column;
+  }
+
+  .home-primary-button,
+  .home-tutorial-button {
+    width: 100%;
+  }
 }
 
 
@@ -1840,11 +1966,7 @@ details summary {
 
 @media (min-width: 768px) {
   .qr-page {
-    max-width: 640px;
-  }
-
-  .qr-grid {
-    grid-template-columns: repeat(4, 1fr);
+    max-width: 1000px;
   }
 
   .welcome-section,

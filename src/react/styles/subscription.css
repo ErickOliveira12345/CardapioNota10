@@ -11,12 +11,13 @@
 .subscription-header{
 
     display:flex;
-
+    flex-direction: column;
     justify-content:space-between;
 
     align-items:center;
 
     margin-bottom:40px;
+
 
 }
 
@@ -48,6 +49,33 @@
 
     cursor:pointer;
 
+    margin-top: 10px;
+
+}
+
+.subscription-change-button-voltar {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+ 
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.subscription-change-button-voltar :hover{
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .subscription-summary{
@@ -282,4 +310,143 @@
     .subscription-actions{
         gap: 10px;
     }
+}
+
+/* ===================================== */
+/* HISTÓRICO DA ASSINATURA */
+/* ===================================== */
+
+.subscription-history {
+  margin-top: 28px;
+
+  padding: 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+.subscription-history__header {
+  margin-bottom: 20px;
+}
+
+.subscription-history__header span {
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+.subscription-history__header h2 {
+  margin: 5px 0 0;
+
+  color: #1e293b;
+}
+
+.subscription-history-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.subscription-history-item {
+  display: grid;
+
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 16px;
+
+  padding: 16px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.subscription-history-icon {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+
+  font-size: 20px;
+}
+
+.subscription-history-content strong {
+  color: #1e293b;
+}
+
+.subscription-history-content p {
+  margin: 4px 0 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+.subscription-history-item time {
+  color: #64748b;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+}
+
+.subscription-history-id {
+  font-size: 15px !important;
+
+  word-break: break-all;
+}
+
+@media (max-width: 700px) {
+  .subscription-history-item {
+    grid-template-columns:
+      44px
+      minmax(0, 1fr);
+  }
+
+  .subscription-history-item time {
+    grid-column: 2;
+
+    white-space: normal;
+  }
+}
+
+.plans-back-button {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+ 
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.plans-back-button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }

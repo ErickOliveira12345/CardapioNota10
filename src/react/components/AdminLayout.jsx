@@ -200,8 +200,8 @@ export function AdminLayout({
             : {};
 
         setEstablishmentName(
-          settingsData.nomeExibicao ||
-            establishmentData.nome ||
+          establishmentData.nome ||
+            settingsData.nomeExibicao ||
             establishmentData.name ||
             "Estabelecimento",
         );
@@ -419,11 +419,19 @@ export function AdminLayout({
           <button
             type="button"
             className="admin-client-button"
-            onClick={() =>
-              onNavigate("/")
-            }
+            onClick={() => {
+              if (!establishmentId) {
+                return;
+              }
+
+              onNavigate(
+                `/menu?est=${encodeURIComponent(
+                  establishmentId,
+                )}&preview=true`,
+              );
+            }}
           >
-            Ver como cliente
+            👁️ Ver como cliente
           </button>
           
         </header>

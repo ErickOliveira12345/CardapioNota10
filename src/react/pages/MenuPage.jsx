@@ -90,46 +90,19 @@ export function MenuPage({
           ),
       );
   }, [categories]);
-  
-
-  // const [
-  //   deliveryAddress,
-  //   setDeliveryAddress,
-  // ] = useState(null);
-
-  // useEffect(() => {
-  //   if (!establishmentId) {
-  //     return undefined;
-  //   }
-
-  //   const unsubscribe =
-  //     observeEstablishmentBranding(
-  //       establishmentId,
-  //       setBranding,
-  //       (error) => {
-  //         console.error(
-  //           "Erro ao acompanhar identidade visual:",
-  //           error,
-  //         );
-  //       },
-  //     );
-
-  //   return () => {
-  //     if (typeof unsubscribe === "function") {
-  //       unsubscribe();
-  //     }
-  //   };
-  // }, [establishmentId]);
 
   const establishmentLogoUrl =
     branding.logoUrl;
 
   const establishmentName =
-    branding.nomeExibicao ||
-    branding.nome ||
+    establishment?.nome ||
+    branding?.nomeExibicao ||
+    branding?.nome ||
     "Estabelecimento";
 
   const accountEmail =
+    establishment?.email ||
+    generalSettings?.email ||
     "Cardápio Digital";
 
   const accountName =

@@ -925,4 +925,75 @@ Botão de preenchimento automático de localização geográfica
   background: var(--brand-primary);
   color: var(--brand-on-primary);
 }
+
+/*
+Link da pagina de Delivery
+*/
+
+.settings-delivery-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.settings-delivery-link input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 12px 14px;
+
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+
+  background: #f8fafc;
+  color: #334155;
+
+  font-size: 14px;
+}
+
+.settings-delivery-link button {
+  padding: 12px 16px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #f97316;
+  color: #ffffff;
+
+  font-weight: 700;
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.settings-field-description {
+  margin: 5px 0 0;
+
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-open-delivery-link {
+  margin-top: 10px;
+
+  padding: 10px 16px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+  .settings-delivery-link {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
   

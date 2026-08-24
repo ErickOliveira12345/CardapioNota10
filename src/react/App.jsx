@@ -49,6 +49,9 @@ import DriverPendingApprovalPage from "./pages/driver/DriverPendingApprovalPage.
 import DriverDashboardPage from "./pages/driver/DriverDashboardPage.jsx";
 import MinhasEntregasPage from "./pages/MinhasEntregasPage";
 import MySubscriptionPage from "./pages/MySubscriptionPage.jsx";
+import TutorialPage from "./pages/TutorialPage.jsx";
+import SubscriptionBillingPage from "./pages/SubscriptionBillingPage.jsx";
+import SubscriptionHistoryPage from "./pages/SubscriptionHistoryPage.jsx";
 
 import { getStatus } from "./services/formatters.js";
 
@@ -1566,6 +1569,17 @@ useEffect(() => {
     );
   }
 
+  if (route === "/tutorial") {
+    return (
+      <>
+        <TutorialPage
+          onNavigate={navigate}
+        />
+
+        <ToastContainer />
+      </>
+    );
+  }
   
   /*
   * CADASTRO
@@ -1969,6 +1983,36 @@ useEffect(() => {
     );
   }
 
+  if ( route === "/admin/assinatura/cobrancas") {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="assinatura"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <SubscriptionBillingPage
+            onNavigate={navigate}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
   if (route === "/planos") {
     if (!isAuthenticated) {
       return (
@@ -1990,6 +2034,36 @@ useEffect(() => {
           orders={orders}
         >
           <PlansPage
+            onNavigate={navigate}
+          />
+        </AdminLayout>
+
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if ( route === "/admin/assinatura/historico" ) {
+    if (!isAuthenticated) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
+
+    if (isOnboarding) {
+      return (
+        <Redirect to="/primeiro-acesso" />
+      );
+    }
+
+    return (
+      <>
+        <AdminLayout
+          activePage="assinatura"
+          onNavigate={navigate}
+          orders={orders}
+        >
+          <SubscriptionHistoryPage
             onNavigate={navigate}
           />
         </AdminLayout>
