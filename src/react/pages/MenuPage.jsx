@@ -27,6 +27,10 @@ import {
   getEstablishmentGeneralSettings,
 } from "../services/establishmentService.js";
 
+import {
+  useSubscription,
+} from "../contexts/SubscriptionContext.jsx";
+
 export function MenuPage({
   establishmentId,
   table,
@@ -44,6 +48,16 @@ export function MenuPage({
 
   firebaseLoading = false,
 }) {
+
+  const {
+    plan,
+    loading: subscriptionLoading,
+  } = useSubscription();
+
+  const isPremium =
+    String(plan?.id || "")
+      .trim()
+      .toLowerCase() === "premium";
 
   const {
     branding,
@@ -245,8 +259,61 @@ export function MenuPage({
   const isDelivery =
     orderType === "entrega";
 
+  const deliveryBlocked =
+    isDelivery &&
+    !subscriptionLoading &&
+    !isPremium;
+
   const isTableOrder =
     orderType === "mesa";
+
+
+  if (
+    isDelivery &&
+    subscriptionLoading
+  ) {
+    return (
+      <main className="delivery-blocked-page">
+        <section className="delivery-blocked-card">
+          <p>
+            Verificando disponibilidade
+            do serviço de entrega...
+          </p>
+        </section>
+      </main>
+    );
+  }
+  
+  if (deliveryBlocked) {
+    return (
+      <main className="delivery-blocked-page">
+        <section className="delivery-blocked-card">
+          <div className="delivery-blocked-icon">
+            🔒
+          </div>
+
+          <h1>
+            Pedidos para entrega indisponíveis
+          </h1>
+
+          <p>
+            Este estabelecimento não possui
+            o recurso de pedidos para entrega
+            disponível no plano atual.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              onNavigate?.("/")
+            }
+          >
+            Voltar
+          </button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <>

@@ -5519,3 +5519,63 @@ SUPER ADMINISTRADOR
     flex-direction: column;
   }
 }
+
+/*Menu page tela de entrega bloqueada*/
+.delivery-blocked-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: #f8fafc;
+}
+
+.delivery-blocked-card {
+  width: 100%;
+  max-width: 520px;
+
+  padding: 36px 28px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.delivery-blocked-icon {
+  margin-bottom: 16px;
+
+  font-size: 42px;
+}
+
+.delivery-blocked-card h1 {
+  margin: 0 0 12px;
+
+  color: #1e293b;
+}
+
+.delivery-blocked-card p {
+  margin: 0 0 24px;
+
+  color: #64748b;
+
+  line-height: 1.6;
+}
+
+.delivery-blocked-card button {
+  padding: 12px 20px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #f97316;
+  color: #ffffff;
+
+  font-weight: 700;
+  cursor: pointer;
+}

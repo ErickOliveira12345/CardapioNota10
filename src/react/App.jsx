@@ -30,7 +30,7 @@ import { AdminOrdersPage } from "./pages/AdminOrdersPage.jsx";
 import { usePlatformSettings } from "./contexts/PlatformSettingsContext.jsx";
 import { calculateDeliveryRoute } from "./services/deliveryRouteService.js";
 import { getEstablishmentById } from "./services/establishmentService.js";
-
+import { useSubscription } from "../contexts/SubscriptionContext.jsx";
 
 import CashierPage from "./pages/CashierPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";
@@ -335,6 +335,16 @@ export function App() {
   ] = useState(
     getOrderTypeFromUrl,
   );
+
+  const {
+    plan,
+    loading: subscriptionLoading,
+  } = useSubscription();
+
+  const isPremium =
+    String(plan?.id || "")
+      .trim()
+      .toLowerCase() === "premium";
 
   useEffect(() => {
     function handlePopState() {
@@ -1307,6 +1317,32 @@ useEffect(() => {
      * Cria pedido de mesa
      * ou entrega.
      */
+    if (
+      orderType === "entrega" &&
+      subscriptionLoading
+    ) {
+      showToast(
+        "Aguarde a verificação do plano.",
+        "info",
+        3000,
+      );
+
+      return;
+    }
+
+    if (
+      orderType === "entrega" &&
+      !isPremium
+    ) {
+      showToast(
+        "Este estabelecimento não possui pedidos para entrega habilitados.",
+        "error",
+        4000,
+      );
+
+      return;
+    }
+
     await createOrder({
       table,
       items: cartItems,

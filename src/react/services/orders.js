@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   onSnapshot,
@@ -380,6 +381,72 @@ export async function createOrder({
       ? "entrega"
       : "mesa";
 
+    /*
+    * =====================================================
+    * BLOQUEIO DE ENTREGA POR PLANO
+    * =====================================================
+    *
+    * Pedidos de entrega só podem ser
+    * criados por estabelecimentos Premium.
+    */
+    if (
+      normalizedOrderType === "entrega"
+    ) {
+      if (!establishmentId) {
+        throw new Error(
+          "Estabelecimento não identificado.",
+        );
+      }
+
+      const establishmentReference =
+        doc(
+          db,
+          "establishments",
+          establishmentId,
+        );
+
+      const establishmentSnapshot =
+        await getDoc(
+          establishmentReference,
+        );
+
+      if (
+        !establishmentSnapshot.exists()
+      ) {
+        throw new Error(
+          "Estabelecimento não encontrado.",
+        );
+      }
+
+      const establishmentData =
+        establishmentSnapshot.data();
+
+      const currentPlan =
+        String(
+          establishmentData
+            ?.planoAtual || "",
+        )
+          .trim()
+          .toLowerCase();
+
+      console.log(
+        "VALIDANDO PLANO PARA ENTREGA:",
+        {
+          establishmentId,
+          planoAtual:
+            currentPlan,
+        },
+      );
+
+      if (
+        currentPlan !== "premium"
+      ) {
+        throw new Error(
+          "Este estabelecimento não possui pedidos para entrega habilitados. Recurso disponível somente no plano Premium.",
+        );
+      }
+    }
+
   /*
    * Mesa só é obrigatória
    * para pedidos feitos na mesa.
@@ -687,9 +754,6 @@ export async function createOrder({
 
     cliente:
       normalizedCustomer,
-
-    tipoPedido:
-      normalizedOrderType,
 
     entrega:
       normalizedDelivery,
