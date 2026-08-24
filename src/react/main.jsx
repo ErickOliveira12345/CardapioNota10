@@ -14,6 +14,22 @@ import { CartProvider } from "./contexts/CartContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { PlatformSettingsProvider } from "./contexts/PlatformSettingsContext.jsx";
 
+const redirectPath =
+  sessionStorage.getItem(
+    "cardapionota10_redirect",
+  );
+
+if (redirectPath) {
+  sessionStorage.removeItem(
+    "cardapionota10_redirect",
+  );
+
+  window.history.replaceState(
+    {},
+    "",
+    redirectPath,
+  );
+}
 
 const rootElement = document.getElementById("root");
 

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>CardápioNota10</title>
+</head>
+
+<body>
+  <script>
+    const path =
+      window.location.pathname +
+      window.location.search +
+      window.location.hash;
+
+    sessionStorage.setItem(
+      "cardapionota10_redirect",
+      path
+    );
+
+    window.location.replace(
+      "/CardapioNota10/"
+    );
+  </script>
+</body>
+</html>

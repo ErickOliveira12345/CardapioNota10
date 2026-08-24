@@ -17,6 +17,10 @@ import {
   createCroppedImage,
 } from "../utils/imageCrop.js";
 
+import {
+  useSubscription,
+} from "../contexts/SubscriptionContext.jsx";
+
 import "../styles/SettingsPage.css";
 
 const INITIAL_FORM = {
@@ -111,6 +115,17 @@ const SETTINGS_TABS = [
 export default function SettingsPage({
   establishmentId,
 }) {
+
+  const {
+    plan,
+    loading: subscriptionLoading,
+  } = useSubscription();
+
+  const isPremium =
+    String(plan?.id || "")
+      .trim()
+      .toLowerCase() === "premium";
+
   const [activeTab, setActiveTab] =
     useState("general");
 
@@ -528,58 +543,83 @@ function handleUseCurrentLocation() {
   );
 }
 
+// function gerarLinkEntrega(establishmentId) {
+//   if (!establishmentId) {
+//     return "";
+//   }
+
+//   const origin =
+//     window.location.origin;
+
+//   return `${origin}/menu?est=${encodeURIComponent(
+//     establishmentId,
+//   )}&tipo=entrega`;
+// }
 function gerarLinkEntrega(establishmentId) {
   if (!establishmentId) {
     return "";
   }
 
-  const origin =
-    window.location.origin;
+  const origin = window.location.origin;
 
-  return `${origin}/menu?est=${encodeURIComponent(
+  const baseUrl = import.meta.env.BASE_URL;
+
+  return `${origin}${baseUrl}menu?est=${encodeURIComponent(
     establishmentId,
   )}&tipo=entrega`;
 }
 
-const deliveryMenuLink =
-  gerarLinkEntrega(
-    establishmentId,
-  );
+  const deliveryMenuLink =
+    isPremium
+      ? gerarLinkEntrega(
+          establishmentId,
+        )
+      : "";
 
   async function copiarLinkEntrega() {
-  if (!deliveryMenuLink) {
-    showToast(
-      "Link de entrega não disponível.",
-      "error",
-      3000,
-    );
+    if (!isPremium) {
+      showToast(
+        "O link para pedidos de entrega está disponível somente no plano Premium.",
+        "info",
+        4000,
+      );
 
-    return;
+      return;
+    }
+
+    if (!deliveryMenuLink) {
+      showToast(
+        "Link de entrega não disponível.",
+        "error",
+        3000,
+      );
+
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        deliveryMenuLink,
+      );
+
+      showToast(
+        "Link de entrega copiado.",
+        "success",
+        3000,
+      );
+    } catch (copyError) {
+      console.error(
+        "Erro ao copiar link de entrega:",
+        copyError,
+      );
+
+      showToast(
+        "Não foi possível copiar o link.",
+        "error",
+        4000,
+      );
+    }
   }
-
-  try {
-    await navigator.clipboard.writeText(
-      deliveryMenuLink,
-    );
-
-    showToast(
-      "Link de entrega copiado.",
-      "success",
-      3000,
-    );
-  } catch (copyError) {
-    console.error(
-      "Erro ao copiar link de entrega:",
-      copyError,
-    );
-
-    showToast(
-      "Não foi possível copiar o link.",
-      "error",
-      4000,
-    );
-  }
-}
 
   if (loading) {
     return (
@@ -795,51 +835,75 @@ const deliveryMenuLink =
                     Link para pedidos de entrega
                   </span>
 
-                  <p className="settings-field-description">
-                    Compartilhe este link com seus
-                    clientes para que eles acessem
-                    diretamente o cardápio no modo
-                    de entrega.
-                  </p>
+                  {subscriptionLoading ? (
+                    <div className="settings-delivery-premium-loading">
+                      Verificando recursos do plano...
+                    </div>
+                  ) : isPremium ? (
+                    <>
+                      <p className="settings-field-description">
+                        Compartilhe este link com seus
+                        clientes para que eles acessem
+                        diretamente o cardápio no modo
+                        de entrega.
+                      </p>
 
-                  <div className="settings-delivery-link">
-                    <input
-                      type="text"
-                      value={deliveryMenuLink}
-                      readOnly
-                    />
+                      <div className="settings-delivery-link">
+                        <input
+                          type="text"
+                          value={deliveryMenuLink}
+                          readOnly
+                          aria-label="Link para pedidos de entrega"
+                        />
 
-                    <button
-                      type="button"
-                      onClick={copiarLinkEntrega}
-                      disabled={
-                        !deliveryMenuLink
-                      }
-                    >
-                      📋 Copiar
-                    </button>
-                  </div>
+                        <button
+                          type="button"
+                          onClick={copiarLinkEntrega}
+                          disabled={!deliveryMenuLink}
+                        >
+                          📋 Copiar
+                        </button>
+                      </div>
 
-                  <button
-                    type="button"
-                    className="settings-open-delivery-link"
-                    disabled={
-                      !deliveryMenuLink
-                    }
-                    onClick={() => {
-                      if (!deliveryMenuLink) {
-                        return;
-                      }
+                      <button
+                        type="button"
+                        className="settings-open-delivery-link"
+                        disabled={!deliveryMenuLink}
+                        onClick={() => {
+                          if (!deliveryMenuLink) {
+                            return;
+                          }
 
-                      window.open(
-                        deliveryMenuLink,
-                        "_blank",
-                        "noopener,noreferrer",
-                      );
-                    }}
-                  >
-                    🔗 Abrir página de entrega
-                  </button>
+                          window.open(
+                            deliveryMenuLink,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        }}
+                      >
+                        🔗 Abrir página de entrega
+                      </button>
+                    </>
+                  ) : (
+                    <div className="settings-delivery-locked">
+                      <div className="settings-delivery-locked__icon">
+                        🔒
+                      </div>
+
+                      <div>
+                        <strong>
+                          Recurso exclusivo do plano Premium
+                        </strong>
+
+                        <p>
+                          O link público para pedidos de
+                          entrega está disponível somente
+                          para estabelecimentos com o
+                          plano Premium.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
               </div>

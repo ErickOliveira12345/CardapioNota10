@@ -996,4 +996,61 @@ Link da pagina de Delivery
     align-items: stretch;
   }
 }
+
+.settings-delivery-locked {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-top: 10px;
+  padding: 16px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  background: #f8fafc;
+}
+
+.settings-delivery-locked__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: #e2e8f0;
+
+  font-size: 20px;
+}
+
+.settings-delivery-locked strong {
+  display: block;
+  color: #334155;
+  font-size: 14px;
+}
+
+.settings-delivery-locked p {
+  margin: 5px 0 0;
+
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-delivery-premium-loading {
+  margin-top: 10px;
+  padding: 14px;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+  color: #64748b;
+
+  font-size: 13px;
+}
   

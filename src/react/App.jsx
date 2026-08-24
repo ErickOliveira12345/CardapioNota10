@@ -88,13 +88,29 @@ const ACTIVE_ORDER_STATUSES = [
   "preparando",
   "saindo",
 ];
+// Função alterada para funcionar com o prefixo /CardapioNota10
+// function getRoute() {
+//   const pathname = window.location.pathname;
+
+//   return pathname === "/"
+//     ? "/"
+//     : pathname.replace(/\/$/, "");
+// }
 
 function getRoute() {
-  const pathname = window.location.pathname;
+  let pathname = window.location.pathname;
 
-  return pathname === "/"
-    ? "/"
-    : pathname.replace(/\/$/, "");
+  const basePath = "/CardapioNota10";
+
+  if (pathname.startsWith(basePath)) {
+    pathname = pathname.slice(basePath.length);
+  }
+
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
+
+  return pathname.replace(/\/$/, "");
 }
 
 function getEstablishmentFromUrl() {
@@ -825,43 +841,84 @@ useEffect(() => {
     );
   }, [cartItems]);
 
+  //Função modificada para usar o prefixo /CardapioNota10
+  // function navigate(path) {
+  //   window.history.pushState(
+  //     {},
+  //     "",
+  //     path,
+  //   );
+
+  //   setRoute(
+  //     getRoute(),
+  //   );
+
+  //   setPublicEstablishmentId(
+  //     getEstablishmentFromUrl(),
+  //   );
+
+  //   setTableToken(
+  //     getTableTokenFromUrl(),
+  //   );
+
+  //   setOrderType(
+  //     getOrderTypeFromUrl(),
+  //   );
+
+  //   const tableFromUrl =
+  //     getTableFromUrl();
+
+  //   if (tableFromUrl) {
+  //     setTable(
+  //       tableFromUrl,
+  //     );
+  //   }
+
+  //   window.scrollTo({
+  //     top: 0,
+  //     behavior: "smooth",
+  //   });
+  // }
   function navigate(path) {
-    window.history.pushState(
-      {},
-      "",
-      path,
-    );
+  const basePath = "/CardapioNota10";
 
-    setRoute(
-      getRoute(),
-    );
+  const targetPath =
+    path === "/"
+      ? `${basePath}/`
+      : `${basePath}${path}`;
 
-    setPublicEstablishmentId(
-      getEstablishmentFromUrl(),
-    );
+  window.history.pushState(
+    {},
+    "",
+    targetPath,
+  );
 
-    setTableToken(
-      getTableTokenFromUrl(),
-    );
+  setRoute(getRoute());
 
-    setOrderType(
-      getOrderTypeFromUrl(),
-    );
+  setPublicEstablishmentId(
+    getEstablishmentFromUrl(),
+  );
 
-    const tableFromUrl =
-      getTableFromUrl();
+  setTableToken(
+    getTableTokenFromUrl(),
+  );
 
-    if (tableFromUrl) {
-      setTable(
-        tableFromUrl,
-      );
-    }
+  setOrderType(
+    getOrderTypeFromUrl(),
+  );
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  const tableFromUrl =
+    getTableFromUrl();
+
+  if (tableFromUrl) {
+    setTable(tableFromUrl);
   }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
 
   function addItem(product) {
     setCartItems((currentItems) => {
