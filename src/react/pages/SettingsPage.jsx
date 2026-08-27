@@ -21,6 +21,10 @@ import {
   useSubscription,
 } from "../contexts/SubscriptionContext.jsx";
 
+import {
+  deleteEstablishmentAccount,
+} from "../services/accountService.js";
+
 import "../styles/SettingsPage.css";
 
 const INITIAL_FORM = {
@@ -167,6 +171,23 @@ export default function SettingsPage({
 
   const [processingCrop, setProcessingCrop] =
     useState(false);
+
+  //Area de configuração do botao e exclusão de conta
+  const [
+    deleteAccountModalOpen,
+    setDeleteAccountModalOpen,
+  ] = useState(false);
+
+  const [
+    deleteConfirmation,
+    setDeleteConfirmation,
+  ] = useState("");
+
+  const [
+    deletingAccount,
+    setDeletingAccount,
+  ] = useState(false);
+  // ====================
 
   useEffect(() => {
     if (!establishmentId) {
@@ -618,6 +639,55 @@ function gerarLinkEntrega(establishmentId) {
         "error",
         4000,
       );
+    }
+  }
+
+  // Função para deleta a conta do Estabelecimento
+  async function handleDeleteAccount() {
+    if (
+      deleteConfirmation.trim().toUpperCase() !==
+      "EXCLUIR"
+    ) {
+      showToast(
+        'Digite "EXCLUIR" para confirmar.',
+        "error",
+        4000,
+      );
+
+      return;
+    }
+
+    try {
+      setDeletingAccount(true);
+      setError("");
+
+      await deleteEstablishmentAccount({
+        establishmentId,
+      });
+
+      showToast(
+        "Conta encerrada com sucesso.",
+        "success",
+        4000,
+      );
+
+      /*
+      * A Cloud Function também excluirá
+      * o usuário do Firebase Auth.
+      */
+      window.location.href = "/";
+    } catch (deleteError) {
+      console.error(
+        "Erro ao excluir conta:",
+        deleteError,
+      );
+
+      setError(
+        deleteError?.message ||
+          "Não foi possível excluir a conta.",
+      );
+    } finally {
+      setDeletingAccount(false);
     }
   }
 
@@ -1553,6 +1623,40 @@ function gerarLinkEntrega(establishmentId) {
                   />
                 </label>
               </div>
+              
+              {/* Botão de encerrar conta */}
+              <div className="settings-danger-zone">
+                <div>
+                  <span className="settings-danger-zone__eyebrow">
+                    Zona de perigo
+                  </span>
+
+                  <h3>
+                    Encerrar conta
+                  </h3>
+
+                  <p>
+                    Exclui permanentemente o estabelecimento,
+                    configurações, produtos, categorias,
+                    mesas, pedidos, assinatura e arquivos.
+                  </p>
+
+                  <strong>
+                    Esta ação não poderá ser desfeita.
+                  </strong>
+                </div>
+
+                <button
+                  type="button"
+                  className="settings-delete-account-button"
+                  onClick={() => {
+                    setDeleteConfirmation("");
+                    setDeleteAccountModalOpen(true);
+                  }}
+                >
+                  🗑️ Encerrar conta
+                </button>
+              </div>
             </section>
           )}
 
@@ -1736,6 +1840,88 @@ function gerarLinkEntrega(establishmentId) {
     </div>
   </div>
 )}
+
+        {/* Modal de exclusão de conta */}
+        {deleteAccountModalOpen && (
+          <div className="delete-account-overlay">
+            <section
+              className="delete-account-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-account-title"
+            >
+              <div className="delete-account-modal__icon">
+                ⚠️
+              </div>
+
+              <h2 id="delete-account-title">
+                Excluir conta permanentemente?
+              </h2>
+
+              <p>
+                Todos os dados do estabelecimento
+                serão removidos permanentemente.
+              </p>
+
+              <ul>
+                <li>Produtos e categorias</li>
+                <li>Mesas e QR Codes</li>
+                <li>Pedidos e histórico</li>
+                <li>Configurações e identidade visual</li>
+                <li>Assinatura e dados relacionados</li>
+                <li>Arquivos armazenados</li>
+              </ul>
+
+              <label>
+                <span>
+                  Para confirmar, digite{" "}
+                  <strong>EXCLUIR</strong>
+                </span>
+
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(event) =>
+                    setDeleteConfirmation(
+                      event.target.value,
+                    )
+                  }
+                  disabled={deletingAccount}
+                  autoComplete="off"
+                />
+              </label>
+
+              <div className="delete-account-modal__actions">
+                <button
+                  type="button"
+                  disabled={deletingAccount}
+                  onClick={() =>
+                    setDeleteAccountModalOpen(false)
+                  }
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  className="delete-account-modal__confirm"
+                  disabled={
+                    deletingAccount ||
+                    deleteConfirmation
+                      .trim()
+                      .toUpperCase() !==
+                      "EXCLUIR"
+                  }
+                  onClick={handleDeleteAccount}
+                >
+                  {deletingAccount
+                    ? "Excluindo..."
+                    : "Excluir permanentemente"}
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
     </section>
 
     

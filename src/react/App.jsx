@@ -30,7 +30,7 @@ import { AdminOrdersPage } from "./pages/AdminOrdersPage.jsx";
 import { usePlatformSettings } from "./contexts/PlatformSettingsContext.jsx";
 import { calculateDeliveryRoute } from "./services/deliveryRouteService.js";
 import { getEstablishmentById } from "./services/establishmentService.js";
-import { useSubscription } from "../contexts/SubscriptionContext.jsx";
+import { useSubscription } from "./contexts/SubscriptionContext.jsx";
 
 import CashierPage from "./pages/CashierPage.jsx";
 import BillingPage from "./pages/BillingPage.jsx";

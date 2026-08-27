@@ -18,6 +18,10 @@ const {
 } = require("firebase-admin/auth");
 
 const {
+  getStorage,
+} = require("firebase-admin/storage");
+
+const {
   defineSecret,
 } = require(
     "firebase-functions/params",
@@ -28,6 +32,8 @@ initializeApp();
 const db = getFirestore();
 
 const adminAuth = getAuth();
+
+const storage = getStorage();
 
 const REGION = "southamerica-east1";
 
@@ -1912,6 +1918,460 @@ exports.createEstablishmentByAdmin =
           error && error.message ?
             error.message :
             "Não foi possível criar o estabelecimento.",
+          );
+        }
+      },
+  );
+
+  /**
+ * Exclui permanentemente a conta de um estabelecimento.
+ *
+ * Somente o proprietário autenticado pode executar esta operação.
+ * A exclusão remove assinatura, estabelecimento e subcoleções,
+ * arquivos do Storage, perfis globais e usuários do Authentication.
+ */
+exports.deleteEstablishmentAccount =
+  onCall(
+      {
+        region: REGION,
+      },
+
+      async (request) => {
+        if (!request.auth) {
+          throw new HttpsError(
+              "unauthenticated",
+              "É necessário estar autenticado.",
+          );
+        }
+
+        const requesterUid = request.auth.uid;
+
+        const {
+          establishmentId,
+          confirmation,
+        } = request.data || {};
+
+        /*
+         * Exige uma confirmação explícita
+         * enviada pelo front-end.
+         */
+        if (confirmation !== "EXCLUIR") {
+          throw new HttpsError(
+              "invalid-argument",
+              "Confirmação de exclusão inválida.",
+          );
+        }
+
+        if (!establishmentId) {
+          throw new HttpsError(
+              "invalid-argument",
+              "Estabelecimento não informado.",
+          );
+        }
+
+        /*
+         * Busca o estabelecimento.
+         */
+        const establishmentReference = db
+            .collection("establishments")
+            .doc(establishmentId);
+
+        const establishmentSnapshot =
+          await establishmentReference.get();
+
+        if (!establishmentSnapshot.exists) {
+          throw new HttpsError(
+              "not-found",
+              "Estabelecimento não encontrado.",
+          );
+        }
+
+        const establishment =
+          establishmentSnapshot.data();
+
+        /*
+         * Somente o proprietário pode
+         * excluir definitivamente a conta.
+         */
+        if (
+          establishment.ownerId !==
+          requesterUid
+        ) {
+          throw new HttpsError(
+              "permission-denied",
+              "Somente o proprietário pode encerrar a conta do estabelecimento.",
+          );
+        }
+
+        /*
+         * Confirma também o vínculo pelo
+         * documento global users/{uid}.
+         */
+        const ownerUserReference = db
+            .collection("users")
+            .doc(requesterUid);
+
+        const ownerUserSnapshot =
+          await ownerUserReference.get();
+
+        if (!ownerUserSnapshot.exists) {
+          throw new HttpsError(
+              "failed-precondition",
+              "Perfil do proprietário não encontrado.",
+          );
+        }
+
+        const ownerProfile =
+          ownerUserSnapshot.data();
+
+        const ownerEstablishmentId =
+          ownerProfile.estabelecimentoId ||
+          ownerProfile.establishmentId ||
+          null;
+
+        if (
+          ownerEstablishmentId !==
+          establishmentId
+        ) {
+          throw new HttpsError(
+              "permission-denied",
+              "O usuário não pertence a este estabelecimento.",
+          );
+        }
+
+        try {
+          /*
+           * ============================================
+           * USUÁRIOS DO ESTABELECIMENTO
+           * ============================================
+           *
+           * Precisamos descobrir os UIDs antes
+           * de excluir os documentos.
+           */
+
+          const usersByPortugueseField =
+            await db
+                .collection("users")
+                .where(
+                    "estabelecimentoId",
+                    "==",
+                    establishmentId,
+                )
+                .get();
+
+          const usersByEnglishField =
+            await db
+                .collection("users")
+                .where(
+                    "establishmentId",
+                    "==",
+                    establishmentId,
+                )
+                .get();
+
+          const userIds = new Set();
+
+          usersByPortugueseField.docs.forEach(
+              (documentSnapshot) => {
+                userIds.add(
+                    documentSnapshot.id,
+                );
+              },
+          );
+
+          usersByEnglishField.docs.forEach(
+              (documentSnapshot) => {
+                userIds.add(
+                    documentSnapshot.id,
+                );
+              },
+          );
+
+          /*
+           * Garante que o proprietário
+           * esteja incluído.
+           */
+          userIds.add(requesterUid);
+
+          /*
+           * ============================================
+           * PLANO ATUAL
+           * ============================================
+           */
+
+          let currentPlanId =
+            establishment.planoAtual ||
+            null;
+
+          const subscriptionReference = db
+              .collection("subscriptions")
+              .doc(establishmentId);
+
+          const subscriptionSnapshot =
+            await subscriptionReference.get();
+
+          if (subscriptionSnapshot.exists) {
+            const subscriptionData =
+              subscriptionSnapshot.data();
+
+            currentPlanId =
+              subscriptionData.planId ||
+              subscriptionData.planoId ||
+              currentPlanId;
+          }
+
+          /*
+           * ============================================
+           * ASSINATURA
+           * ============================================
+           */
+
+          if (subscriptionSnapshot.exists) {
+            await subscriptionReference.delete();
+          }
+
+          /*
+           * Também procura assinaturas que
+           * tenham establishmentId como campo.
+           */
+          const subscriptionsSnapshot =
+            await db
+                .collection("subscriptions")
+                .where(
+                    "establishmentId",
+                    "==",
+                    establishmentId,
+                )
+                .get();
+
+          if (!subscriptionsSnapshot.empty) {
+            const subscriptionBatch =
+              db.batch();
+
+            subscriptionsSnapshot.docs.forEach(
+                (documentSnapshot) => {
+                  subscriptionBatch.delete(
+                      documentSnapshot.ref,
+                  );
+                },
+            );
+
+            await subscriptionBatch.commit();
+          }
+
+          /*
+           * ============================================
+           * CONTADOR DO PLANO
+           * ============================================
+           */
+
+          if (currentPlanId) {
+            const planReference = db
+                .collection("plans")
+                .doc(currentPlanId);
+
+            const planSnapshot =
+              await planReference.get();
+
+            if (planSnapshot.exists) {
+              await planReference.update({
+                totalAssinantes:
+                  FieldValue.increment(-1),
+
+                atualizadoEm:
+                  FieldValue.serverTimestamp(),
+              });
+            }
+          }
+
+          /*
+           * ============================================
+           * FIREBASE STORAGE
+           * ============================================
+           *
+           * Remove:
+           *
+           * establishments/{establishmentId}/...
+           */
+
+          const bucket = storage.bucket();
+
+          try {
+            await bucket.deleteFiles({
+              prefix:
+                `establishments/${establishmentId}/`,
+            });
+          } catch (storageError) {
+            /*
+             * Não interrompemos toda a exclusão
+             * caso haja um problema isolado
+             * com arquivos.
+             */
+            console.error(
+                "Erro ao remover arquivos do estabelecimento:",
+                storageError,
+            );
+          }
+
+          /*
+           * ============================================
+           * ESTABELECIMENTO
+           * ============================================
+           *
+           * recursiveDelete remove o documento
+           * e suas subcoleções.
+           *
+           * Exemplos:
+           *
+           * orders
+           * products
+           * categories
+           * tables
+           * settings
+           * employees
+           */
+
+          await db.recursiveDelete(
+              establishmentReference,
+          );
+
+          /*
+           * ============================================
+           * DOCUMENTOS USERS
+           * ============================================
+           */
+
+          const userIdList =
+            Array.from(userIds);
+
+          /*
+           * Utilizamos lotes menores que o
+           * limite máximo do Firestore.
+           */
+          for (
+            let index = 0;
+            index < userIdList.length;
+            index += 400
+          ) {
+            const chunk =
+              userIdList.slice(
+                  index,
+                  index + 400,
+              );
+
+            const userDeleteBatch =
+              db.batch();
+
+            chunk.forEach((uid) => {
+              userDeleteBatch.delete(
+                  db
+                      .collection("users")
+                      .doc(uid),
+              );
+            });
+
+            await userDeleteBatch.commit();
+          }
+
+          /*
+           * ============================================
+           * FIREBASE AUTHENTICATION
+           * ============================================
+           *
+           * Authentication é excluído por último.
+           *
+           * Dessa maneira o proprietário continua
+           * autenticado durante a operação.
+           */
+
+          let authFailureCount = 0;
+
+          for (
+            let index = 0;
+            index < userIdList.length;
+            index += 1000
+          ) {
+            const chunk =
+              userIdList.slice(
+                  index,
+                  index + 1000,
+              );
+
+            const deleteResult =
+              await adminAuth.deleteUsers(
+                  chunk,
+              );
+
+            authFailureCount +=
+              deleteResult.failureCount;
+
+            if (
+              deleteResult.failureCount > 0
+            ) {
+              console.error(
+                  "Alguns usuários do Authentication não puderam ser removidos:",
+                  deleteResult.errors,
+              );
+            }
+          }
+
+          /*
+           * ============================================
+           * LOG
+           * ============================================
+           */
+
+          console.log(
+              "ESTABELECIMENTO EXCLUÍDO:",
+              {
+                establishmentId,
+
+                ownerUid:
+                  requesterUid,
+
+                usersRemoved:
+                  userIdList.length,
+
+                authFailureCount,
+              },
+          );
+
+          return {
+            success: true,
+
+            establishmentId,
+
+            usersRemoved:
+              userIdList.length,
+
+            authFailureCount,
+
+            message:
+              "Conta encerrada e dados excluídos com sucesso.",
+          };
+        } catch (error) {
+          console.error(
+              "Erro ao excluir estabelecimento:",
+              error,
+          );
+
+          if (
+            error instanceof
+            HttpsError
+          ) {
+            throw error;
+          }
+
+          throw new HttpsError(
+              "internal",
+              "Não foi possível encerrar a conta do estabelecimento.",
+              {
+                originalMessage:
+                  error &&
+                  error.message ?
+                    error.message :
+                    null,
+              },
           );
         }
       },
