@@ -114,11 +114,6 @@ export function MenuPage({
     branding?.nome ||
     "Estabelecimento";
 
-  const accountEmail =
-    establishment?.email ||
-    generalSettings?.email ||
-    "Cardápio Digital";
-
   const accountName =
     establishmentName;
 
@@ -322,7 +317,6 @@ export function MenuPage({
           <EstablishmentBrand
             logoUrl={establishmentLogoUrl}
             establishmentName={establishmentName}
-            secondaryText={accountEmail}
             fallbackText={accountName}
             className="menu-establishment-brand"
           />
