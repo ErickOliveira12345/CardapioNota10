@@ -26,6 +26,11 @@ const INITIAL_FORM = {
   icone: "🍽️",
 };
 
+const ICON_OPTIONS = [
+  "🍽️", "🍔", "🍕", "🍟", "🌭", "🥪", "🥗", "🍗", "🥩", "🍖", "🍝",
+   "🍜", "🍣", "🍤", "🥤", "☕", "🍺", "🍷", "🍰", "🍦",
+];
+
 export function CategoriesPage({
   onNavigate,
 }) {
@@ -48,6 +53,9 @@ export function CategoriesPage({
     useState(true);
 
   const [submitting, setSubmitting] =
+    useState(false);
+
+  const [showIconSelector, setShowIconSelector] =
     useState(false);
 
   useEffect(() => {
@@ -326,15 +334,58 @@ export function CategoriesPage({
             />
           </label>
 
-          <label>
-            Ícone ou emoji
+          <label className="category-icon-field">
+            <span>Ícone</span>
 
-            <input
-              name="icone"
-              value={form.icone}
-              onChange={updateField}
-              maxLength={8}
-            />
+            <div className="category-icon-wrapper">
+              <button
+                type="button"
+                className="category-icon-input"
+                onClick={() =>
+                  setShowIconSelector((current) => !current)
+                }
+              >
+                <span className="category-icon-value">
+                  {form.icone}
+                </span>
+
+                <span
+                  className={
+                    showIconSelector
+                      ? "category-icon-arrow open"
+                      : "category-icon-arrow"
+                  }
+                >
+                  ›
+                </span>
+              </button>
+
+              {showIconSelector && (
+                <div className="category-icon-selector">
+                  {ICON_OPTIONS.map((icone) => (
+                    <button
+                      key={icone}
+                      type="button"
+                      className={
+                        form.icone === icone
+                          ? "category-icon-option active"
+                          : "category-icon-option"
+                      }
+                      onClick={() => {
+                        setForm((current) => ({
+                          ...current,
+                          icone,
+                        }));
+
+                        setShowIconSelector(false);
+                      }}
+                    >
+                      {icone}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </label>
 
           <button

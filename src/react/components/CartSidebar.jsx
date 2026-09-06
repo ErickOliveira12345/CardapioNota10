@@ -206,53 +206,54 @@ export function CartSidebar({
                             "🍽️"}
                         </div>
                       )}
+                      <div>
+                        <div className="cart-item__info">
+                          <span className="cart-item__nome">
+                            {itemName}
+                          </span>
 
-                      <div className="cart-item__info">
-                        <span className="cart-item__nome">
-                          {itemName}
-                        </span>
+                          <span className="cart-item__preco">
+                            {formatCurrency(
+                              itemSubtotal,
+                            )}
+                          </span>
+                        </div>
 
-                        <span className="cart-item__preco">
-                          {formatCurrency(
-                            itemSubtotal,
-                          )}
-                        </span>
-                      </div>
+                        <div className="cart-item__qty">
+                          <button
+                            className="qty-btn"
+                            type="button"
+                            onClick={() =>
+                              handleDecrease(
+                                item.id,
+                              )
+                            }
+                            aria-label={
+                              `Diminuir quantidade de ${itemName}`
+                            }
+                          >
+                            −
+                          </button>
 
-                      <div className="cart-item__qty">
-                        <button
-                          className="qty-btn"
-                          type="button"
-                          onClick={() =>
-                            handleDecrease(
-                              item.id,
-                            )
-                          }
-                          aria-label={
-                            `Diminuir quantidade de ${itemName}`
-                          }
-                        >
-                          −
-                        </button>
+                          <span className="qty-value">
+                            {itemQuantity}
+                          </span>
 
-                        <span className="qty-value">
-                          {itemQuantity}
-                        </span>
-
-                        <button
-                          className="qty-btn"
-                          type="button"
-                          onClick={() =>
-                            handleIncrease(
-                              item.id,
-                            )
-                          }
-                          aria-label={
-                            `Aumentar quantidade de ${itemName}`
-                          }
-                        >
-                          +
-                        </button>
+                          <button
+                            className="qty-btn"
+                            type="button"
+                            onClick={() =>
+                              handleIncrease(
+                                item.id,
+                              )
+                            }
+                            aria-label={
+                              `Aumentar quantidade de ${itemName}`
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

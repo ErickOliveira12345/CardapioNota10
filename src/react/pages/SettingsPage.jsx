@@ -25,6 +25,10 @@ import {
   deleteEstablishmentAccount,
 } from "../services/accountService.js";
 
+import {
+  applyTheme,
+} from "../services/themeService.js";
+
 import "../styles/SettingsPage.css";
 
 const INITIAL_FORM = {
@@ -188,6 +192,16 @@ export default function SettingsPage({
     setDeletingAccount,
   ] = useState(false);
   // ====================
+
+  useEffect(() => {
+    if (!form.tema) {
+      return;
+    }
+
+    applyTheme(
+      form.tema,
+    );
+  }, [form.tema]);
 
   useEffect(() => {
     if (!establishmentId) {

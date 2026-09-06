@@ -5,7 +5,8 @@
 .plans-page {
   min-height: 100vh;
   padding: 60px 24px;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+  background: var(--bg-d-l);
+  border-radius: 24px;
 }
 
 .plans-header {
@@ -47,10 +48,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-
+  
   padding: 36px;
 
-  background: #ffffff;
+  background: var(--bg-d-l);
 
   border: 1px solid #e2e8f0;
 

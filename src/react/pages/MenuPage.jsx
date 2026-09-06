@@ -31,6 +31,12 @@ import {
   useSubscription,
 } from "../contexts/SubscriptionContext.jsx";
 
+import {
+  applyTheme,
+  getClientTheme,
+  saveClientTheme,
+} from "../services/themeService.js";
+
 export function MenuPage({
   establishmentId,
   table,
@@ -174,6 +180,55 @@ export function MenuPage({
     activeCategory,
     availableProducts,
   ]);
+
+  const [
+    currentTheme,
+    setCurrentTheme,
+  ] = useState("light");
+
+  useEffect(() => {
+    if (!establishmentId) {
+      return;
+    }
+
+    const clientTheme =
+      getClientTheme(
+        establishmentId,
+      );
+
+    const theme =
+      clientTheme ||
+      generalSettings?.tema ||
+      branding?.tema ||
+      "light";
+
+    const appliedTheme =
+      applyTheme(theme);
+
+    setCurrentTheme(
+      appliedTheme,
+    );
+  }, [
+    establishmentId,
+    generalSettings?.tema,
+    branding?.tema,
+  ]);
+
+  function handleToggleTheme() {
+    const nextTheme =
+      currentTheme === "dark"
+        ? "light"
+        : "dark";
+
+    saveClientTheme(
+      establishmentId,
+      nextTheme,
+    );
+
+    setCurrentTheme(
+      nextTheme,
+    );
+  }
 
   /*
    * Caso uma categoria seja desativada ou excluída
@@ -344,6 +399,19 @@ export function MenuPage({
               Atendimento
             </button>
           )}
+        </div>
+        <div>
+          <button
+            type="button"
+            className="menu-theme-button"
+            onClick={handleToggleTheme}
+            aria-label="Alterar tema"
+            title="Alterar tema"
+          >
+            {currentTheme === "dark"
+              ? "☀️"
+              : "🌙"}
+        </button>
         </div>
       </header>
 
