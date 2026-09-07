@@ -58,7 +58,7 @@
   --surface: #ffffff;
   --border: #e8ecef;
   --text: #2c3e50;
-  --text-light: #7f8c8d;
+  --text-light: #363f40;
   --text-muted: #bdc3c7;
   --text-d-l: #7f8c8d;
   --bg-d-l: #ffffff;
@@ -562,7 +562,7 @@ details summary {
   padding: .45rem 1rem;
   border: 1.5px solid var(--border);
   border-radius: 100px;
-  color: var(--text-d-l);
+  color: var(--text);
   font-size: .85rem;
   font-weight: 500;
   white-space: nowrap;
@@ -608,7 +608,7 @@ details summary {
 .welcome-hero p {
   font-size: 1rem;
   opacity: .85;
-  color: var(--text-d-l);
+  color: var(--text);
 }
 
 .welcome-section h3 {
@@ -629,7 +629,7 @@ details summary {
   align-items: center;
   gap: .4rem;
   padding: 1.25rem 1rem;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--primary);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
@@ -766,7 +766,7 @@ details summary {
   padding: .3rem .6rem;
   border: 1.5px solid var(--primary);
   border-radius: var(--radius-sm);
-  color: var(--primary);
+  color: var(--text);
   font-size: .9rem;
   font-weight: 600;
 }
@@ -774,6 +774,7 @@ details summary {
 #categoria-titulo {
   font-size: 1.2rem;
   font-weight: 700;
+  color: var(--text-light);
 }
 
 .itens-grid {
@@ -788,7 +789,7 @@ details summary {
   align-items: center;
   gap: .9rem;
   padding: 1rem;
-  border: 1.5px solid transparent;
+  border: 2px solid var(--primary);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
@@ -852,6 +853,7 @@ details summary {
 .pedido-card {
   padding: 1rem;
   border-left: 4px solid var(--primary);
+  border-top: 3px solid var(--primary);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
@@ -874,7 +876,8 @@ details summary {
   margin-bottom: .75rem;
 }
 
-.pedido-card small {
+.pedido-card small,
+.pedido-card strong {
   color: var(--text-light);
 }
 
@@ -1032,7 +1035,7 @@ details summary {
   flex-direction: row;
   gap: .75rem;
   padding: .75rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--primary);
 }
 
 .cart-item img {
@@ -1740,6 +1743,11 @@ details summary {
   box-shadow: var(--shadow-sm);
 }
 
+.pedido-card-admin p,
+.pedido-card-admin strong {
+  color: var(--text-light);
+}
+
 .pedido-card-admin.card--warning { border-top-color: var(--warning); }
 .pedido-card-admin.card--info { border-top-color: var(--info); }
 .pedido-card-admin.card--primary { border-top-color: var(--primary); }
@@ -1754,6 +1762,10 @@ details summary {
   flex-wrap: wrap;
   gap: .4rem;
   margin-bottom: .75rem;
+}
+
+.pedido-card-admin__header strong {
+  color: var(--text);
 }
 
 .pedido-card-admin__meta {
@@ -2100,6 +2112,9 @@ details summary {
   cursor: not-allowed;
 }
 
+.products-layout h2{
+  color: var(--text);
+}
 
 .product-image-preview {
   display: grid;
@@ -2307,7 +2322,8 @@ details summary {
 }
 
 .admin-sidebar__brand strong {
-  font-size: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .admin-sidebar__brand small {
@@ -2495,8 +2511,9 @@ details summary {
   gap: 2px;
 }
 
+.admin-topbar strong,
 .admin-topbar small {
-  color: #667085;
+  color: var(--text-light);
 }
 
 .admin-menu-button {
@@ -2505,9 +2522,14 @@ details summary {
   height: 42px;
   border: 1px solid #d0d5dd;
   border-radius: 9px;
-  background: var(--input-bg);
+  background: var(--primary-light);
   font-size: 1.25rem;
   cursor: pointer;
+  color:var(--primary-dark)
+}
+
+.admin-menu-button:hover{
+  color: var(--brand-on-primary);
 }
 
 .admin-client-button {
@@ -2597,9 +2619,6 @@ details summary {
   .admin-client-button {
     padding: 9px 10px;
     font-size: 0.75rem;
-  }
-  .admin-topbar small {
-    display: none;
   }
 }
 
@@ -4821,6 +4840,10 @@ details summary {
   border-radius:18px;
   padding:24px;
   box-shadow:0 12px 28px rgba(15,23,42,.06);
+}
+
+.cashier-history h2 {
+  color: #000000;
 }
 
 .cashier-table-wrapper{

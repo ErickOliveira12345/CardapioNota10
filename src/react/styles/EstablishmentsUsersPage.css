@@ -22,7 +22,7 @@
 
 .establishment-users-page__header h1 {
   margin: 0 0 8px;
-  color: #0f172a;
+  color: var(--text-light);
   font-size: 2rem;
 }
 

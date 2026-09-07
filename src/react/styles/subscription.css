@@ -92,13 +92,13 @@
   box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
 
-.summary-card span, p, small{
+.summary-card span, p, small, h2{
   color:var(--text-d-l);
 }
 
 .summary-card h2{
   margin-top:10px;
-  color:var(--text-d-l);
+  color:var(--text-light);
   font-size:30px;
 }
 
