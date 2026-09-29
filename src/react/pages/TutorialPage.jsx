@@ -67,16 +67,18 @@ export default function TutorialPage({
   return (
     <main className="tutorial-page">
       <section className="tutorial-hero">
-        <button
-          type="button"
-          className="tutorial-back-button"
-          onClick={() =>
-            onNavigate?.("/")
-          }
-        >
-          ← Voltar
-        </button>
-
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+          <button
+            type="button"
+            className="tutorial-back-button"
+            onClick={() =>
+              onNavigate?.("/")
+            }
+          >
+            ← Voltar
+          </button>
+          <img className="logoCardapioNota10" src="./src/img/logo-CardapioNota10.png" alt="Logo do Cardápio Nota10" width={80} height={80}/>
+        </div>
         <div className="tutorial-hero__content">
           <span className="tutorial-eyebrow">
             Tutorial

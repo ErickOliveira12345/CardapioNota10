@@ -35,6 +35,11 @@ const INITIAL_FORM = {
   foto: null,
 };
 
+const EMOJI_OPTIONS = [
+  "🍽️", "🍔", "🍕", "🍟", "🌭", "🥪", "🥗", "🍗", "🥩", "🍖", "🍝",
+   "🍜", "🍣", "🍤", "🥤", "☕", "🍺", "🍷", "🍰", "🍦",
+];
+
 export function ProductsPage({
   onNavigate,
 }) {
@@ -83,6 +88,9 @@ export function ProductsPage({
     uploadProgress,
     setUploadProgress,
   ] = useState(0);
+
+  const [showEmojiSelector, setShowEmojiSelector] =
+  useState(false);
 
   useEffect(() => {
     if (!establishmentId) {
@@ -613,13 +621,58 @@ export function ProductsPage({
           <label>
             Emoji
 
-            <input
-              name="emoji"
-              value={form.emoji}
-              onChange={updateField}
-              disabled={submitting}
-              maxLength={4}
-            />
+            <div className="emoji-field">
+  <div className="emoji-selector-wrapper">
+    <button
+      type="button"
+      className="emoji-selector-input"
+      disabled={submitting}
+      onClick={() =>
+        setShowEmojiSelector((current) => !current)
+      }
+    >
+      <span className="emoji-selector-value">
+        {form.emoji || "🍽️"}
+      </span>
+
+      <span
+        className={
+          showEmojiSelector
+            ? "emoji-selector-arrow open"
+            : "emoji-selector-arrow"
+        }
+      >
+        ›
+      </span>
+    </button>
+
+    {showEmojiSelector && (
+      <div className="emoji-selector-grid">
+        {EMOJI_OPTIONS.map((emoji) => (
+          <button
+            key={emoji}
+            type="button"
+            className={
+              form.emoji === emoji
+                ? "emoji-selector-option active"
+                : "emoji-selector-option"
+            }
+            onClick={() => {
+              setForm((current) => ({
+                ...current,
+                emoji,
+              }));
+
+              setShowEmojiSelector(false);
+            }}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
           </label>
 
           <label>
@@ -778,26 +831,26 @@ export function ProductsPage({
                             : "Indisponível"}
                         </strong>
                       </p>
-
-                      <button
-                        type="button"
-                        className="btn-client-view"
-                        disabled={
-                          isDeleting ||
-                          submitting
-                        }
-                        onClick={() =>
-                          toggleAvailability(
-                            product,
-                          )
-                        }
-                      >
-                        {product.disponivel
-                          ? "Marcar indisponível"
-                          : "Marcar disponível"}
-                      </button>
-
                       <div className="product-actions">
+                        <button
+                          type="button"
+                          className="btn-client-view"
+                          disabled={
+                            isDeleting ||
+                            submitting
+                          }
+                          onClick={() =>
+                            toggleAvailability(
+                              product,
+                            )
+                          }
+                        >
+                          {product.disponivel
+                            ? "Marcar indisponível"
+                            : "Marcar disponível"}
+                        </button>
+
+                      
                         <button
                           type="button"
                           className="category-action-btn"

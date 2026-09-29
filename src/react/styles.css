@@ -1,5 +1,5 @@
 /* 
---primary: #ff6b35;
+--primary: #ff5630;
 
 */
 
@@ -10,7 +10,7 @@
 }
 
 :root {
-  --brand-primary: #ff6b35;
+  --brand-primary: #ff5630;
   --brand-on-primary: #ffffff;
   --primary: var(--brand-primary);
   --primary-dark:
@@ -159,6 +159,7 @@ button {
   border-radius: 8px;
   margin: 2%;
   transition: background 0.2s ease;
+  padding: .2rem .2rem;
 }
 
 button:hover {
@@ -209,12 +210,7 @@ details summary {
 
 .page-qr {
   min-height: 100dvh;
-  background: linear-gradient(
-    135deg,
-    var(--brand-primary) 0%,
-    var(--primary-dark) 40%,
-    var(--secondary) 100%
-  );
+  background: var(--brand-primary);
 }
 
 .qr-page {
@@ -233,8 +229,10 @@ details summary {
 }
 
 .qr-logo {
+  display: flex;
   margin-bottom: .5rem;
   font-size: 3rem;
+  justify-content: center;
 }
 
 .qr-restaurant-name {
@@ -242,10 +240,16 @@ details summary {
   font-weight: 700;
 }
 
+.logoCardapioNota10 {
+  margin-bottom: .5rem;
+  border-radius: 15%;
+}
+
 .qr-tagline {
   margin-top: .25rem;
   font-size: .95rem;
   opacity: .85;
+  color: #000000;
 }
 
 .session-banner,
@@ -458,6 +462,9 @@ details summary {
   .home-primary-button,
   .home-tutorial-button {
     width: 100%;
+  }
+  button {
+    margin: 1%;
   }
 }
 
@@ -1572,14 +1579,15 @@ details summary {
 
 .btn-client-view,
 .btn-clear {
-  padding: .45rem .85rem;
+  padding: .35rem .35rem;
   border-radius: var(--radius-sm);
-  font-size: .82rem;
+  font-size: .9rem;
 }
 
 .btn-client-view {
   border: 1px solid rgba(255, 255, 255, .2);
-  color: rgba(255, 255, 255, .78);
+  color: #334155;
+  font-weight: 600;
 }
 
 .btn-clear {
@@ -2273,6 +2281,114 @@ details summary {
     width: 100%;
   }
 }
+
+/*
+Seletor de emoji
+*/
+.emoji-field {
+  width: 100%;
+}
+
+.emoji-selector-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.emoji-selector-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--surface);
+  color: var(--text);
+
+  cursor: pointer;
+}
+
+.emoji-selector-value {
+  font-size: 1.4rem;
+}
+
+.emoji-selector-arrow {
+  display: inline-block;
+
+  color: var(--text-light);
+  font-size: 1.5rem;
+  line-height: 1;
+
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.emoji-selector-arrow.open {
+  transform: rotate(90deg);
+}
+
+.emoji-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+
+  margin-top: 6px;
+  padding: 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+}
+
+.emoji-selector-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--surface);
+
+  font-size: 1.4rem;
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.emoji-selector-option:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+
+.emoji-selector-option.active {
+  border-color: var(--brand-primary);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--brand-primary) 12%,
+      var(--surface)
+    );
+}
+
+@media (max-width: 600px) {
+  .emoji-selector-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 
 /* ================================
   PAINEL ADMINISTRATIVO
@@ -4391,8 +4507,8 @@ details summary {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  padding: 20px 22px 16px;
+  gap: 10px;
+  padding: 8px;
   border-bottom: 1px solid #edf2f7;
 }
 
@@ -4402,8 +4518,8 @@ details summary {
 }
 
 .admin-order-card__table {
-  font-size: 1.25rem;
-  font-weight: 900;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .admin-order-card__header small {
@@ -4430,11 +4546,9 @@ details summary {
 .admin-order-status--saindo { background: #ecfdf5; color: #047857; }
 .admin-order-status--finalizado { background: #f1f5f9; color: #475569; }
 .admin-order-status--cancelado { background: #fef2f2; color: #b91c1c; }
-
-.admin-order-card .order-progress {
-  padding: 16px 22px 6px;
+.order-progress {
+  padding: 0 8px;
 }
-
 .order-progress__header {
   display: flex;
   align-items: center;
@@ -4470,7 +4584,7 @@ details summary {
 
 .admin-order-items {
   display: grid;
-  margin: 12px 22px 0;
+  margin: 5px 0 0;
   padding: 0;
   list-style: none;
   border: 1px solid #edf2f7;
@@ -4482,15 +4596,15 @@ details summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 13px 15px;
+  gap: 10px;
+  padding: 5px;
   border-bottom: 1px solid #edf2f7;
 }
 
 .admin-order-items li:last-child { border-bottom: 0; }
 .admin-order-items li > div { display: flex; align-items: center; min-width: 0; gap: 8px; }
 .admin-order-items li > div strong { color: var(--orders-primary-dark); font-size: 0.9rem; }
-.admin-order-items li > div span { overflow: hidden; color: #334155; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.admin-order-items li > div span { overflow: hidden; color: #334155; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .admin-order-items li > span { flex: 0 0 auto; font-size: 0.92rem; font-weight: 900; }
 
 .admin-order-note {
@@ -4506,9 +4620,9 @@ details summary {
 
 .admin-order-card__footer {
   display: grid;
-  gap: 16px;
-  margin-top: 18px;
-  padding: 18px 22px 22px;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 5px 10px 10px;
   border-top: 1px solid #edf2f7;
   background: #fcfdff;
 }
@@ -4682,8 +4796,8 @@ details summary {
   .admin-orders-header-summary { min-width: 0; }
   .orders-table-summary { padding: 20px 14px; }
   .orders-table-grid, .admin-orders-grid { grid-template-columns: 1fr; }
-  .admin-order-card__header, .admin-order-card .order-progress, .admin-order-card__footer { padding-inline: 17px; }
-  .admin-order-items, .admin-order-note { margin-inline: 17px; }
+  .admin-order-card__header, .admin-order-card .order-progress, .admin-order-card__footer { padding-inline: 10px; }
+  .admin-order-items, .admin-order-note { margin-inline: 5px; }
   .admin-order-card__actions { display: grid; grid-template-columns: 1fr; }
   .admin-order-card__actions button { width: 100%; }
   .order-closing-overlay { align-items: end; padding: 0; }
@@ -4698,9 +4812,8 @@ details summary {
 @media (max-width: 480px) {
   .orders-table-card { grid-template-columns: 1fr 1fr; }
   .orders-table-card > div:nth-child(3) { grid-column: 1 / -1; }
-  .admin-order-card__header { flex-direction: column; }
   .admin-order-status { align-self: flex-start; }
-  .admin-order-items li { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .admin-order-items li { align-items: flex-start; flex-direction: column; gap: 5px; }
   .admin-orders-filters{ scrollbar-width: none;}
 }
 
@@ -5342,8 +5455,7 @@ SUPER ADMINISTRADOR
 
 
 .admin-order-delivery {
-  margin-top: 20px;
-  padding: 18px;
+  margin: 5px;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   background: #fff;
@@ -5380,6 +5492,82 @@ SUPER ADMINISTRADOR
 
 .admin-order-delivery__address span {
   font-size: 0.9rem;
+}
+
+.admin-order-delivery__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 30px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+  color: var(--text-light);
+
+  font: inherit;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-order-delivery__toggle:hover {
+  background:
+    color-mix(
+      in srgb,
+      var(--brand-primary) 7%,
+      transparent
+    );
+}
+
+.admin-order-delivery__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.admin-order-delivery__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  color: var(--text-light);
+
+  font-size: 1.7rem;
+  line-height: 1;
+
+  transform: rotate(0deg);
+
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-order-delivery__arrow.open {
+  color: var(--brand-primary);
+  transform: rotate(90deg);
+}
+
+.admin-order-delivery__details {
+  display: grid;
+  gap: 16px;
+
+  padding: 16px;
+
+  border-top: 1px solid var(--border);
 }
 
 @media (max-width: 600px) {

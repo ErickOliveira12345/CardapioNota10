@@ -99,7 +99,7 @@ export function HomePage({
           className="qr-logo"
           aria-hidden="true"
         >
-          🍽️
+          <img className="logoCardapioNota10" src="./src/img/logo-CardapioNota10.png" alt="Logo do Cardápio Nota10" width={80} height={80}/>
         </div>
 
         <h1 className="qr-restaurant-name">
@@ -119,8 +119,17 @@ export function HomePage({
               onNavigate?.("/login")
             }
           >
-            Criar Conta Para Meu
-            Estabelecimento
+            Criar Conta Para Meu Estabelecimento
+          </button>
+
+          <button
+            type="button"
+            className="home-driver-button home-primary-button"
+            onClick={() =>
+              onNavigate?.("/entregador/login")
+            }
+          >
+            🛵 Entrar como Entregador
           </button>
 
           <button

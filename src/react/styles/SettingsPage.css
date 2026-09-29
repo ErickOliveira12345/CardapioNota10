@@ -893,6 +893,10 @@ Modal de recorte de imagem
   .logo-crop-modal__actions button {
     width: 100%;
   }
+
+  .settings-logo-upload__content input {
+    padding: 10px 5px;
+  }
 }
 
 /*

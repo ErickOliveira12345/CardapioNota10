@@ -166,6 +166,9 @@ export function AdminOrdersPage() {
     setDiscount,
   ] = useState(0);
 
+  const [openDeliveryOrderId, setOpenDeliveryOrderId] =
+  useState(null);
+
   useEffect(() => {
     if (!establishmentId) {
       setOrders([]);
@@ -1101,8 +1104,6 @@ export function AdminOrdersPage() {
                             </strong>
 
                             <span>
-                              {item.emoji ||
-                                "🍽️"}{" "}
                               {item.nome}
                             </span>
                           </div>
@@ -1138,107 +1139,104 @@ export function AdminOrdersPage() {
                     order?.entrega?.rota
                       ?.encodedPolyline && (
                       <section className="admin-order-delivery">
-                        <div className="admin-order-delivery__header">
-                          <h3>
-                            🚚 Entrega
-                          </h3>
+                        <button
+                        type="button"
+                        className="admin-order-delivery__toggle"
+                        onClick={() =>
+                          setOpenDeliveryOrderId((currentId) =>
+                            currentId === orderId
+                              ? null
+                              : orderId
+                          )
+                        }
+                        aria-expanded={
+                          openDeliveryOrderId === orderId
+                        }
+                      >
+                        <span className="admin-order-delivery__title">
+                          🚚 Entrega
+                        </span>
 
-                          <div className="admin-order-delivery__metrics">
-                            <span>
-                              Distância:{" "}
-                              <strong>
-                                {order.entrega.rota
-                                  .distanciaKm}{" "}
-                                km
-                              </strong>
-                            </span>
+                        <span
+                          className={
+                            openDeliveryOrderId === orderId
+                              ? "admin-order-delivery__arrow open"
+                              : "admin-order-delivery__arrow"
+                          }
+                        >
+                          ›
+                        </span>
+                      </button>
 
-                            <span>
-                              Tempo estimado:{" "}
-                              <strong>
-                                {order.entrega.rota
-                                  .duracaoMinutos}{" "}
-                                min
-                              </strong>
-                            </span>
-                          </div>
-                        </div>
+                        {openDeliveryOrderId === orderId && (
+                          <div className="admin-order-delivery__details">
+                            <div className="admin-order-delivery__metrics">
+                              <span>
+                                Distância:{" "}
+                                <strong>
+                                  {order.entrega.rota.distanciaKm} km
+                                </strong>
+                              </span>
 
-                        {order.entrega.endereco && (
-                          <div className="admin-order-delivery__address">
-                            <strong>
-                              Endereço do cliente
-                            </strong>
+                              <span>
+                                Tempo estimado:{" "}
+                                <strong>
+                                  {order.entrega.rota.duracaoMinutos} min
+                                </strong>
+                              </span>
+                            </div>
 
-                            <span>
-                              {
-                                order.entrega.endereco
-                                  .rua
+                            {order.entrega.endereco && (
+                              <div className="admin-order-delivery__address">
+                                <strong>
+                                  Endereço do cliente
+                                </strong>
+
+                                <span>
+                                  {order.entrega.endereco.rua}
+                                  {order.entrega.endereco.numero
+                                    ? `, ${order.entrega.endereco.numero}`
+                                    : ""}
+                                </span>
+
+                                <span>
+                                  {order.entrega.endereco.bairro}
+                                </span>
+
+                                <span>
+                                  {order.entrega.endereco.cidade}
+                                  {order.entrega.endereco.estado
+                                    ? ` - ${order.entrega.endereco.estado}`
+                                    : ""}
+                                </span>
+                              </div>
+                            )}
+
+                            <DeliveryMap
+                              origin={{
+                                latitude:
+                                  establishment.localizacao.latitude,
+                                longitude:
+                                  establishment.localizacao.longitude,
+                              }}
+                              destination={{
+                                latitude:
+                                  order.entrega.localizacao.latitude,
+                                longitude:
+                                  order.entrega.localizacao.longitude,
+                              }}
+                              encodedPolyline={
+                                order.entrega.rota.encodedPolyline
                               }
-                              {order.entrega.endereco
-                                .numero
-                                ? `, ${
-                                    order.entrega.endereco
-                                      .numero
-                                  }`
-                                : ""}
-                            </span>
-
-                            <span>
-                              {
-                                order.entrega.endereco
-                                  .bairro
+                              distanceKm={
+                                order.entrega.rota.distanciaKm
                               }
-                            </span>
-
-                            <span>
-                              {
-                                order.entrega.endereco
-                                  .cidade
+                              durationMinutes={
+                                order.entrega.rota.duracaoMinutos
                               }
-                              {order.entrega.endereco
-                                .estado
-                                ? ` - ${
-                                    order.entrega.endereco
-                                      .estado
-                                  }`
-                                : ""}
-                            </span>
+                            />
                           </div>
                         )}
-
-                        <DeliveryMap
-                          origin={{
-                            latitude:
-                              establishment.localizacao
-                                .latitude,
-
-                            longitude:
-                              establishment.localizacao
-                                .longitude,
-                          }}
-                          destination={{
-                            latitude:
-                              order.entrega.localizacao
-                                .latitude,
-
-                            longitude:
-                              order.entrega.localizacao
-                                .longitude,
-                          }}
-                          encodedPolyline={
-                            order.entrega.rota
-                              .encodedPolyline
-                          }
-                          distanceKm={
-                            order.entrega.rota
-                              .distanciaKm
-                          }
-                          durationMinutes={
-                            order.entrega.rota
-                              .duracaoMinutos
-                          }
-                        />
                       </section>
                     )}
 

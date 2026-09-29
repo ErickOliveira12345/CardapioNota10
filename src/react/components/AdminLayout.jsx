@@ -309,12 +309,7 @@ export function AdminLayout({
         }
       >
         <div className="admin-sidebar__brand">
-          <span
-            className="admin-sidebar__logo"
-            aria-hidden="true"
-          >
-            🍽️
-          </span>
+          <img className="logoCardapioNota10" src="../src/img/logo-CardapioNota10.png" alt="Logo do Cardápio Nota10" width={50} height={50}/>
 
           <div>
             <strong>Cardápio Nota10</strong>
