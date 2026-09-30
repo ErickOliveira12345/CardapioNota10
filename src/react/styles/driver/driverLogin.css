@@ -1,7 +1,7 @@
 .driver-login-page {
   min-height: 100dvh;
 
-  display: flex;
+  display: inline-block;
   align-items: center;
   justify-content: center;
 

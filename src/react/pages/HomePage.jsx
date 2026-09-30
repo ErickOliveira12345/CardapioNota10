@@ -3,6 +3,8 @@ import React, {
   useState,
 } from "react";
 
+import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
+
 import PlanCard from "../components/PlanCard";
 
 import {
@@ -99,7 +101,11 @@ export function HomePage({
           className="qr-logo"
           aria-hidden="true"
         >
-          <img className="logoCardapioNota10" src="./src/img/logo-CardapioNota10.png" alt="Logo do Cardápio Nota10" width={80} height={80}/>
+          <img
+            className="logoCardapioNota10"
+            src={logoCardapioNota10}
+            alt="Cardápio Nota10" width={80} height={80}
+          />
         </div>
 
         <h1 className="qr-restaurant-name">

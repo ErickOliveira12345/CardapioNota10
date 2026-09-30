@@ -2,6 +2,8 @@ import React, {
   useState,
 } from "react";
 
+import logoCardapioNota10 from "../../../img/logo-CardapioNota10.png";
+
 import {
   loginDriver,
 } from "../../services/driverService.js";
@@ -185,6 +187,18 @@ export default function DriverLoginPage({
 
   return (
     <main className="driver-login-page">
+      <section >
+        <div
+                  className="qr-logo"
+                  aria-hidden="true"
+                >
+                  <img
+                    className="logoCardapioNota10"
+                    src={logoCardapioNota10}
+                    alt="Cardápio Nota10" width={80} height={80}
+                  />
+                </div>
+      </section>
       <section className="driver-login">
         <header className="driver-login__header">
           <div className="driver-login__icon">
