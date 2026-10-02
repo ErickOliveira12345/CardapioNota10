@@ -3,20 +3,12 @@
    ========================================= */
 
 .driver-page {
-  min-height: 100dvh;
-
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-
+  min-height: 100dvh;
   padding: 32px 16px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #f8fafc 0%,
-      #eef2f7 100%
-    );
+  background: #f8fafc;
 }
 
 /* =========================================
@@ -25,7 +17,7 @@
 
 .driver-register {
   width: 100%;
-  max-width: 640px;
+  max-width: 560px;
 
   padding: 28px;
 
@@ -394,8 +386,6 @@
 
 @media (max-width: 700px) {
   .driver-page {
-    align-items: flex-start;
-
     padding: 18px 12px;
   }
 

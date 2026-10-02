@@ -2,6 +2,8 @@ import React, {
   useState,
 } from "react";
 
+import logoCardapioNota10 from "../../../img/logo-CardapioNota10.png"; 
+
 import {createDriverAccount} from "../../services/driverService.js";
 import "../../styles/driver/driverRegister.css";
 
@@ -263,6 +265,26 @@ export default function DriverRegisterPage({
 
   return (
     <main className="driver-page">
+
+      <section className="navigation-header">
+        <div className="navigation-header__content">
+          <button
+            type="button"
+            className="navigation-back-button"
+            onClick={() => onNavigate?.("/")}
+          >
+            <span>←</span>
+            <span>Voltar</span>
+          </button>
+
+          <img
+            className="logoCardapioNota10"
+            src={logoCardapioNota10}
+            alt="Logo do Cardápio Nota10"
+          />
+        </div>
+      </section>
+
       <section className="driver-register">
         <header className="driver-register__header">
           <div className="driver-register__icon">
