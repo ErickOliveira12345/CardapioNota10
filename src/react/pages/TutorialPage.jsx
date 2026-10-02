@@ -2,6 +2,8 @@ import React from "react";
 
 import "../styles/tutorial.css";
 
+import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
+
 export default function TutorialPage({
   onNavigate,
 }) {
@@ -66,19 +68,27 @@ export default function TutorialPage({
 
   return (
     <main className="tutorial-page">
+
+      <section className="navigation-header">
+            <div className="navigation-header__content">
+              <button
+                type="button"
+                className="navigation-back-button"
+                onClick={() => onNavigate?.("/")}
+              >
+                <span>←</span>
+                <span>Voltar</span>
+              </button>
+    
+              <img
+                className="logoCardapioNota10"
+                src={logoCardapioNota10}
+                alt="Logo do Cardápio Nota10"
+              />
+            </div>
+      </section>  
+      
       <section className="tutorial-hero">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
-          <button
-            type="button"
-            className="tutorial-back-button"
-            onClick={() =>
-              onNavigate?.("/")
-            }
-          >
-            ← Voltar
-          </button>
-          <img className="logoCardapioNota10" src="./src/img/logo-CardapioNota10.png" alt="Logo do Cardápio Nota10" width={80} height={80}/>
-        </div>
         <div className="tutorial-hero__content">
           <span className="tutorial-eyebrow">
             Tutorial

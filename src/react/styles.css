@@ -2023,6 +2023,7 @@ details summary {
 .auth-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 24px;
@@ -5620,4 +5621,89 @@ SUPER ADMINISTRADOR
   color: #ffffff;
   font-weight: 700;
   cursor: pointer;
+}
+
+/*
+Estilo do cabeçalho de navegação pagina inicial
+*/
+/* CABEÇALHO */
+
+.navigation-header {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto 30px;
+}
+
+.navigation-header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+/* BOTÃO VOLTAR */
+
+.navigation-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 105px;
+  height: 50px;
+  padding: 10px 16px;
+  margin-bottom: 30px;
+
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+
+  background: var(--surface, #ffffff);
+  color: var(--text, #334155);
+
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.navigation-back-button span:first-child {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.navigation-back-button:hover {
+  background: var(--bg, #f1f5f9);
+  transform: translateY(-2px);
+}
+
+/* LOGO */
+
+.navigation-header .logoCardapioNota10 {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 600px) {
+  .navigation-header {
+    margin-bottom: 20px;
+  }
+
+  .navigation-back-button {
+    min-width: 85px;
+    font-size: 14px;
+  }
+
+  .navigation-header .logoCardapioNota10 {
+    width: 80px;
+    height: 80px;
+  }
 }

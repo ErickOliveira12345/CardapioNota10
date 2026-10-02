@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
+
 import {
   entrar,
   recuperarSenha,
@@ -86,6 +88,25 @@ export function LoginPage({
 
   return (
     <main className="auth-page">
+      <section className="navigation-header">
+        <div className="navigation-header__content">
+          <button
+            type="button"
+            className="navigation-back-button"
+            onClick={() => onNavigate?.("/")}
+          >
+            <span>←</span>
+            <span>Voltar</span>
+          </button>
+
+          <img
+            className="logoCardapioNota10"
+            src={logoCardapioNota10}
+            alt="Logo do Cardápio Nota10"
+          />
+        </div>
+      </section>
+
       <section className="auth-card">
         <div className="auth-card__header">
           <span

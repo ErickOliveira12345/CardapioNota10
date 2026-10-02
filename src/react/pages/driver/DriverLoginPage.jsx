@@ -187,18 +187,25 @@ export default function DriverLoginPage({
 
   return (
     <main className="driver-login-page">
-      <section >
-        <div
-                  className="qr-logo"
-                  aria-hidden="true"
+      <section className="navigation-header">
+              <div className="navigation-header__content">
+                <button
+                  type="button"
+                  className="navigation-back-button"
+                  onClick={() => onNavigate?.("/")}
                 >
-                  <img
-                    className="logoCardapioNota10"
-                    src={logoCardapioNota10}
-                    alt="Cardápio Nota10" width={80} height={80}
-                  />
-                </div>
+                  <span>←</span>
+                  <span>Voltar</span>
+                </button>
+      
+                <img
+                  className="logoCardapioNota10"
+                  src={logoCardapioNota10}
+                  alt="Logo do Cardápio Nota10"
+                />
+              </div>
       </section>
+      
       <section className="driver-login">
         <header className="driver-login__header">
           <div className="driver-login__icon">
