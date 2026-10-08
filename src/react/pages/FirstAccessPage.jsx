@@ -2,6 +2,16 @@ import React, {
   useState,
 } from "react";
 
+import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
+
+import {
+  useAuth,
+} from "../contexts/AuthContext.jsx";
+
+import {
+  sair,
+} from "../services/authService.js";
+
 import {
   criarEstruturaInicialEstabelecimento,
 } from "../services/establishmentService.js";
@@ -33,6 +43,10 @@ const INITIAL_FORM = {
 export function FirstAccessPage({
   onNavigate,
 }) {
+  const {
+    refreshProfile,
+  } = useAuth();
+
   const [form, setForm] =
     useState(INITIAL_FORM);
 
@@ -67,6 +81,31 @@ export function FirstAccessPage({
     }));
   }
 
+  async function handleVoltarLogin() {
+    try {
+      // ======================================================
+      // RETORNO AO LOGIN
+      // O primeiro acesso exige que o proprietário esteja
+      // autenticado. Por isso, antes de retornar ao login,
+      // encerra a sessão atual no Firebase Authentication.
+      // ======================================================
+      await sair();
+
+      onNavigate?.("/login");
+    } catch (error) {
+      console.error(
+        "Erro ao voltar para o login:",
+        error,
+      );
+
+      showToast(
+        "Não foi possível voltar para o login.",
+        "error",
+        5000,
+      );
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -91,7 +130,10 @@ export function FirstAccessPage({
         5000,
       );
 
+      await refreshProfile();
+
       onNavigate("/admin");
+
     } catch (error) {
       console.error(
         "Erro no primeiro acesso:",
@@ -111,6 +153,25 @@ export function FirstAccessPage({
 
   return (
     <main className="auth-page">
+      <section className="navigation-header">
+        <div className="navigation-header__content">
+          <button
+            type="button"
+            className="navigation-back-button"
+            onClick={handleVoltarLogin}
+          >
+            <span>←</span>
+            <span>Voltar</span>
+          </button>
+
+          <img
+            className="logoCardapioNota10"
+            src={logoCardapioNota10}
+            alt="Logo do Cardápio Nota10"
+          />
+        </div>
+      </section>
+
       <section className="auth-card">
         <header className="auth-card__header">
           <span

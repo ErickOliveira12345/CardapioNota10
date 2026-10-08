@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
+import { PasswordInput } from "../components/PasswordInput.jsx";
 
 import {
   entrar,
@@ -31,6 +32,28 @@ export function LoginPage({
         email,
         senha,
       });
+
+      // ======================================================
+      // VERIFICAÇÃO DO E-MAIL
+      // Impede que usuários com e-mail ainda não confirmado
+      // avancem para o primeiro acesso ou painel administrativo.
+      // ======================================================
+      if (!resultado?.emailVerificado) {
+        showToast(
+          "Seu e-mail ainda não foi verificado. Verifique seu e-mail para continuar.",
+          "warning",
+          5000,
+        );
+
+        // ======================================================
+        // VERIFICAÇÃO DO E-MAIL
+        // O usuário permanece autenticado porque a página de
+        // verificação utiliza auth.currentUser para consultar
+        // o status e permitir o reenvio do link.
+        // ======================================================
+        onNavigate("/verificar-email");
+        return;
+      }
 
       const perfil = resultado?.perfil;
       const role = perfil?.role;
@@ -144,8 +167,7 @@ export function LoginPage({
           <label>
             Senha
 
-            <input
-              type="password"
+            <PasswordInput
               value={senha}
               onChange={(event) =>
                 setSenha(event.target.value)

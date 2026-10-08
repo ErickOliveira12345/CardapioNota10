@@ -2,6 +2,8 @@ import {
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
+  sendEmailVerification,
+  reload,
   sendPasswordResetEmail,
   signInAnonymously,
   signInWithEmailAndPassword,
@@ -86,9 +88,10 @@ export async function cadastrarProprietario({
       displayName: String(nome).trim(),
     });
 
-    await setDoc(
-      doc(db, "users", usuarioCriado.uid),
-      {
+    // VERIFICAÇÃO DO E-MAIL: Envia automaticamente o link de verificação
+    await sendEmailVerification(usuarioCriado);
+
+    await setDoc(doc(db, "users", usuarioCriado.uid),{
         nome: String(nome).trim(),
         email: emailNormalizado,
 
@@ -97,6 +100,7 @@ export async function cadastrarProprietario({
 
         estabelecimentoId: null,
 
+        // VERIFICAÇÃO DO E-MAIL: No momento do cadastro o e-mail ainda não foi confirmado pelo usuário.
         emailVerificado:
           usuarioCriado.emailVerified,
 
@@ -135,6 +139,77 @@ export async function cadastrarProprietario({
   }
 }
 
+// ======================================================
+// VERIFICAÇÃO DO E-MAIL
+// Reenvia o link de verificação para o e-mail do usuário
+// que está atualmente autenticado no Firebase.
+// ======================================================
+export async function reenviarEmailVerificacao() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error(
+      "Nenhum usuário autenticado para reenviar o e-mail de verificação."
+    );
+  }
+
+  // ======================================================
+  // VERIFICAÇÃO DO E-MAIL
+  // Evita o reenvio caso o e-mail já tenha sido verificado.
+  // ======================================================
+  await reload(usuario);
+
+  if (usuario.emailVerified) {
+    return {
+      verificado: true,
+      mensagem: "O e-mail já está verificado.",
+    };
+  }
+
+  // ======================================================
+  // VERIFICAÇÃO DO E-MAIL
+  // Solicita ao Firebase o envio de um novo link de
+  // verificação para o endereço de e-mail do usuário.
+  // ======================================================
+  await sendEmailVerification(usuario);
+
+  return {
+    verificado: false,
+    mensagem: "E-mail de verificação reenviado com sucesso.",
+  };
+}
+
+
+// ======================================================
+// VERIFICAÇÃO DO E-MAIL
+// Atualiza os dados do usuário autenticado usando reload()
+// e retorna o estado mais recente de emailVerified.
+// ======================================================
+export async function atualizarStatusVerificacaoEmail() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error(
+      "Nenhum usuário autenticado para verificar o e-mail."
+    );
+  }
+
+  // ======================================================
+  // VERIFICAÇÃO DO E-MAIL
+  // Busca novamente no Firebase Authentication os dados
+  // atualizados do usuário.
+  // ======================================================
+  await reload(usuario);
+
+  return {
+    verificado: usuario.emailVerified,
+    email: usuario.email,
+  };
+}
+
+/**
+ * Faz login e retorna também o perfil do Firestore.
+ */
 /**
  * Faz login e retorna também o perfil do Firestore.
  */
@@ -142,7 +217,8 @@ export async function entrar({
   email,
   senha,
 }) {
-  const emailNormalizado = normalizarEmail(email);
+  const emailNormalizado =
+    normalizarEmail(email);
 
   if (!emailNormalizado || !senha) {
     throw new Error(
@@ -158,12 +234,40 @@ export async function entrar({
         senha,
       );
 
+    // ======================================================
+    // VERIFICAÇÃO DO E-MAIL
+    // Atualiza os dados do usuário diretamente no Firebase
+    // Authentication para obter o estado mais recente de
+    // emailVerified após o login.
+    // ======================================================
+    await reload(credencial.user);
+
+    // ======================================================
+    // VERIFICAÇÃO DO E-MAIL
+    // O valor abaixo vem diretamente do Firebase Auth e
+    // será usado pelo LoginPage para decidir se o usuário
+    // pode continuar para o sistema.
+    // ======================================================
+    const emailVerificado =
+      credencial.user.emailVerified;
+
     const perfilSnapshot = await getDoc(
-      doc(db, "users", credencial.user.uid),
+      doc(
+        db,
+        "users",
+        credencial.user.uid,
+      ),
     );
 
     return {
       usuario: credencial.user,
+
+      // ======================================================
+      // VERIFICAÇÃO DO E-MAIL
+      // Retorna para o LoginPage o estado real da
+      // verificação do e-mail no Firebase Authentication.
+      // ======================================================
+      emailVerificado,
 
       perfil: perfilSnapshot.exists()
         ? {
@@ -291,9 +395,6 @@ function traduzirErroAuth(error) {
 
     "auth/admin-restricted-operation":
       "A autenticação anônima não está ativada.",
-
-    "auth/operation-not-allowed":
-      "Este método de autenticação não está ativado.",
   };
 
   return (

@@ -52,6 +52,7 @@ import MySubscriptionPage from "./pages/MySubscriptionPage.jsx";
 import TutorialPage from "./pages/TutorialPage.jsx";
 import SubscriptionBillingPage from "./pages/SubscriptionBillingPage.jsx";
 import SubscriptionHistoryPage from "./pages/SubscriptionHistoryPage.jsx";
+import VerifyEmailPage from "./pages/VerifyEmailPage.jsx";
 
 import { getStatus } from "./services/formatters.js";
 
@@ -1719,9 +1720,28 @@ useEffect(() => {
     );
   }
 
+  // ======================================================
+  // VERIFICAÇÃO DO E-MAIL
+  // Exibe a página onde o usuário confirma que já clicou
+  // no link de verificação enviado pelo Firebase.
+  // ======================================================
+  if (route === "/verificar-email") {
+    return (
+      <>
+        <VerifyEmailPage
+          onNavigate={navigate}
+        />
+        
+        <div
+          id="toast-container"
+          aria-live="polite"
+        />
+      </>
+    );
+  }
+
   /*
   * LOGIN
-  *
   * Usuário não autenticado sempre
   * visualiza primeiro a tela de login.
   */

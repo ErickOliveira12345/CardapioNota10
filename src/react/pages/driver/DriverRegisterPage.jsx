@@ -3,6 +3,7 @@ import React, {
 } from "react";
 
 import logoCardapioNota10 from "../../../img/logo-CardapioNota10.png"; 
+import { PasswordInput } from "../../components/PasswordInput.jsx";
 
 import {createDriverAccount} from "../../services/driverService.js";
 import "../../styles/driver/driverRegister.css";
@@ -473,21 +474,15 @@ export default function DriverRegisterPage({
             </label>
           )}
 
+          
           <label>
-            <span>
-              Senha *
-            </span>
+            <span>Senha *</span>
 
-            <input
-              type="password"
+            <PasswordInput
               name="senha"
               value={form.senha}
-              onChange={
-                handleChange
-              }
-              disabled={
-                isSubmitting
-              }
+              onChange={handleChange}
+              disabled={isSubmitting}
               autoComplete="new-password"
               minLength={6}
               placeholder="Mínimo 6 caracteres"
@@ -496,27 +491,19 @@ export default function DriverRegisterPage({
           </label>
 
           <label>
-            <span>
-              Confirmar senha *
-            </span>
+            <span>Confirmar senha *</span>
 
-            <input
-              type="password"
+            <PasswordInput
               name="confirmarSenha"
-              value={
-                form.confirmarSenha
-              }
-              onChange={
-                handleChange
-              }
-              disabled={
-                isSubmitting
-              }
+              value={form.confirmarSenha}
+              onChange={handleChange}
+              disabled={isSubmitting}
               autoComplete="new-password"
               minLength={6}
               required
             />
           </label>
+
 
           <button
             type="submit"

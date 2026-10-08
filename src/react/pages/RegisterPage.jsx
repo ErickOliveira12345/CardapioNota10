@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
+import { PasswordInput } from "../components/PasswordInput.jsx";
 
 import {
   cadastrarProprietario,
@@ -16,6 +17,7 @@ export function RegisterPage({
   const [form, setForm] = useState({
     nome: "",
     email: "",
+    cpf: "",
     senha: "",
     confirmarSenha: "",
   });
@@ -23,12 +25,90 @@ export function RegisterPage({
   const [enviando, setEnviando] =
     useState(false);
 
+  // ======================================================
+  // VALIDAÇÃO DE CPF
+  // Aplica a máscara 000.000.000-00 enquanto o usuário
+  // digita o CPF no formulário de cadastro.
+  // ======================================================
+  function formatarCPF(valor) {
+    const numeros = String(valor || "")
+      .replace(/\D/g, "")
+      .slice(0, 11);
+
+    return numeros
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  }
+
+  // ======================================================
+  // VALIDAÇÃO DE CPF
+  // Verifica os dígitos verificadores do CPF e rejeita
+  // números incompletos ou sequências repetidas.
+  // ======================================================
+  function validarCPF(cpf) {
+    const numeros = String(cpf || "")
+      .replace(/\D/g, "");
+
+    if (numeros.length !== 11) {
+      return false;
+    }
+
+    if (/^(\d)\1{10}$/.test(numeros)) {
+      return false;
+    }
+
+    let soma = 0;
+
+    for (let i = 0; i < 9; i += 1) {
+      soma +=
+        Number(numeros[i]) *
+        (10 - i);
+    }
+
+    let resto = (soma * 10) % 11;
+
+    if (resto === 10) {
+      resto = 0;
+    }
+
+    if (resto !== Number(numeros[9])) {
+      return false;
+    }
+
+    soma = 0;
+
+    for (let i = 0; i < 10; i += 1) {
+      soma +=
+        Number(numeros[i]) *
+        (11 - i);
+    }
+
+    resto = (soma * 10) % 11;
+
+    if (resto === 10) {
+      resto = 0;
+    }
+
+    return resto === Number(numeros[10]);
+  }
+
   function atualizarCampo(event) {
     const { name, value } = event.target;
 
+    // ======================================================
+    // VALIDAÇÃO DE CPF
+    // Quando o campo alterado for CPF, aplica a máscara
+    // antes de armazenar o valor no formulário.
+    // ======================================================
+    const valorFormatado =
+      name === "cpf"
+        ? formatarCPF(value)
+        : value;
+
     setForm((dadosAtuais) => ({
       ...dadosAtuais,
-      [name]: value,
+      [name]: valorFormatado,
     }));
   }
 
@@ -36,6 +116,21 @@ export function RegisterPage({
     event.preventDefault();
 
     if (enviando) return;
+
+    // ======================================================
+    // VALIDAÇÃO DE CPF
+    // Impede a criação da conta quando o CPF informado
+    // não possuir dígitos verificadores válidos.
+    // ======================================================
+    if (!validarCPF(form.cpf)) {
+      showToast(
+        "Informe um CPF válido.",
+        "warning",
+        5000,
+      );
+
+      return;
+    }
 
     try {
       setEnviando(true);
@@ -48,11 +143,13 @@ export function RegisterPage({
         4000,
       );
 
-      /*
-       * Na próxima etapa criaremos essa tela
-       * para completar os dados do restaurante.
-       */
-      onNavigate("/primeiro-acesso");
+      // ======================================================
+      // VERIFICAÇÃO DO E-MAIL
+      // Após criar a conta, direciona o usuário para a página
+      // de verificação em vez de liberar o primeiro acesso.
+      // ======================================================
+      onNavigate("/verificar-email");
+
     } catch (error) {
       console.error(
         "Erro no cadastro:",
@@ -139,10 +236,25 @@ export function RegisterPage({
           </label>
 
           <label>
-            Senha
+            CPF
 
             <input
-              type="password"
+              type="text"
+              name="cpf"
+              value={form.cpf}
+              onChange={atualizarCampo}
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="000.000.000-00"
+              maxLength={14}
+              required
+            />
+          </label>
+
+          <label>
+            Senha
+
+            <PasswordInput
               name="senha"
               value={form.senha}
               onChange={atualizarCampo}
@@ -155,8 +267,7 @@ export function RegisterPage({
           <label>
             Confirmar senha
 
-            <input
-              type="password"
+            <PasswordInput
               name="confirmarSenha"
               value={form.confirmarSenha}
               onChange={atualizarCampo}

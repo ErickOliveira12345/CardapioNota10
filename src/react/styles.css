@@ -5707,3 +5707,144 @@ Estilo do cabeçalho de navegação pagina inicial
     height: 80px;
   }
 }
+
+/* ======================================================
+   VERIFICAÇÃO DO E-MAIL
+   Estilos da página de confirmação do endereço de e-mail.
+   ====================================================== */
+
+.verify-email-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg, #f5f5f5);
+}
+
+.verify-email-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verify-email-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 32px;
+  background: var(--surface, #ffffff);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.verify-email-logo {
+  width: 80px;
+  max-width: 70%;
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.verify-email-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.verify-email-card h1 {
+  margin: 0 0 16px;
+  font-size: 26px;
+}
+
+.verify-email-description,
+.verify-email-instructions {
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.verify-email-instructions {
+  opacity: 0.75;
+  margin-bottom: 26px;
+}
+
+.verify-email-primary-button,
+.verify-email-secondary-button,
+.verify-email-logout-button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.verify-email-primary-button {
+  border: none;
+  background: #ff6600;
+  color: #ffffff;
+}
+
+.verify-email-secondary-button {
+  background: transparent;
+  border: 1px solid #ff6600;
+  color: #ff6600;
+}
+
+.verify-email-logout-button {
+  background: transparent;
+  border: none;
+  color: #666666;
+}
+
+.verify-email-primary-button:disabled,
+.verify-email-secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* ======================================================
+   CAMPO PADRÃO DE SENHA
+   Permite visualizar e ocultar a senha em todas as páginas.
+   ====================================================== */
+
+.password-input {
+  position: relative;
+  width: 100%;
+}
+
+.password-input input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 48px;
+}
+
+.password-input__toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: none;
+  background: transparent;
+  color: #777;
+  cursor: pointer;
+}
+
+.password-input__toggle:hover {
+  color: #ff6600;
+}
+
+.password-input__toggle:focus-visible {
+  outline: 2px solid #ff6600;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

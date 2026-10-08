@@ -5,11 +5,23 @@ export function showToast(
   type = "info",
   duration = 3500,
 ) {
-  const container = document.getElementById(
+  // ======================================================
+  // SISTEMA DE NOTIFICAÇÕES
+  // Procura o container global dos toasts. Caso ele ainda
+  // não exista na página atual, cria automaticamente.
+  // ======================================================
+  let container = document.getElementById(
     "toast-container",
   );
 
-  if (!container) return;
+  if (!container) {
+    container = document.createElement("div");
+
+    container.id = "toast-container";
+    container.className = "toast-container";
+
+    document.body.appendChild(container);
+  }
 
   const icons = {
     success: "✅",

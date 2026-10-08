@@ -3,6 +3,7 @@ import React, {
 } from "react";
 
 import logoCardapioNota10 from "../../../img/logo-CardapioNota10.png";
+import { PasswordInput } from "../../components/PasswordInput.jsx";
 
 import {
   loginDriver,
@@ -269,20 +270,13 @@ export default function DriverLoginPage({
           </label>
 
           <label>
-            <span>
-              Senha
-            </span>
+            <span>Senha</span>
 
-            <input
-              type="password"
+            <PasswordInput
               name="senha"
               value={form.senha}
-              onChange={
-                handleChange
-              }
-              disabled={
-                isSubmitting
-              }
+              onChange={handleChange}
+              disabled={isSubmitting}
               autoComplete="current-password"
               placeholder="Sua senha"
               required
