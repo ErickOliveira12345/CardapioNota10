@@ -7,6 +7,7 @@ import {
 
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { db } from "../firebase/firebaseConfig.js";
+import logoCardapioNota10 from "../../img/logo-CardapioNota10.png";
 
 import {
   sair,
@@ -309,7 +310,7 @@ export function AdminLayout({
         }
       >
         <div className="admin-sidebar__brand">
-          <img className="logoCardapioNota10" src="../src/img/logo-CardapioNota10.png" alt="Logo do Cardápio Nota10" width={50} height={50}/>
+          <img className="logoCardapioNota10" src={logoCardapioNota10} alt="Logo do Cardápio Nota10" width={50} height={50}/>
 
           <div>
             <strong>Cardápio Nota10</strong>

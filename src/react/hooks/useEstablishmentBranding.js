@@ -251,19 +251,6 @@ export function useEstablishmentBranding(
       theme,
   };
 
-  console.log(
-    "BRANDING APLICADO:",
-    {
-      establishmentId,
-
-      establishmentData,
-
-      settingsData,
-
-      nextBranding,
-    },
-  );
-
   setBranding(
     nextBranding,
   );
@@ -272,25 +259,6 @@ export function useEstablishmentBranding(
     primaryColor,
     theme,
   });
-
-  console.log(
-    "CSS BRANDING:",
-    {
-      primary:
-        getComputedStyle(
-          document.documentElement,
-        ).getPropertyValue(
-          "--primary",
-        ),
-
-      brandPrimary:
-        getComputedStyle(
-          document.documentElement,
-        ).getPropertyValue(
-          "--brand-primary",
-        ),
-    },
-  );
 
   setLoading(false);
 }
@@ -358,18 +326,6 @@ export function useEstablishmentBranding(
         snapshot.exists()
           ? snapshot.data()
           : {};
-
-      console.log(
-        "BRANDING FIRESTORE:",
-        {
-          establishmentId,
-
-          exists:
-            snapshot.exists(),
-
-          settings,
-        },
-      );
 
       settingsData =
         settings;

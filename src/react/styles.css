@@ -60,7 +60,7 @@
   --text: #2c3e50;
   --text-light: #363f40;
   --text-muted: #bdc3c7;
-  --text-d-l: #7f8c8d;
+  --text-d-l: #020202;
   --bg-d-l: #ffffff;
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, .08);
   --shadow: 0 2px 12px rgba(0, 0, 0, .10);
@@ -521,7 +521,7 @@ details summary {
   padding: .3rem .9rem;
   border-radius: 100px;
   background: rgba(255, 255, 255, .2);
-  color: white;
+  color: #000000;
   font-size: .9rem;
   font-weight: 700;
 }
@@ -530,7 +530,7 @@ details summary {
   padding: .5rem .9rem;
   border-radius: 100px;
   background: rgba(255, 255, 255, .95);
-  color: var(--primary);
+  color: #000000;
   font-size: .8rem;
   font-weight: 700;
   white-space: nowrap;
@@ -569,7 +569,7 @@ details summary {
   padding: .45rem 1rem;
   border: 1.5px solid var(--border);
   border-radius: 100px;
-  color: var(--text);
+  color: #000000;
   font-size: .85rem;
   font-weight: 500;
   white-space: nowrap;
@@ -613,15 +613,15 @@ details summary {
 }
 
 .welcome-hero p {
-  font-size: 1rem;
+  font-size: 1.2rem;
   opacity: .85;
-  color: var(--text);
+  color: var(--text-d-l);
 }
 
 .welcome-section h3 {
   margin-bottom: .75rem;
   color: var(--text-light);
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .categorias-grid {
@@ -662,7 +662,7 @@ details summary {
 
 .categoria-card__desc {
   color: var(--text-light);
-  font-size: .78rem;
+  font-size: 1rem;
   line-height: 1.3;
 }
 
@@ -773,7 +773,7 @@ details summary {
   padding: .3rem .6rem;
   border: 1.5px solid var(--primary);
   border-radius: var(--radius-sm);
-  color: var(--text);
+  color: #000000;
   font-size: .9rem;
   font-weight: 600;
 }
@@ -842,14 +842,23 @@ details summary {
   width: 40px;
   height: 40px;
   flex-shrink: 0;
-  display: grid;
+  display: flex;
   place-items: center;
+  align-items: center;
   border-radius: 50%;
   background: var(--brand-primary);
   color: var(--brand-on-primary);
-  font-size: 1.4rem;
-  font-weight: 300;
+  font-size: 1.6rem;
+  font-weight: 500;
   transition: all var(--transition);
+}
+
+.btn-add span {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-add:hover {
@@ -1084,13 +1093,13 @@ details summary {
 .qty-btn {
   width: 28px;
   height: 28px;
-  display: grid;
+  display: flex;
   place-items: center;
   border: 1.5px solid var(--border);
   border-radius: 50%;
-  color: var(--text);
-  font-size: 1rem;
-  font-weight: 600;
+  color: var(--text-d-l);
+  font-size: 1.5rem;
+  font-weight: 800;
 }
 
 .qty-value {
@@ -2543,7 +2552,7 @@ Seletor de emoji
 
 .admin-sidebar__account-info strong {
   overflow: hidden;
-  color: #f8fafc;
+  color: #000000;
   font-size: 13px;
   font-weight: 750;
   text-overflow: ellipsis;

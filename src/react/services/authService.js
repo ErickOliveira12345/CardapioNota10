@@ -186,6 +186,56 @@ export async function reenviarEmailVerificacao() {
 // Atualiza o estado de verificação consultando o Firebase
 // Authentication e sincroniza o campo no Firestore.
 // ======================================================
+// export async function atualizarStatusVerificacaoEmail() {
+//   console.log("E-mail verificado:", resultado.verificado);
+// console.log("E-mail:", resultado.email);
+//   const usuario = auth.currentUser;
+
+//   if (!usuario) {
+//     throw new Error(
+//       "Nenhum usuário autenticado para verificar o e-mail."
+//     );
+//   }
+
+//   // ======================================================
+//   // VERIFICAÇÃO DO E-MAIL
+//   // Atualiza os dados do usuário para obter o estado
+//   // mais recente da confirmação no Firebase Authentication.
+//   // ======================================================
+//  console.log(
+//   "Firebase Authentication emailVerified:",
+//   usuario.emailVerified,
+// );
+
+// console.log(
+//   "UID do usuário:",
+//   usuario.uid,
+// );
+//   await reload(usuario);
+
+//   // ======================================================
+//   // VERIFICAÇÃO DO E-MAIL
+//   // Só grava true no Firestore se o Firebase Authentication
+//   // confirmar que o e-mail foi realmente verificado.
+//   // ======================================================
+//   if (usuario.emailVerified) {
+//     await setDoc(
+//       doc(db, "users", usuario.uid),
+//       {
+//         emailVerificado: true,
+//         atualizadoEm: serverTimestamp(),
+//       },
+//       { merge: true }
+//     );
+//   }
+
+//   return {
+//     verificado: usuario.emailVerified,
+//     email: usuario.email,
+//   };
+// }
+
+
 export async function atualizarStatusVerificacaoEmail() {
   const usuario = auth.currentUser;
 
@@ -197,17 +247,31 @@ export async function atualizarStatusVerificacaoEmail() {
 
   // ======================================================
   // VERIFICAÇÃO DO E-MAIL
-  // Atualiza os dados do usuário para obter o estado
-  // mais recente da confirmação no Firebase Authentication.
+  // Atualiza os dados do usuário diretamente no Firebase
+  // Authentication para consultar o estado mais recente.
   // ======================================================
   await reload(usuario);
 
+  console.log(
+    "1 - UID:",
+    usuario.uid
+  );
+
+  console.log(
+    "2 - Firebase emailVerified:",
+    usuario.emailVerified
+  );
+
   // ======================================================
   // VERIFICAÇÃO DO E-MAIL
-  // Só grava true no Firestore se o Firebase Authentication
-  // confirmar que o e-mail foi realmente verificado.
+  // Atualiza o documento do usuário somente depois que
+  // o Firebase confirmar que o e-mail foi verificado.
   // ======================================================
-  if (usuario.emailVerified) {
+  if (usuario.emailVerified === true) {
+    console.log(
+      "3 - Atualizando Firestore..."
+    );
+
     await setDoc(
       doc(db, "users", usuario.uid),
       {
@@ -216,6 +280,14 @@ export async function atualizarStatusVerificacaoEmail() {
       },
       { merge: true }
     );
+
+    console.log(
+      "4 - Firestore atualizado com sucesso!"
+    );
+  } else {
+    console.log(
+      "3 - E-mail ainda não confirmado no Firebase."
+    );
   }
 
   return {
@@ -223,6 +295,7 @@ export async function atualizarStatusVerificacaoEmail() {
     email: usuario.email,
   };
 }
+
 
 
 /**

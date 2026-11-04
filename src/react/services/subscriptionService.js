@@ -89,11 +89,6 @@ export function observePlans(
           ),
       );
 
-      console.log(
-        "PLANOS ATUALIZADOS DO FIREBASE:",
-        plans,
-      );
-
       onChange?.(
         plans,
       );
